@@ -1,0 +1,88 @@
+Solo in sxiv-24.patched: autoreload_inotify.o
+Solo in sxiv-24.patched: commands.o
+diff -aur sxiv-24/config.def.h sxiv-24.patched/config.def.h
+--- sxiv-24/config.def.h	2017-11-11 00:42:40.401521330 +0100
++++ sxiv-24.patched/config.def.h	2017-11-10 19:23:45.452134946 +0100
+@@ -17,6 +17,7 @@
+ static const char * const WIN_BG_COLOR = "#555555";
+ static const char * const WIN_FS_COLOR = "#000000";
+ static const char * const SEL_COLOR    = "#EEEEEE";
++static const char * const MARK_COLOR   = "#FF0000";
+ static const char * const BAR_BG_COLOR = "#222222";
+ static const char * const BAR_FG_COLOR = "#EEEEEE";
+ 
+diff -aur sxiv-24/config.h sxiv-24.patched/config.h
+--- sxiv-24/config.h	2017-11-11 00:42:40.401521330 +0100
++++ sxiv-24.patched/config.h	2017-11-10 19:23:45.452134946 +0100
+@@ -17,6 +17,7 @@
+ static const char * const WIN_BG_COLOR = "#555555";
+ static const char * const WIN_FS_COLOR = "#000000";
+ static const char * const SEL_COLOR    = "#EEEEEE";
++static const char * const MARK_COLOR   = "#FF0000";
+ static const char * const BAR_BG_COLOR = "#222222";
+ static const char * const BAR_FG_COLOR = "#EEEEEE";
+ 
+Solo in sxiv-24.patched: image.o
+diff -aur sxiv-24/main.c sxiv-24.patched/main.c
+--- sxiv-24/main.c	2017-10-27 17:25:56.000000000 +0200
++++ sxiv-24.patched/main.c	2017-11-10 17:44:00.488993535 +0100
+@@ -368,7 +368,7 @@
+ 		} else {
+ 			ow_info = true;
+ 		}
+-		bar_put(r, "%s%0*d/%d", mark, fw, fileidx + 1, filecnt);
++		bar_put(r, "%s%d %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+ 	} else {
+ 		bar_put(r, "%s", mark);
+ 		if (img.ss.on) {
+Solo in sxiv-24.patched: main.o
+Solo in sxiv-24.patched: options.o
+Solo in sxiv-24.patched: sxiv
+diff -aur sxiv-24/sxiv.h sxiv-24.patched/sxiv.h
+--- sxiv-24/sxiv.h	2017-10-27 17:25:56.000000000 +0200
++++ sxiv-24.patched/sxiv.h	2017-11-10 19:24:00.208801139 +0100
+@@ -407,6 +407,7 @@
+ 	XftColor bgcol;
+ 	XftColor fscol;
+ 	XftColor selcol;
++	XftColor markcol;
+ 
+ 	int x;
+ 	int y;
+diff -aur sxiv-24/thumbs.c sxiv-24.patched/thumbs.c
+--- sxiv-24/thumbs.c	2017-10-27 17:25:56.000000000 +0200
++++ sxiv-24.patched/thumbs.c	2017-11-11 00:44:22.778184717 +0100
+@@ -484,15 +484,13 @@
+ 		win_t *win = tns->win;
+ 		thumb_t *t = &tns->thumbs[n];
+ 		unsigned long col = win->fullscreen ? win->fscol.pixel : win->bgcol.pixel;
+-		int x = t->x + t->w, y = t->y + t->h;
+-
+-		win_draw_rect(win, x - 1, y + 1, 1, tns->bw, true, 1, col);
+-		win_draw_rect(win, x + 1, y - 1, tns->bw, 1, true, 1, col);
++		int oxy = (tns->bw + 1) / 2, owh = tns->bw;
+ 
+ 		if (mark)
+-			col = win->selcol.pixel;
++			col = win->markcol.pixel;
+ 
+-		win_draw_rect(win, x, y, tns->bw + 2, tns->bw + 2, true, 1, col);
++		win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
++			false, tns->bw - 2, col);
+ 
+ 		if (!mark && n == *tns->sel)
+ 			tns_highlight(tns, n, true);
+Solo in sxiv-24.patched: thumbs.o
+Solo in sxiv-24.patched: util.o
+diff -aur sxiv-24/window.c sxiv-24.patched/window.c
+--- sxiv-24/window.c	2017-10-27 17:25:56.000000000 +0200
++++ sxiv-24.patched/window.c	2017-11-10 19:24:27.705466923 +0100
+@@ -126,6 +126,7 @@
+ 	win_alloc_color(e, WIN_BG_COLOR, &win->bgcol);
+ 	win_alloc_color(e, WIN_FS_COLOR, &win->fscol);
+ 	win_alloc_color(e, SEL_COLOR,    &win->selcol);
++	win_alloc_color(e, MARK_COLOR,   &win->markcol);
+ 	win_alloc_color(e, BAR_BG_COLOR, &win->bar.bgcol);
+ 	win_alloc_color(e, BAR_FG_COLOR, &win->bar.fgcol);
+ 
+Solo in sxiv-24.patched: window.o
