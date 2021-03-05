@@ -1,19 +1,23 @@
 #!/bin/sh
+
+# Key handler for sxiv, the idea is to use the mark binding built in and then make and action
+
 saved="$HOME/Media/Pictures/Saved"
 alias xs="xsel -l /dev/null"
 
 while read file
 do
         case "$1" in
-        "w")
+        "w")	# if the zoom if greater than 100 w fits the image
 		setbg "$file" & ;;
         "v")
 		[ -z "$dirs" ] && dirs="$(echo "~/Media/Pictures/Wallpapers\n~/Docs\n~/Media\n~/Downloads" | dmenu -l 5 -i -p "Move file(s) to where?"  | sed "s|~|$HOME|g")"
 		[ -z "$dirs" ] && exit
 		[ ! -d "$dirs" ] && notify-send "$dirs is not a directory, cancelled." && exit
-		mv "$file" "$dirs" && notify-send -i "$dirs/$(echo "$file" | sed 's/^..//')" "🚚 File moved" "$(echo "$file" | sed 's/^..//') moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
+		#mv "$file" "$dirs" && notify-send -i "$dirs/$(echo "$file" | sed 's/^..//')" "🚚 File moved" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
+		mv "$file" "$dirs" && notify-send -i "$dirs/$(noextname -f "$file")" "🚚 File moved" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
 		#xdotool key r		# reload sxiv
-		xdotool key grave	# reload sxiv
+		xdotool key control+R	# reload sxiv
 		;;
 	"s")
 
@@ -24,7 +28,7 @@ do
 	"2")
 		notify-send " hi $PWD" ;;
 	"c")
-		[ -z "$name" ] && name=$(dmenu -i -p "New name:")
+		name=$(dmenu -i -p "New name:")
 		[ -z "$name" ] && exit
 		[ -f "$name.$(noextname "$file")" ] && notify-send "There's already a file with that name😠" && exit
 		mv "$file" "$name.${file##*.}" && notify-send "'$(noextname -b "$file")' renamed📝 to '$name'" &
@@ -47,10 +51,11 @@ do
 		readlink -f "$file" | tr -d '\n' | xs &&
 		notify-send "$(readlink -f "$file") copied to clipboard📋" & ;;
 	"d")
-		[ "$(printf "No\\nYes" | dmenu -i -p "Really delete $file?")" = "Yes" ] && rm "$file" && notify-send "$file deleted." ;;
+		[ "$(printf "Yes\\nNo" | dmenu -i -p "Really delete $file?")" = "Yes" ] && rm "$file" && notify-send "$file deleted.❌" ;;
 	"6")
 		setsid -f gimp "$file" & notify-send "Opening on gimp...✏️ 🖼️" ;;
-	"apostrophe")
+	#"apostrophe")
+	"semicolon")
 		notify-send "File informationℹ️ " "$(mediainfo --Output=file://$HOME/.local/Templates/mediainfo "$file")" ;;
         esac
 done
