@@ -3,3 +3,7 @@
   multiple frames. Issue #241.
 - Add support for more embedded thumbnail formats. Right now, sxiv seems to use
   the smallest one. Issue #238.
+# My Build
+- Autoreload feature
+- Use the space better
+- '-T' for title and '-d' for dmenu like output?
