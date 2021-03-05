@@ -120,9 +120,12 @@ void win_init(win_t *win)
 	f = win_res(db, RES_CLASS ".font", "'SauceCodePro Nerd Font:pixelsize=12:antialias=true:autohint=true', 'Noto Color Emoji:pixelsize=12:antialias=true:autohint=true: style=Regular'");
 	win_init_font(e, f);
 
-	bg = win_res(db, RES_CLASS ".background", "#303048");
-	fg = win_res(db, RES_CLASS ".foreground", "red");
+//	bg = win_res(db, RES_CLASS ".background", "color15");
+//	fg = win_res(db, RES_CLASS ".foreground", "color8");
+	bg = win_res(db, RES_CLASS ".background", "color0");
+	fg = win_res(db, RES_CLASS ".color2", "color8");	//works with pywal
 	mark = win_res(db, RES_CLASS ".mark", "red");
+//	mark = win_res(db, RES_CLASS ".color2", "red");
 	win_alloc_color(e, bg, &win->bg);
 	win_alloc_color(e, fg, &win->fg);
  	win_alloc_color(e, mark, &win->markcol);
