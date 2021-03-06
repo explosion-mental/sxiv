@@ -1,0 +1,116 @@
+From 6ae2df6ed549c2cc119bd7d235b75154fc042d2d Mon Sep 17 00:00:00 2001
+From: David Gowers <finticemo@gmail.com>
+Date: Wed, 1 Apr 2020 16:51:47 +1030
+Subject: [PATCH] Use a refreshable timeout rather than a fixed delay before
+ autoreloading image
+
+---
+ main.c | 31 +++++++++++++++++++++++--------
+ sxiv.h |  5 ++++-
+ 2 files changed, 27 insertions(+), 9 deletions(-)
+
+diff --git a/main.c b/main.c
+index 088f739..9df76af 100644
+--- a/main.c
++++ b/main.c
+@@ -46,6 +46,7 @@ typedef struct {
+ } timeout_t;
+
+ /* timeout handler functions: */
++void autoreload(void);
+ void redraw(void);
+ void reset_cursor(void);
+ void animate(void);
+@@ -88,6 +89,7 @@ struct {
+ } keyhandler;
+
+ timeout_t timeouts[] = {
++	{ { 0, 0 }, false, autoreload   },
+ 	{ { 0, 0 }, false, redraw       },
+ 	{ { 0, 0 }, false, reset_cursor },
+ 	{ { 0, 0 }, false, animate      },
+@@ -943,10 +945,12 @@ void load_image(int new)
+
+ 	if (win.xwin != None)
+ 		win_set_cursor(&win, CURSOR_WATCH);
++        reset_timeout(autoreload);
+ 	reset_timeout(slideshow);
+-
+-	if (new != current)
++	if (new != current) {
+ 		alternate = current;
++		img.pending_autoreload = false;
++	}
+
+ 	img_close(&img, false);
+
+@@ -1092,6 +1096,21 @@ int ptr_third_x(void)
+ 	return MAX(0, MIN(2, (x / (win.w * 0.33))));
+ }
+
++// kau
++
++void autoreload(void)
++{
++	if (img.pending_autoreload) {
++		img_close(&img, true);
++		/* loading an image also resets the autoreload timeout */
++		load_image(fileidx);
++		redraw();
++	} else {
++		/* shouldn't happen */
++		reset_timeout(autoreload);
++	}
++}
++
+ void redraw(void)
+ {
+ 	int t;
+@@ -1394,8 +1413,6 @@ void on_buttonpress(XButtonEvent *bev)
+ 	prefix = 0;
+ }
+
+-const struct timespec ten_ms = {0, 10000000};
+-
+ void run(void)
+ {
+ 	int xfd;
+@@ -1442,10 +1459,8 @@ void run(void)
+ 				if (arl.fd != -1 && FD_ISSET(arl.fd, &fds)) {
+ 					if (arl_handle(&arl)) {
+ 						/* when too fast, imlib2 can't load the image */
+-						nanosleep(&ten_ms, NULL);
+-						img_close(&img, true);
+-						load_image(fileidx);
+-						redraw();
++						img.pending_autoreload = true;
++						set_timeout(autoreload, TO_AUTORELOAD, true);
+ 					}
+ 				}
+ 			}
+diff --git a/sxiv.h b/sxiv.h
+index ba25cc6..466cb91 100644
+--- a/sxiv.h
++++ b/sxiv.h
+@@ -129,7 +129,8 @@ enum {
+ 	TO_REDRAW_RESIZE = 75,
+ 	TO_REDRAW_THUMBS = 200,
+ 	TO_CURSOR_HIDE   = 1200,
+-	TO_DOUBLE_CLICK  = 300
++	TO_DOUBLE_CLICK  = 300,
++	TO_AUTORELOAD    = 500
+ };
+
+ typedef void (*timeout_f)(void);
+@@ -257,6 +258,8 @@ struct img {
+ 		int delay;
+ 	} ss;
+
++        bool pending_autoreload;
++
+ 	multi_img_t multi;
+ };
+
+--
+2.25.2
+
