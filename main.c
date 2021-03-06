@@ -259,6 +259,7 @@ void open_info(void)
 		snprintf(w, sizeof(w), "%d", img.w);
 		snprintf(h, sizeof(h), "%d", img.h);
 		execl(info.f.cmd, info.f.cmd, files[fileidx].name, w, h, NULL);
+		//execl(info.f.cmd, info.f.cmd, basename((char *)files[fileidx].name), w, h, NULL);
 		error(EXIT_FAILURE, errno, "exec: %s", info.f.cmd);
 	}
 	close(pfd[1]);
@@ -375,7 +376,9 @@ void update_info(void)
 	if (win.bar.h == 0)
 		return;
 	for (fw = 0, i = filecnt; i > 0; fw++, i /= 10);
-	mark = files[fileidx].flags & FF_MARK ? "* " : "";
+	mark = files[fileidx].flags & FF_MARK ? " " : "";
+//	mark = files[fileidx].flags & FF_MARK ? "¤ " : "";
+//	mark = files[fileidx].flags & FF_MARK ? "* " : "";
 	l->p = l->buf;
 	r->p = r->buf;
 	if (mode == MODE_THUMB) {
@@ -384,7 +387,9 @@ void update_info(void)
 		else if (tns.initnext < filecnt)
 			bar_put(l, "Caching... %0*d", fw, tns.initnext + 1);
 		else
-			strncpy(l->buf, files[fileidx].name, l->size);
+			//Show only the image basename() in titlebar, not the entire path.
+			//strncpy(l->buf, files[fileidx].name, l->size);
+			strncpy(l->buf, basename((char *)files[fileidx].name), l->size);
 		bar_put(r, "%s%d %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
 	} else {
 		bar_put(r, "%s", mark);
@@ -520,7 +525,8 @@ void run_key_handler(const char *key, unsigned int mask)
 	oldst = emalloc(fcnt * sizeof(*oldst));
 
 	close_info();
-	strncpy(win.bar.l.buf, "Running key handler...", win.bar.l.size);
+	strncpy(win.bar.l.buf, "[Keyhandler]...", win.bar.l.size);
+	//strncpy(win.bar.l.buf, "Running key handler...", win.bar.l.size);
 	win_draw(&win);
 	win_set_cursor(&win, CURSOR_WATCH);
 
@@ -1009,6 +1015,7 @@ int main(int argc, char **argv)
 	}
 	if (homedir != NULL) {
 		extcmd_t *cmd[] = { &info.f, &keyhandler.f };
+		//cool
 		const char *name[] = { "image-info", "key-handler" };
 
 		for (i = 0; i < ARRLEN(cmd); i++) {
