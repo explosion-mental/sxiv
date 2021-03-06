@@ -7,7 +7,7 @@ enum {
 };
 
 /* colors and font are configured with 'background', 'foreground' and
- * 'font' X resource properties.
+ * 'font' X resource properties or by using wal (pywal).
  * See X(7) section Resources and xrdb(1) for more information.
  */
 
