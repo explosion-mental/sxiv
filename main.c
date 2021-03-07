@@ -334,6 +334,8 @@ void load_image(int new)
 	open_info();
 	arl_setup(&arl, files[fileidx].path);
 
+//	ci_fit_to_win();	//reset scale on navigation
+				//from this fork conceptualspace/sxiv
 	if (img.multi.cnt > 0 && img.multi.animate)
 		set_timeout(animate, img.multi.frames[img.multi.sel].delay, true);
 	else
@@ -390,9 +392,13 @@ void update_info(void)
 			//Show only the image basename() in titlebar, not the entire path.
 			//strncpy(l->buf, files[fileidx].name, l->size);
 			strncpy(l->buf, basename((char *)files[fileidx].name), l->size);
-		bar_put(r, "%s%d %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+	//	bar_put(r, "%s%d %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+		bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
 	} else {
-		bar_put(r, "%s", mark);
+		//bar_put(r, "%s", mark);
+		//make the counted marks on bar on imagemode (only if there's at least one image marked)
+		//if (strlen(mark) > 0)
+			bar_put(r, "[%s%d]", mark, markcnt);
 		if (img.ss.on) {
 			if (img.ss.delay % 10 != 0)
 				bar_put(r, "%2.1fs" BAR_SEP, (float)img.ss.delay / 10);
@@ -400,7 +406,8 @@ void update_info(void)
 				bar_put(r, "%ds" BAR_SEP, img.ss.delay / 10);
 		}
 		if (img.gamma != 0)
-			bar_put(r, "G%+d" BAR_SEP, img.gamma);
+			bar_put(r, "Gamma%+d" BAR_SEP, img.gamma);
+			//bar_put(r, "G%+d" BAR_SEP, img.gamma);
 		bar_put(r, "%3d%%" BAR_SEP, (int) (img.zoom * 100.0));
 		if (img.multi.cnt > 0) {
 			for (fn = 0, i = img.multi.cnt; i > 0; fn++, i /= 10);
