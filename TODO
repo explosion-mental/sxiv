@@ -7,3 +7,4 @@
 - Autoreload feature
 - Use the space better
 - '-T' for title and '-d' for dmenu like output?
+- If the bar is hidden when image mode, when switching modes toggle the bar (maybe bar always shown on thumbnail mode?)
