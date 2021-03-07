@@ -1,0 +1,287 @@
+From 7ceea2b3219210ff11f50702f724eca4d39f9e76 Mon Sep 17 00:00:00 2001
+From: Jari Vetoniemi <mailroxas@gmail.com>
+Date: Thu, 31 Oct 2013 22:04:58 +0200
+Subject: [PATCH] Fast recursive mode for image loading
+
+Add new command line option (-R) for fast recursive image loading.
+This new mode doesn't care about the sorting, and instead opens the
+first image OS gives through directory read function.
+
+Rest of the images will be then loaded in background, giving instant
+startup.
+
+The purpose for this mode is to be used with directories that contains
+_lots_ of images for instant viewing.
+---
+ image.c   | 14 +++++++++++
+ image.h   |  1 +
+ main.c    | 74 +++++++++++++++++++++++++++++++++++++++++++++----------
+ options.c |  8 ++++--
+ options.h |  1 +
+ sxiv.1    |  4 +++
+ types.h   |  3 ++-
+ 7 files changed, 89 insertions(+), 16 deletions(-)
+
+diff --git a/image.c b/image.c
+index ec248e1..aa3c8b5 100644
+--- a/image.c
++++ b/image.c
+@@ -275,6 +275,20 @@ bool img_load_gif(img_t *img, const fileinfo_t *file)
+ }
+ #endif /* HAVE_GIFLIB */
+ 
++bool img_test(const char *filename)
++{
++	Imlib_Image *tmp, *old;
++
++	if (!(tmp = imlib_load_image(filename)))
++		return false;
++
++	old = imlib_context_get_image();
++	imlib_context_set_image(tmp);
++	imlib_free_image_and_decache();
++	if (old) imlib_context_set_image(old);
++	return true;
++}
++
+ bool img_load(img_t *img, const fileinfo_t *file)
+ {
+ 	const char *fmt;
+diff --git a/image.h b/image.h
+index 9a4efe6..4b49b3c 100644
+--- a/image.h
++++ b/image.h
+@@ -60,6 +60,7 @@ typedef struct {
+ 
+ void img_init(img_t*, win_t*);
+ 
++bool img_test(const char *filename);
+ bool img_load(img_t*, const fileinfo_t*);
+ void img_close(img_t*, bool);
+ 
+diff --git a/main.c b/main.c
+index fb8b8b6..476c024 100644
+--- a/main.c
++++ b/main.c
+@@ -63,8 +63,11 @@ img_t img;
+ tns_t tns;
+ win_t win;
+ 
++/* directory handle for recursive-fast mode */
++r_dir_t *dirr = NULL;
++
+ fileinfo_t *files;
+-int filecnt, fileidx;
++int memfilecnt, filecnt, fileidx;
+ int markcnt;
+ int alternate;
+ 
+@@ -91,6 +94,9 @@ void cleanup(void)
+ {
+ 	static bool in = false;
+ 
++	if (dirr)
++		r_closedir(dirr);
++
+ 	if (!in) {
+ 		in = true;
+ 		img_close(&img, false);
+@@ -111,9 +117,9 @@ void check_add_file(char *filename)
+ 		return;
+ 	}
+ 
+-	if (fileidx == filecnt) {
+-		filecnt *= 2;
+-		files = (fileinfo_t*) s_realloc(files, filecnt * sizeof(fileinfo_t));
++	if (fileidx == memfilecnt) {
++		memfilecnt *= 2;
++		files = (fileinfo_t*) s_realloc(files, memfilecnt * sizeof(fileinfo_t));
+ 	}
+ 	if (*filename != '/') {
+ 		files[fileidx].path = absolute_path(filename);
+@@ -500,11 +506,12 @@ void on_buttonpress(XButtonEvent *bev)
+ 
+ void run(void)
+ {
+-	int xfd;
++	int xfd, ofileidx;
+ 	fd_set fds;
+ 	struct timeval timeout;
+ 	bool discard, to_set;
+ 	XEvent ev, nextev;
++	char *filename;
+ 
+ 	redraw();
+ 
+@@ -527,6 +534,29 @@ void run(void)
+ 				check_timeouts(NULL);
+ 		}
+ 
++		if (dirr && XPending(win.env.dpy) == 0)
++		{
++			/* load images (recursive-fast) */
++			set_timeout(redraw, TO_LOAD_NEXT, false);
++			if ((filename = r_readdir(dirr)) != NULL) {
++				ofileidx = fileidx;
++				fileidx = filecnt;
++				if (img_test(filename))
++					check_add_file(filename);
++				free((void*) filename);
++				filecnt = fileidx;
++				fileidx = ofileidx;
++				if (mode == MODE_THUMB && filecnt > tns.cap) {
++					tns.thumbs = (thumb_t*) s_realloc(tns.thumbs, filecnt*2 * sizeof(thumb_t));
++					memset(&tns.thumbs[tns.cap], 0, (filecnt*2-tns.cap) * sizeof(thumb_t));
++					tns.cap = filecnt*2;
++				}
++			} else {
++				r_closedir(dirr);
++				dirr = NULL;
++			}
++		}
++
+ 		while (XPending(win.env.dpy) == 0
+ 		       && ((to_set = check_timeouts(&timeout)) || info.fd != -1))
+ 		{
+@@ -630,12 +660,13 @@ int main(int argc, char **argv)
+ 		exit(EXIT_FAILURE);
+ 	}
+ 
+-	if (options->recursive || options->from_stdin)
++	if (options->recursive || options->recursive_fast || options->from_stdin)
+ 		filecnt = FILENAME_CNT;
+ 	else
+ 		filecnt = options->filecnt;
+ 
+ 	files = (fileinfo_t*) s_malloc(filecnt * sizeof(fileinfo_t));
++	memfilecnt = filecnt;
+ 	fileidx = 0;
+ 
+ 	if (options->from_stdin) {
+@@ -659,7 +690,7 @@ int main(int argc, char **argv)
+ 		if (!S_ISDIR(fstats.st_mode)) {
+ 			check_add_file(filename);
+ 		} else {
+-			if (!options->recursive) {
++			if (!options->recursive && !options->recursive_fast) {
+ 				warn("ignoring directory: %s", filename);
+ 				continue;
+ 			}
+@@ -668,13 +699,30 @@ int main(int argc, char **argv)
+ 				continue;
+ 			}
+ 			start = fileidx;
+-			while ((filename = r_readdir(&dir)) != NULL) {
+-				check_add_file(filename);
+-				free((void*) filename);
++
++			if (options->recursive_fast) {
++				dirr = &dir;
++				while ((filename = r_readdir(&dir)) != NULL) {
++					if (img_test(filename)) {
++						check_add_file(filename);
++						free((void*) filename);
++						break;
++					}
++					free((void*) filename);
++				}
++				if (!filename) {
++					r_closedir(&dir);
++					dirr = NULL;
++				}
++			} else {
++				while ((filename = r_readdir(&dir)) != NULL) {
++					check_add_file(filename);
++					free((void*) filename);
++				}
++				r_closedir(&dir);
++				if (fileidx - start > 1)
++					qsort(files + start, fileidx - start, sizeof(fileinfo_t), fncmp);
+ 			}
+-			r_closedir(&dir);
+-			if (fileidx - start > 1)
+-				qsort(files + start, fileidx - start, sizeof(fileinfo_t), fncmp);
+ 		}
+ 	}
+ 
+diff --git a/options.c b/options.c
+index e47ad37..f7296ff 100644
+--- a/options.c
++++ b/options.c
+@@ -33,7 +33,7 @@ const options_t *options = (const options_t*) &_options;
+ 
+ void print_usage(void)
+ {
+-	printf("usage: sxiv [-bcdFfhioqrstvZ] [-g GEOMETRY] [-n NUM] "
++	printf("usage: sxiv [-bcdFfhioqRrstvZ] [-g GEOMETRY] [-n NUM] "
+ 	       "[-N name] [-z ZOOM] FILES...\n");
+ }
+ 
+@@ -49,6 +49,7 @@ void parse_options(int argc, char **argv)
+ 	_options.from_stdin = false;
+ 	_options.to_stdout = false;
+ 	_options.recursive = false;
++	_options.recursive_fast = false;
+ 	_options.startnum = 0;
+ 
+ 	_options.scalemode = SCALE_MODE;
+@@ -64,7 +65,7 @@ void parse_options(int argc, char **argv)
+ 	_options.thumb_mode = false;
+ 	_options.clean_cache = false;
+ 
+-	while ((opt = getopt(argc, argv, "bcdFfg:hin:N:oqrstvZz:")) != -1) {
++	while ((opt = getopt(argc, argv, "bcdFfg:hin:N:oqRrstvZz:")) != -1) {
+ 		switch (opt) {
+ 			case '?':
+ 				print_usage();
+@@ -111,6 +112,9 @@ void parse_options(int argc, char **argv)
+ 			case 'q':
+ 				_options.quiet = true;
+ 				break;
++			case 'R':
++				_options.recursive_fast = true;
++				break;
+ 			case 'r':
+ 				_options.recursive = true;
+ 				break;
+diff --git a/options.h b/options.h
+index 848a6b2..ae5571e 100644
+--- a/options.h
++++ b/options.h
+@@ -28,6 +28,7 @@ typedef struct {
+ 	bool from_stdin;
+ 	bool to_stdout;
+ 	bool recursive;
++	bool recursive_fast;
+ 	int filecnt;
+ 	int startnum;
+ 
+diff --git a/sxiv.1 b/sxiv.1
+index ee42a00..f7d19d4 100644
+--- a/sxiv.1
++++ b/sxiv.1
+@@ -70,6 +70,10 @@ sxiv can be used as a visual filter/pipe.
+ .B \-q
+ Be quiet, disable warnings to standard error stream.
+ .TP
++.B \-R
++Read images from given directories recursively on the fly.
++This mode reads the images in order as the OS gives them, so there is no sorting involed.
++.TP
+ .B \-r
+ Search the given directories recursively for images to view.
+ .TP
+diff --git a/types.h b/types.h
+index 2cd305e..2ca55ca 100644
+--- a/types.h
++++ b/types.h
+@@ -76,7 +76,8 @@ typedef struct {
+ enum {
+ 	TO_REDRAW_RESIZE = 75,
+ 	TO_REDRAW_THUMBS = 200,
+-	TO_CURSOR_HIDE   = 1200
++	TO_CURSOR_HIDE   = 1200,
++	TO_LOAD_NEXT     = 100,
+ };
+ 
+ typedef void (*timeout_f)(void);
