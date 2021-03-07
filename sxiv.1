@@ -131,8 +131,7 @@ Toggle fullscreen mode.
 Toggle visibility of info bar on bottom of window.
 .TP
 .B Ctrl-x
-Send the next key to the external key-handler. See section EXTERNAL KEY HANDLER
-for more information.
+See section EXTERNAL KEY HANDLER
 .TP
 .B g
 Go to the first image.
@@ -406,8 +405,8 @@ Additional external keyboard commands can be defined using a handler program
 located in
 .IR $XDG_CONFIG_HOME/sxiv/exec/key-handler .
 The handler is invoked by pressing
-.BR Ctrl-x .
-The next key combo is passed as its first argument. Passed via stdin are the
+.BR "Your Binding"
+In this build you can simply call the handler by the key you assing it on the executable, remember to be carefull if there's inconsitecy between the handler and config.h bindings. Passed via stdin are the
 images to act upon, one path per line: all marked images, if in thumbnail mode
 and at least one image has been marked, otherwise the current image.
 sxiv(1) will block until the handler terminates. It then checks which images
@@ -445,7 +444,8 @@ Max Voit        <mvdev at with-eyes.net>
 .SH HOMEPAGE
 .EX
 Main sxiv       https://github.com/muennich/sxiv
-This fork       https://github.com/qsmodo/sxiv
+Main fork       https://github.com/qsmodo/sxiv
+This fork       https://github.com/explosion-mental/sxiv
 .EE
 .SH SEE ALSO
 .BR X (7),

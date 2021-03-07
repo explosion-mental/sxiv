@@ -35,7 +35,7 @@ static const float zoom_levels[] = {
 };
 
 /* default slideshow delay (in sec, overwritten via -S option): */
-enum { SLIDESHOW_DELAY = 3 };
+enum { SLIDESHOW_DELAY = 2 };
 
 /* gamma correction: the user-visible ranges [-GAMMA_RANGE, 0] and
  * (0, GAMMA_RANGE] are mapped to the ranges [0, 1], and (1, GAMMA_MAX].
