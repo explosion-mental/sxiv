@@ -277,8 +277,10 @@ bool ci_navigate(arg_t n)
 	n += fileidx;
 	if (n < 0)
 		n = filecnt - 1;
+//		n = 0;
 	if (n >= filecnt)
 		n = 0;
+//		n = filecnt - 1;
 
 	if (n != fileidx) {
 		load_image(n);
@@ -440,6 +442,21 @@ bool ct_reload_all(arg_t _)
 	tns.dirty = true;
 	return true;
 }
+
+	/* Customs */
+bool ci_random_navigate(arg_t _)
+{
+  int n = rand() % filecnt;
+
+  if (n != fileidx) {
+    load_image(n);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
 
 /*bool it_shell_cmd(arg_t a)
 {

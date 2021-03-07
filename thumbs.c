@@ -43,7 +43,7 @@ char* tns_cache_filepath(const char *filepath)
 
 	if (*filepath != '/')
 		return NULL;
-	
+
 	if (strncmp(filepath, cache_dir, strlen(cache_dir)) != 0) {
 		/* don't cache images inside the cache directory! */
 		len = strlen(cache_dir) + strlen(filepath) + 2;
@@ -414,8 +414,10 @@ void tns_render(tns_t *tns)
 	win_clear(win);
 	imlib_context_set_drawable(win->buf.pm);
 
-	tns->cols = MAX(1, win->w / tns->dim);
-	tns->rows = MAX(1, win->h / tns->dim);
+//	tns->cols = MAX(1, win->w / tns->dim);
+//	tns->rows = MAX(1, win->h / tns->dim);
+	tns->cols = MAX(1, (win->w - 2 * abs(THUMB_MARGIN)) / tns->dim);
+	tns->rows = MAX(1, (win->h - 2 * abs(THUMB_MARGIN)) / tns->dim);
 
 	if (*tns->cnt < tns->cols * tns->rows) {
 		tns->first = 0;
@@ -429,8 +431,10 @@ void tns_render(tns_t *tns)
 			cnt -= r % tns->cols;
 	}
 	r = cnt % tns->cols ? 1 : 0;
-	tns->x = x = (win->w - MIN(cnt, tns->cols) * tns->dim) / 2 + tns->bw + 3;
-	tns->y = y = (win->h - (cnt / tns->cols + r) * tns->dim) / 2 + tns->bw + 3;
+//	tns->x = x = (win->w - MIN(cnt, tns->cols) * tns->dim) / 2 + tns->bw + 3;
+//	tns->y = y = (win->h - (cnt / tns->cols + r) * tns->dim) / 2 + tns->bw + 3;
+	tns->x = x = (win->w - MIN(cnt, tns->cols) * tns->dim) / 2 + tns->bw + THUMB_PADDING + THUMB_MARGIN;
+	tns->y = y = (win->h - (cnt / tns->cols + r) * tns->dim) / 2 + tns->bw + THUMB_PADDING + THUMB_MARGIN;
 	tns->loadnext = *tns->cnt;
 	tns->end = tns->first + cnt;
 
@@ -470,11 +474,18 @@ void tns_mark(tns_t *tns, int n, bool mark)
 		win_t *win = tns->win;
 		thumb_t *t = &tns->thumbs[n];
 		unsigned long col = win->bg.pixel;
-        int oxy = (tns->bw + 1) / 2, owh = tns->bw;
+     //   int oxy = (tns->bw + 1) / 2, owh = tns->bw;
+		int x = t->x - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
+		    y = t->y - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
+		    w = t->w + 2 * THUMB_PADDING + tns->bw,
+		    h = t->h + 2 * THUMB_PADDING + tns->bw;
+
+
 
         if (mark) col = win->markcol.pixel;
-        win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
-                      false, tns->bw, col);
+//	win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
+//	              false, tns->bw, col);
+	win_draw_rect(win, x, y, w, h, false, tns->bw, col);
 
 		if (!mark && n == *tns->sel)
 			tns_highlight(tns, n, true);
@@ -487,10 +498,16 @@ void tns_highlight(tns_t *tns, int n, bool hl)
 		win_t *win = tns->win;
 		thumb_t *t = &tns->thumbs[n];
 		unsigned long col = hl ? win->fg.pixel : win->bg.pixel;
-		int oxy = (tns->bw + 1) / 2 + 1, owh = tns->bw + 2;
+//		int oxy = (tns->bw + 1) / 2 + 1, owh = tns->bw + 2;
 
-		win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
-		              false, tns->bw, col);
+//		win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
+//		              false, tns->bw, col);
+		int x = t->x - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
+		    y = t->y - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
+		    w = t->w + 2 * THUMB_PADDING + tns->bw,
+		    h = t->h + 2 * THUMB_PADDING + tns->bw;
+
+		win_draw_rect(win, x, y, w, h, false, tns->bw, col);
 
 		if (tns->files[n].flags & FF_MARK)
 			tns_mark(tns, n, true);
@@ -562,9 +579,11 @@ bool tns_zoom(tns_t *tns, int d)
 	tns->zl = MAX(tns->zl, 0);
 	tns->zl = MIN(tns->zl, ARRLEN(thumb_sizes)-1);
 
-	tns->bw = ((thumb_sizes[tns->zl] - 1) >> 5) + 1;
-	tns->bw = MIN(tns->bw, 4);
-	tns->dim = thumb_sizes[tns->zl] + 2 * tns->bw + 6;
+//	tns->bw = ((thumb_sizes[tns->zl] - 1) >> 5) + 1;
+//	tns->bw = MIN(tns->bw, 4);
+//	tns->dim = thumb_sizes[tns->zl] + 2 * tns->bw + 6;
+	tns->bw = THUMB_BORDERS[tns->zl];
+	tns->dim = thumb_sizes[tns->zl] + 2 * (tns->bw + THUMB_PADDING + THUMB_MARGIN);
 
 	if (tns->zl != oldzl) {
 		for (i = 0; i < *tns->cnt; i++)
