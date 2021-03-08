@@ -173,7 +173,7 @@ static const keymap_t keys[] = {
 	{ 0,            XK_0,             i_fit_to_win,         SCALE_FIT },
 	{ 0,            XK_e,             i_fit_to_win,         SCALE_WIDTH },
 	{ 0,            XK_E,             i_fit_to_win,         SCALE_HEIGHT },
- 	{ 0,            XK_F,             i_fit_to_win,         SCALE_FILL },/*sxiv-xphyro*/
+ 	{ 0,            XK_F,             i_fit_to_win,         SCALE_FILL },
 
 				/* Rotation */
 	{ 0,            XK_less,          i_rotate,             DEGREE_270 },
