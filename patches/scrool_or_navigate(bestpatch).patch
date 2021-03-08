@@ -1,0 +1,131 @@
+From f5b7c26c6687099d4354fd308843c55c8fee99bd Mon Sep 17 00:00:00 2001
+From: Naheel-Azawy <naheelazawy@gmail.com>
+Date: Fri, 12 Jul 2019 17:23:57 +0300
+Subject: [PATCH] navigate if not scroll command
+
+---
+ commands.c   | 15 +++++++++++++++
+ commands.lst |  1 +
+ config.def.h | 16 ++++++++--------
+ image.c      | 19 ++++++++++++++-----
+ sxiv.h       |  1 +
+ 5 files changed, 39 insertions(+), 13 deletions(-)
+
+diff --git a/commands.c b/commands.c
+index f685bc0..7546963 100644
+--- a/commands.c
++++ b/commands.c
+@@ -332,6 +332,21 @@ bool ci_scroll_to_edge(arg_t dir)
+ 	return img_pan_edge(&img, dir);
+ }
+ 
++bool ci_scroll_or_navigate(arg_t dir)
++{
++  if (img_zoom_diff(&img, NULL) >= 0) {
++    arg_t n;
++    switch (dir) {
++		case DIR_LEFT:  n = -1; break;
++		case DIR_RIGHT: n =  1; break;
++    default:        n =  0; break;
++    }
++    return ci_navigate(n);
++  } else {
++    return ci_scroll(dir);
++  }
++}
++
+ bool ci_drag(arg_t mode)
+ {
+ 	int x, y, ox, oy;
+diff --git a/commands.lst b/commands.lst
+index 06e7d78..29b8e2c 100644
+--- a/commands.lst
++++ b/commands.lst
+@@ -23,6 +23,7 @@ I_CMD(navigate_frame)
+ I_CMD(toggle_animation)
+ I_CMD(scroll)
+ I_CMD(scroll_to_edge)
++I_CMD(scroll_or_navigate)
+ I_CMD(drag)
+ I_CMD(set_zoom)
+ I_CMD(fit_to_win)
+diff --git a/config.def.h b/config.def.h
+index 9981ca3..f3ed463 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -112,14 +112,14 @@ static const keymap_t keys[] = {
+ 	{ ControlMask,  XK_n,             i_navigate_frame,     +1 },
+ 	{ ControlMask,  XK_p,             i_navigate_frame,     -1 },
+ 	{ ControlMask,  XK_space,         i_toggle_animation,   None },
+-	{ 0,            XK_h,             i_scroll,             DIR_LEFT },
+-	{ 0,            XK_Left,          i_scroll,             DIR_LEFT },
+-	{ 0,            XK_j,             i_scroll,             DIR_DOWN },
+-	{ 0,            XK_Down,          i_scroll,             DIR_DOWN },
+-	{ 0,            XK_k,             i_scroll,             DIR_UP },
+-	{ 0,            XK_Up,            i_scroll,             DIR_UP },
+-	{ 0,            XK_l,             i_scroll,             DIR_RIGHT },
+-	{ 0,            XK_Right,         i_scroll,             DIR_RIGHT },
++	{ 0,            XK_h,             i_scroll_or_navigate, DIR_LEFT },
++	{ 0,            XK_Left,          i_scroll_or_navigate, DIR_LEFT },
++	{ 0,            XK_j,             i_scroll_or_navigate, DIR_DOWN },
++	{ 0,            XK_Down,          i_scroll_or_navigate, DIR_DOWN },
++	{ 0,            XK_k,             i_scroll_or_navigate, DIR_UP },
++	{ 0,            XK_Up,            i_scroll_or_navigate, DIR_UP },
++	{ 0,            XK_l,             i_scroll_or_navigate, DIR_RIGHT },
++	{ 0,            XK_Right,         i_scroll_or_navigate, DIR_RIGHT },
+ 	{ 0,            XK_H,             i_scroll_to_edge,     DIR_LEFT },
+ 	{ 0,            XK_J,             i_scroll_to_edge,     DIR_DOWN },
+ 	{ 0,            XK_K,             i_scroll_to_edge,     DIR_UP },
+diff --git a/image.c b/image.c
+index 94cfc2d..1b0028b 100644
+--- a/image.c
++++ b/image.c
+@@ -391,13 +391,10 @@ void img_check_pan(img_t *img, bool moved)
+ 		img->dirty = true;
+ }
+ 
+-bool img_fit(img_t *img)
++int img_zoom_diff(img_t *img, float *zptr)
+ {
+ 	float z, zw, zh;
+ 
+-	if (img->scalemode == SCALE_ZOOM)
+-		return false;
+-
+ 	zw = (float) img->win->w / (float) img->w;
+ 	zh = (float) img->win->h / (float) img->h;
+ 
+@@ -413,8 +410,20 @@ bool img_fit(img_t *img)
+ 			break;
+ 	}
+ 	z = MIN(z, img->scalemode == SCALE_DOWN ? 1.0 : zoom_max);
++  if (zptr != NULL)
++    *zptr = z;
+ 
+-	if (zoomdiff(img, z) != 0) {
++  return zoomdiff(img, z);
++}
++
++bool img_fit(img_t *img)
++{
++  float z;
++
++	if (img->scalemode == SCALE_ZOOM)
++		return false;
++
++	if (img_zoom_diff(img, &z) != 0) {
+ 		img->zoom = z;
+ 		img->dirty = true;
+ 		return true;
+diff --git a/sxiv.h b/sxiv.h
+index 140132f..c2a4348 100644
+--- a/sxiv.h
++++ b/sxiv.h
+@@ -252,6 +252,7 @@ void img_toggle_antialias(img_t*);
+ bool img_change_gamma(img_t*, int);
+ bool img_frame_navigate(img_t*, int);
+ bool img_frame_animate(img_t*);
++int  img_zoom_diff(img_t*, float*);
+ 
+ 
+ /* options.c */
