@@ -7,7 +7,7 @@ alias xs="xsel -l /dev/null"
 
 while read file
 do
-        case "$1" in
+case "$1" in
         "w")	# if the zoom if greater than 100 w fits the image
 		setbg "$file" & ;;
         "v")
@@ -30,7 +30,7 @@ do
 	"c")
 		name=$(dmenu -i -p "New name:")
 		[ -z "$name" ] && exit
-		[ -f "$name.$(noextname "$file")" ] && notify-send "There's already a file with that name😠" && exit
+		[ -f $name.$(noextname -e "$file") ] && notify-send "There's already a file with that name😠" && exit
 		mv "$file" "$name.${file##*.}" && notify-send "'$(noextname -b "$file")' renamed📝 to '$name'" &
 		;;
 	"r")
