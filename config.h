@@ -30,12 +30,13 @@ enum {
 //    910.0, 920.0, 930.0, 940.0, 950.0, 960.0, 970.0, 980.0, 990.0, 1000.0
 //};
 static const float zoom_levels[] = {
+	 	  0.1,  /* https://github.com/muennich/sxiv/issues/273 */
 	 12.5,  25.0,  50.0,  75.0,
 	100.0, 150.0, 200.0, 400.0, 800.0
 };
 
 /* default slideshow delay (in sec, overwritten via -S option): */
-enum { SLIDESHOW_DELAY = 2 };
+enum { SLIDESHOW_DELAY = 3 };
 
 /* gamma correction: the user-visible ranges [-GAMMA_RANGE, 0] and
  * (0, GAMMA_RANGE] are mapped to the ranges [0, 1], and (1, GAMMA_MAX].
@@ -65,8 +66,8 @@ static const int thumb_sizes[] = { 32, 64, 96, 128, 286, 361, 412 }; //265, 160,
 /*added configurable box model with thumbnail padding, margin and borde… THIS IS INSANEEE
 i-tsvetkov/sxiv this person made it*/
 const int THUMB_BORDERS[] = { 7 };	//thickness of the selction and mark color(an array in case you want different sizes on differents zoom levels
-const int THUMB_MARGIN = 0;		//images from window borders
-const int THUMB_PADDING = -2;		//padding between images and selection
+const int THUMB_MARGIN = -2;		//images from window borders
+const int THUMB_PADDING = -4;		//padding between images and selection
 /* thumbnail size at startup, index into thumb_sizes[]: */
 static const int THUMB_SIZE= 4;
 
@@ -78,6 +79,14 @@ static const int THUMB_SIZE= 4;
 static const keymap_t keys[] = {
 	/* modifiers    key               function              argument */
 				/* Navigation */
+	{ 0,            XK_h,             i_scroll_or_navigate, DIR_LEFT },
+//	{ 0,            XK_Left,          i_scroll_or_navigate, DIR_LEFT },
+	{ 0,            XK_j,             i_scroll_or_navigate, DIR_DOWN },
+//	{ 0,            XK_Down,          i_scroll_or_navigate, DIR_DOWN },
+	{ 0,            XK_k,             i_scroll_or_navigate, DIR_UP },
+//	{ 0,            XK_Up,            i_scroll_or_navigate, DIR_UP },
+	{ 0,            XK_l,             i_scroll_or_navigate, DIR_RIGHT },
+//	{ 0,            XK_Right,         i_scroll_or_navigate, DIR_RIGHT },
 //	{ 0,            XK_j,             i_navigate,           +1 },
 //	{ 0,            XK_k,             i_navigate,           -1 },
 	{ 0,            XK_comma,         i_navigate,           +1 },
@@ -85,15 +94,38 @@ static const keymap_t keys[] = {
 	{ 0,            XK_period,        i_navigate,           -1 },
 	{ 0,            XK_period,        i_scroll_to_edge,     DIR_LEFT | DIR_UP },
 //	{ 0,            XK_space,         i_navigate,           +1 },
-	{ 0,            XK_BackSpace,     i_navigate,           -1 },
-	{ 0,            XK_bracketright,  i_navigate,           +3 },
-	{ 0,            XK_bracketleft,   i_navigate,           -3 },
+//	{ 0,            XK_BackSpace,     i_navigate,           -1 },
+//	{ 0,            XK_bracketright,  i_navigate,           +3 },
+//	{ 0,            XK_bracketleft,   i_navigate,           -3 },
 	{ 0,		XK_Tab,           i_alternate,          None },
-	{ ControlMask,  XK_n,             i_navigate_frame,     +1 },
-	{ ControlMask,  XK_p,             i_navigate_frame,     -1 },
+//	{ ControlMask,  XK_n,             i_navigate_frame,     +1 },
+//	{ ControlMask,  XK_p,             i_navigate_frame,     -1 },
 	{ 0,            XK_g,             g_first,              None },
 	{ 0,            XK_G,             g_n_or_last,          None },
 	{ 0,		XK_grave,         i_random_navigate,    None },
+
+				/* Scroll */
+//	{ 0,            XK_h,             i_scroll,             DIR_LEFT },
+//	{ 0,            XK_Left,          i_scroll,             DIR_LEFT },
+//	{ 0,            XK_j,             i_scroll,             DIR_DOWN },
+//	{ 0,            XK_Down,          i_scroll,             DIR_DOWN },
+//	{ 0,            XK_k,             i_scroll,             DIR_UP },
+//	{ 0,            XK_Up,            i_scroll,             DIR_UP },
+//	{ 0,            XK_l,             i_scroll,             DIR_RIGHT },
+//	{ 0,            XK_Right,         i_scroll,             DIR_RIGHT },
+	{ 0,            XK_H,             i_scroll_to_edge,     DIR_LEFT },
+	{ 0,            XK_J,             i_scroll_to_edge,     DIR_DOWN },
+	{ 0,            XK_K,             i_scroll_to_edge,     DIR_UP },
+	{ 0,            XK_L,             i_scroll_to_edge,     DIR_RIGHT },
+	//what are these?? useless?
+	{ ControlMask,  XK_h,             g_scroll_screen,      DIR_LEFT },
+	{ ControlMask,  XK_Left,          g_scroll_screen,      DIR_LEFT },
+//	{ ControlMask,  XK_j,             g_scroll_screen,      DIR_DOWN },
+	{ ControlMask,  XK_Down,          g_scroll_screen,      DIR_DOWN },
+//	{ ControlMask,  XK_k,             g_scroll_screen,      DIR_UP },
+	{ ControlMask,  XK_Up,            g_scroll_screen,      DIR_UP },
+	{ ControlMask,  XK_l,             g_scroll_screen,      DIR_RIGHT },
+	{ ControlMask,  XK_Right,         g_scroll_screen,      DIR_RIGHT },
 
 				/* Marks */
 	{ 0,            XK_m,             g_toggle_image_mark,  None },
@@ -118,45 +150,21 @@ static const keymap_t keys[] = {
 	{ 0,            XK_Up,            t_move_sel,           DIR_UP },
 	{ 0,            XK_l,             t_move_sel,           DIR_RIGHT },
 	{ 0,            XK_Right,         t_move_sel,           DIR_RIGHT },
-//	{ 0,            XK_R,             t_reload_all,         None },
 
 				/* Zoom */
 	{ 0,            XK_o,             g_zoom,               +1 },
 	{ 0,            XK_i,             g_zoom,               -1 },
 	{ 0,            XK_equal,         g_zoom,               +1 },
-	{ 0,            XK_K,             g_zoom,               +1 },
+	{ 0,            XK_minus,         g_zoom,               -1 },
+//	{ 0,            XK_K,             g_zoom,               +1 },
 	{ ControlMask,  XK_k,             g_zoom,               +1 },
 	{ ControlMask,  XK_j,             g_zoom,               -1 },
-	{ 0,            XK_J,             g_zoom,               -1 },
-	{ 0,            XK_minus,         g_zoom,               -1 },
+//	{ 0,            XK_J,             g_zoom,               -1 },
 //	{ 0,            XK_equal,         i_set_zoom,           100 },
 //	{ 0,            XK_9,		  i_set_zoom,           100 },
 //	{ 0,            XK_plus,          g_zoom,               +1 },
 //	{ 0,            XK_KP_Add,        g_zoom,               +1 },
 	//	{ 0,            XK_KP_Subtract,   g_zoom,               -1 },
-
-				/* Scroll */
-	{ 0,            XK_h,             i_scroll,             DIR_LEFT },
-	{ 0,            XK_Left,          i_scroll,             DIR_LEFT },
-	{ 0,            XK_j,             i_scroll,             DIR_DOWN },
-	{ 0,            XK_Down,          i_scroll,             DIR_DOWN },
-	{ 0,            XK_k,             i_scroll,             DIR_UP },
-	{ 0,            XK_Up,            i_scroll,             DIR_UP },
-	{ 0,            XK_l,             i_scroll,             DIR_RIGHT },
-	{ 0,            XK_Right,         i_scroll,             DIR_RIGHT },
-	{ 0,            XK_H,             i_scroll_to_edge,     DIR_LEFT },
-//	{ 0,            XK_J,             i_scroll_to_edge,     DIR_DOWN },
-//	{ 0,            XK_K,             i_scroll_to_edge,     DIR_UP },
-	{ 0,            XK_L,             i_scroll_to_edge,     DIR_RIGHT },
-	//what are these?? useless?
-	{ ControlMask,  XK_h,             g_scroll_screen,      DIR_LEFT },
-	{ ControlMask,  XK_Left,          g_scroll_screen,      DIR_LEFT },
-//	{ ControlMask,  XK_j,             g_scroll_screen,      DIR_DOWN },
-	{ ControlMask,  XK_Down,          g_scroll_screen,      DIR_DOWN },
-//	{ ControlMask,  XK_k,             g_scroll_screen,      DIR_UP },
-	{ ControlMask,  XK_Up,            g_scroll_screen,      DIR_UP },
-	{ ControlMask,  XK_l,             g_scroll_screen,      DIR_RIGHT },
-	{ ControlMask,  XK_Right,         g_scroll_screen,      DIR_RIGHT },
 
 				/* Scaling */
 	{ 0,            XK_9,             i_fit_to_win,         SCALE_WIDTH },

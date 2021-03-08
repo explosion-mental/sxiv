@@ -1,0 +1,87 @@
+From 193cea3360707a6e0bec38ff1417d632d0783b05 Mon Sep 17 00:00:00 2001
+From: malnova <61915737+malnova@users.noreply.github.com>
+Date: Mon, 16 Nov 2020 07:07:34 +0100
+Subject: [PATCH] main.c : toujours lire tous les fichiers du dossier. Cf.
+ https://github.com/muennich/sxiv/commit/4c99b47411932c2e46ca282597418329a7fbeea9
+
+---
+ main.c | 43 ++++++++++++++++++++++++++++++-------------
+ 1 file changed, 30 insertions(+), 13 deletions(-)
+
+diff --git a/main.c b/main.c
+index 520e97f..6868292 100644
+--- a/main.c
++++ b/main.c
+@@ -21,6 +21,7 @@
+ #include "config.h"
+ 
+ #include <stdlib.h>
++#include <libgen.h>
+ #include <string.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+@@ -866,15 +867,36 @@ void setup_signal(int sig, void (*handler)(int sig))
+ 		error(EXIT_FAILURE, errno, "signal %d", sig);
+ }
+ 
++int add_files_from_dir(char *directory, char *exclude_filename, bool recursive)
++{
++	r_dir_t dir;
++	if (r_opendir(&dir, directory, recursive) < 0) {
++		error(0, errno, "%s", directory);
++		return 1;
++	}
++	int start = fileidx;
++	char *filename;
++	while ((filename = r_readdir(&dir, true)) != NULL) {
++
++		if (strcmp(filename, exclude_filename) != 0) {
++			check_add_file(filename, false);
++		}
++		free((void*) filename);
++	}
++	r_closedir(&dir);
++	if (fileidx - start > 1)
++		qsort(files + start, fileidx - start, sizeof(fileinfo_t), fncmp);
++	return 0;
++}
++
+ int main(int argc, char **argv)
+ {
+-	int i, start;
++	int i;
+ 	size_t n;
+ 	ssize_t len;
+ 	char *filename;
+ 	const char *homedir, *dsuffix = "";
+ 	struct stat fstats;
+-	r_dir_t dir;
+ 
+ 	setup_signal(SIGCHLD, sigchld);
+ 	setup_signal(SIGPIPE, SIG_IGN);
+@@ -928,19 +950,14 @@ int main(int argc, char **argv)
+ 		}
+ 		if (!S_ISDIR(fstats.st_mode)) {
+ 			check_add_file(filename, true);
++			char *_filename = strdup(filename);
++			char *filedir = strdup(filename);
++			filedir = dirname(filename);
++			if (!add_files_from_dir(filedir, _filename, options->recursive))
++				continue;
+ 		} else {
+-			if (r_opendir(&dir, filename, options->recursive) < 0) {
+-				error(0, errno, "%s", filename);
++			if (!add_files_from_dir(filename, "", options->recursive))
+ 				continue;
+-			}
+-			start = fileidx;
+-			while ((filename = r_readdir(&dir, true)) != NULL) {
+-				check_add_file(filename, false);
+-				free((void*) filename);
+-			}
+-			r_closedir(&dir);
+-			if (fileidx - start > 1)
+-				qsort(files + start, fileidx - start, sizeof(fileinfo_t), fncmp);
+ 		}
+ 	}
+ 
