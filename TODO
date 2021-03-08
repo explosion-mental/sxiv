@@ -9,3 +9,4 @@
 - '-T' for title and '-d' for dmenu like output?
 - If the bar is hidden when image mode, when switching modes toggle the bar (maybe bar always shown on thumbnail mode?)
 - after the padding patch I notice , I had an screenshot of my dwm bar it is really wide but not with that much height. When I mark it on thumbnail mode on some of the smalls zooms the image "dissapear" (the image was almost as thick as the marks)
+- Is there a way to not navigate (to scroll) on WIDTH mode? (usefull on some memes)

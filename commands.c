@@ -471,6 +471,11 @@ bool ci_random_navigate(arg_t _)
   }
 }
 
+bool cg_dmenu_output(arg_t _)
+{
+	printf("%s\n", files[fileidx].name);
+        exit(EXIT_SUCCESS);
+}
 
 
 /*bool it_shell_cmd(arg_t a)
