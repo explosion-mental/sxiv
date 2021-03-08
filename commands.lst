@@ -36,5 +36,6 @@ I_CMD(slideshow)
 T_CMD(move_sel)
 T_CMD(reload_all)
 
-
+/* Customs */
 I_CMD(random_navigate)
+G_CMD(dmenu_output)
