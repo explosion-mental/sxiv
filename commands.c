@@ -339,9 +339,9 @@ bool ci_scroll_or_navigate(arg_t dir)
   if (img_zoom_diff(&img, NULL) >= 0) {
     arg_t n;
     switch (dir) {
-		case DIR_LEFT:  n = -1; break;
-		case DIR_RIGHT: n =  1; break;
-    default:        n =  0; break;
+		case DIR_DOWN:	n = -1; break;
+		case DIR_UP:	n =  1; break;
+		default:	n =  0; break;
     }
     return ci_navigate(n);
   } else {

@@ -405,17 +405,21 @@ int img_zoom_diff(img_t *img, float *zptr)
 		case SCALE_HEIGHT:
 			z = zh;
 			break;
+		 case SCALE_FILL:
+           		 z = MAX(zw, zh);
+	                 break;
 		default:
 			z = MIN(zw, zh);
 			break;
 	}
-	z = MIN(z, img->scalemode == SCALE_DOWN ? 1.0 : zoom_max);
+//	z = MIN(z, img->scalemode == SCALE_DOWN ? 1.0 : zoom_max);
   if (zptr != NULL)
     *zptr = z;
 
   return zoomdiff(img, z);
 }
 
+//Is there a way to not navigate (to scroll) on WIDTH mode? (usefull on some memes)
 bool img_fit(img_t *img)
 {
   float z;
