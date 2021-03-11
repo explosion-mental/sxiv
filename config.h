@@ -17,6 +17,11 @@ enum {
 /* levels (in percent) to use when zooming via '-' and '+':
  * (first/last value is used as min/max zoom level)
  */
+static const float zoom_levels[] = {
+	 	  0.1,  /* https://github.com/muennich/sxiv/issues/273 */
+	 12.5,  25.0,  50.0,  75.0,
+	100.0, 150.0, 200.0, 400.0, 800.0
+};
 //static const float zoom_levels[] = {	//Pretty smooth zooming but too slow for me
 //     10.0,  20.0,  30.0,  40.0,  50.0,  60.0,  70.0,  80.0,  90.0, 100.0,
 //    110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0,
@@ -29,12 +34,6 @@ enum {
 //    810.0, 820.0, 830.0, 840.0, 850.0, 860.0, 870.0, 880.0, 890.0, 900.0,
 //    910.0, 920.0, 930.0, 940.0, 950.0, 960.0, 970.0, 980.0, 990.0, 1000.0
 //};
-static const float zoom_levels[] = {
-	 	  0.1,  /* https://github.com/muennich/sxiv/issues/273 */
-	 12.5,  25.0,  50.0,  75.0,
-	100.0, 150.0, 200.0, 400.0, 800.0
-};
-
 /* default slideshow delay (in sec, overwritten via -S option): */
 enum { SLIDESHOW_DELAY = 3 };
 
