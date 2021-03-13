@@ -1,17 +1,65 @@
 #!/bin/sh
 
 # Key handler for sxiv, the idea is to use the mark binding built in and then make and action
+# you need noextname script which is on my github, otherwise just use basename
 
+# Saved directory
 saved="$HOME/Media/Pictures/Saved"
-alias xs="xsel -l /dev/null"
+# List your directories here
+dirlist="~/Media/Pictures/Wallpapers\n~/Media/Pictures/Saved\n~/Media\n~/Downloads\n~/Docs"
 
 while read file
 do
-case "$1" in
-        "w")	# if the zoom if greater than 100 w fits the image
+        case "$1" in
+	#"apostrophe")
+	"semicolon")	# Information
+		notify-send "File informationℹ️ " "$(mediainfo --Output=file://$HOME/.local/Templates/mediainfo "$file")" ;;
+	"d")	# Delete
+		[ "$(printf "Yes\\nNo" | dmenu -i -p "Really delete $file?")" = "Yes" ] && rm "$file" && notify-send "$(noextname "$file") deleted.❌" ;;
+
+	"w")	# Wallpaper (on image mode, if it's zoomed or scaled, "w" changes scale mode to FIT)
 		setbg "$file" & ;;
-        "v")
-		[ -z "$dirs" ] && dirs="$(echo "~/Media/Pictures/Wallpapers\n~/Docs\n~/Media\n~/Downloads" | dmenu -l 5 -i -p "Move file(s) to where?"  | sed "s|~|$HOME|g")"
+	"6")	# GIMP
+		setsid -f gimp "$file" & notify-send "Opening on gimp...✏️ 🖼️" ;;
+	"s")	# "Save", usefull when looking for wallpapers, memes, etc...
+		[ ! -d "$saved" ] && notify-send "$saved is not a directory, cancelled." && exit
+		[ "$PWD" = "$saved" ] && notify-send "You are on the SAVED DIR🤦" && exit
+		mv "$file" "$saved" && notify-send "Successfully saved🌟" "$(basename "$file")✅" &
+		;;
+	"2")
+		notify-send " hi $PWD"	;;
+	"c")	# Rename
+		[ -z "$name" ] && name=$(dmenu -i -p "New name:")
+		[ -z "$name" ] && exit
+		[ -f "$name.$(noextname -e "$file")" ] && notify-send "There's already a file with that name😠" && exit
+		mv "$file" "$name.${file##*.}" && notify-send "'$(noextname -b "$file")' renamed📝 to '$name'" &	;;
+	"r")	# Rotations
+		convert -rotate 90 "$file" "$file"	;;
+	"R")
+		convert -rotate -90 "$file" "$file"	;;
+	"U")
+		convert -rotate 180 "$file" "$file"	;;
+	"4")
+		convert -flop "$file" "$file" ;;
+	"y")	# Clipboard, doesnt seem to work with xsel
+		printf '%s' "$file" | xsel -b -l /tmp/.xsel && notify-send "Clipboard📋" "<b><i>'$file'</i></b> copied" ;;
+		#echo -n "$file" | sed 's/^..//' | tr -d '\n' | xclip -selection clipboard &&
+	#	echo  "$file" | tr -d '\n' | xsel -b -l /tmp/.xsel &&
+		#printf '%s' "$file" | xsel -b -l /tmp/.xsel &&
+		#notify-send -t 500 "$(basename "$file") copied to clipboard📋" & ;;
+	"P")
+		#readlink -f "$file" | tr -d '\n' | xclip -selection clipboard &&
+		readlink -f "$file" | tr -d '\n' | xsel -l /dev/null &&
+		notify-send "$(readlink -f "$file") copied to clipboard📋" & ;;
+	"C")	# Copy
+		[ -z "$dirs" ] && dirs="$(echo "$dirlist" | dmenu -l 5 -i -p "Copy file(s) to where?"  | sed "s|~|$HOME|g")"
+		[ -z "$dirs" ] && exit
+		[ ! -d "$dirs" ] && notify-send "$dirs is not a directory, cancelled." && exit
+		cp "$file" "$dirs" && notify-send -i "$dirs/$(noextname -f "$file")" "🚚 File copied" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
+		xdotool key control+R	# reload sxiv
+		;;
+        "v")	# Move an img
+		[ -z "$dirs" ] && dirs="$(echo "$dirlist" | dmenu -l 5 -i -p "Move file(s) to where?"  | sed "s|~|$HOME|g")"
 		[ -z "$dirs" ] && exit
 		[ ! -d "$dirs" ] && notify-send "$dirs is not a directory, cancelled." && exit
 		#mv "$file" "$dirs" && notify-send -i "$dirs/$(echo "$file" | sed 's/^..//')" "🚚 File moved" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
@@ -19,52 +67,5 @@ case "$1" in
 		#xdotool key r		# reload sxiv
 		xdotool key control+R	# reload sxiv
 		;;
-	"s")
-
-		[ ! -d "$saved" ] && notify-send "$saved is not a directory, cancelled." && exit
-		[ "$PWD" = "$saved" ] && notify-send "You are on the SAVED DIR🤦" && exit
-		mv "$file" "$saved" && notify-send "Successfully saved🌟" "$(basename "$file")✅"  &
-		;;
-	"2")
-		notify-send " hi $PWD" ;;
-	"c")
-		name=$(dmenu -i -p "New name:")
-		[ -z "$name" ] && exit
-		[ -f $name.$(noextname -e "$file") ] && notify-send "There's already a file with that name😠" && exit
-		mv "$file" "$name.${file##*.}" && notify-send "'$(noextname -b "$file")' renamed📝 to '$name'" &
-		;;
-	"r")
-		convert -rotate 90 "$file" "$file" ;;
-	"R")
-		convert -rotate -90 "$file" "$file" ;;
-	"U")
-		convert -rotate 180 "$file" "$file" ;;
-
-	"4")
-		convert -flop "$file" "$file" ;;
-	"y")
-		#echo -n "$file" | sed 's/^..//' | tr -d '\n' | xclip -selection clipboard &&
-		echo -n "$file" | sed 's/^..//' | tr -d '\n' | xs &&
-			notify-send -t 500 "$(basename "$file") copied to clipboard📋" & ;;
-	"p")
-		#readlink -f "$file" | tr -d '\n' | xclip -selection clipboard &&
-		readlink -f "$file" | tr -d '\n' | xs &&
-		notify-send "$(readlink -f "$file") copied to clipboard📋" & ;;
-	"d")
-		[ "$(printf "Yes\\nNo" | dmenu -i -p "Really delete $file?")" = "Yes" ] && rm "$file" && notify-send "$file deleted.❌" ;;
-	"6")
-		setsid -f gimp "$file" & notify-send "Opening on gimp...✏️ 🖼️" ;;
-	#"apostrophe")
-	"semicolon")
-		notify-send "File informationℹ️ " "$(mediainfo --Output=file://$HOME/.local/Templates/mediainfo "$file")" ;;
         esac
 done
-	#mv "$file" "$name" && notify-send -i "$(readlink -f "$file")" "$file renamed to $name" &
-	#"${file%.*}
-	#mv "$file" "$destdir" && notify-send -i "$(readlink -f "$file")" "$file moved to $destdir." &
-# "C")
-#		[ -z "$destdir" ] && destdir="$(sed "s/\s.*#.*$//;/^\s*$/d" ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | awk '{print $2}' | dmenu -l 20 -i -p "Copy file(s) to where?" | sed "s|~|$HOME|g")"
-#		[ ! -d "$destdir" ] && notify-send "$destdir is not a directory, cancelled." && exit
-#		cp "$file" "$destdir" && notify-send -i "$(readlink -f "$file")" "$file copied to $destdir." &
-#		;;
-#
