@@ -329,9 +329,13 @@ bool ci_scroll(arg_t dir)
 	return img_pan(&img, dir, prefix);
 }
 
-bool ci_scroll_to_edge(arg_t dir)
+bool ci_scroll_to_edge(arg_t dir) /* If not zoomed, zoom one float on the array of zoom (config.h) */
 {
+  if (img_zoom_diff(&img, NULL) >= 0) {
+	return img_zoom(&img, 1);
+  } else {
 	return img_pan_edge(&img, dir);
+  }
 }
 
 bool ci_scroll_or_navigate(arg_t dir)
