@@ -18,7 +18,6 @@ enum {
  * (first/last value is used as min/max zoom level)
  */
 static const float zoom_levels[] = {
-//	 	  0.1,  /* https://github.com/muennich/sxiv/issues/273 */
 	 12.5,  25.0,  50.0,  75.0,
 	100.0, 150.0, 200.0, 400.0, 800.0
 };
@@ -49,53 +48,41 @@ static const bool ALPHA_LAYER = false;
 #ifdef _THUMBS_CONFIG
 
 /* thumbnail sizes in pixels (width == height): */
-static const int thumb_sizes[] = { 32, 64, 96, 128, 286, 361, 412 };
+static const int thumb_sizes[] = { 32, 64, 116, 145, 181, 286, 361, 412 };
+/* thumbnail size at startup, index into thumb_sizes[]: */
+static const int THUMB_SIZE= 3;
 /*added configurable box model with thumbnail padding, margin and borde… THIS IS INSANEEE
 i-tsvetkov/sxiv this person made it*/
 const int THUMB_BORDERS[] = { 7 };	//thickness of the selction and mark color(an array in case you want different sizes on differents zoom levels
 const int THUMB_MARGIN = 0;		//margins between images
 const int THUMB_PADDING = -4;		//padding of the highlight or mark
-/* thumbnail size at startup, index into thumb_sizes[]: */
-static const int THUMB_SIZE= 4;
 
 #endif
 #ifdef _MAPPINGS_CONFIG
 
 /* keyboard mappings for image and thumbnail mode: */
-/* Disable all keys that I don't need and are on the key-handler since I patch sxiv so it doesn't need a "Modkey" to use external commands */
+/* My sxiv doen't use a PREFIX KEY for the keyhandler, don't mix up bindings! */
 static const keymap_t keys[] = {
 	/* modifiers    key               function              argument */
 				/* Navigation */
 	{ 0,            XK_h,             i_scroll_or_navigate, DIR_LEFT },
-//	{ 0,            XK_Left,          i_scroll_or_navigate, DIR_LEFT },
 	{ 0,            XK_j,             i_scroll_or_navigate, DIR_DOWN },
-//	{ 0,            XK_Down,          i_scroll_or_navigate, DIR_DOWN },
 	{ 0,            XK_k,             i_scroll_or_navigate, DIR_UP },
-//	{ 0,            XK_Up,            i_scroll_or_navigate, DIR_UP },
 	{ 0,            XK_l,             i_scroll_or_navigate, DIR_RIGHT },
-//	{ 0,            XK_Right,         i_scroll_or_navigate, DIR_RIGHT },
-//	{ 0,            XK_j,             i_navigate,           +1 },
-//	{ 0,            XK_k,             i_navigate,           -1 },
 	{ 0,            XK_comma,         i_navigate,           +1 },
-	{ 0,            XK_comma,         i_scroll_to_edge,     DIR_LEFT | DIR_UP },
 	{ 0,            XK_period,        i_navigate,           -1 },
-	{ 0,            XK_period,        i_scroll_to_edge,     DIR_LEFT | DIR_UP },
 //	{ 0,            XK_space,         i_navigate,           +1 },
 //	{ 0,            XK_BackSpace,     i_navigate,           -1 },
 	{ 0,            XK_bracketright,  i_navigate,           +3 },
 	{ 0,            XK_bracketleft,   i_navigate,           -3 },
-	{ 0,		XK_Tab,           i_alternate,          None },
 	{ ControlMask,  XK_j,             i_navigate_frame,     -1 },
 	{ ControlMask,  XK_k,             i_navigate_frame,     +1 },
+	{ 0,		XK_Tab,           i_alternate,          None },
 	{ 0,            XK_g,             g_first,              None },
 	{ 0,            XK_G,             g_n_or_last,          None },
 	{ 0,		XK_grave,         i_random_navigate,    None },
 
 				/* Scroll */
-//	{ 0,            XK_h,             i_scroll,             DIR_LEFT },
-//	{ 0,            XK_j,             i_scroll,             DIR_DOWN },
-//	{ 0,            XK_k,             i_scroll,             DIR_UP },
-//	{ 0,            XK_l,             i_scroll,             DIR_RIGHT },
 	{ 0,            XK_Left,          i_scroll,             DIR_LEFT },
 	{ 0,            XK_Down,          i_scroll,             DIR_DOWN },
 	{ 0,            XK_Up,            i_scroll,             DIR_UP },
@@ -105,13 +92,13 @@ static const keymap_t keys[] = {
 	{ 0,            XK_K,             i_scroll_to_edge,     DIR_UP },
 	{ 0,            XK_L,             i_scroll_to_edge,     DIR_RIGHT },
 	//what are these?? useless?
-//	{ ControlMask,  XK_h,             g_scroll_screen,      DIR_LEFT },
-	{ ControlMask,  XK_Left,          g_scroll_screen,      DIR_LEFT },
-//	{ ControlMask,  XK_j,             g_scroll_screen,      DIR_DOWN },
-	{ ControlMask,  XK_Down,          g_scroll_screen,      DIR_DOWN },
-//	{ ControlMask,  XK_k,             g_scroll_screen,      DIR_UP },
-	{ ControlMask,  XK_Up,            g_scroll_screen,      DIR_UP },
 //	{ ControlMask,  XK_l,             g_scroll_screen,      DIR_RIGHT },
+//	{ ControlMask,  XK_k,             g_scroll_screen,      DIR_UP },
+//	{ ControlMask,  XK_h,             g_scroll_screen,      DIR_LEFT },
+//	{ ControlMask,  XK_j,             g_scroll_screen,      DIR_DOWN },
+	{ ControlMask,  XK_Left,          g_scroll_screen,      DIR_LEFT },
+	{ ControlMask,  XK_Down,          g_scroll_screen,      DIR_DOWN },
+	{ ControlMask,  XK_Up,            g_scroll_screen,      DIR_UP },
 	{ ControlMask,  XK_Right,         g_scroll_screen,      DIR_RIGHT },
 
 					/* Zoom */
@@ -119,16 +106,7 @@ static const keymap_t keys[] = {
 	{ 0,            XK_i,             g_zoom,               -1 },
 	{ 0,            XK_equal,         g_zoom,               +1 },
 	{ 0,            XK_minus,         g_zoom,               -1 },
-//	{ 0,            XK_K,             g_zoom,               +1 },
-//	{ ControlMask,  XK_k,             g_zoom,               +1 },
-//	{ ControlMask,  XK_j,             g_zoom,               -1 },
-//	{ 0,            XK_J,             g_zoom,               -1 },
 //	{ 0,            XK_equal,         i_set_zoom,           100 },
-//	{ 0,            XK_equal,         i_set_zoom,           100 },
-//	{ 0,            XK_9,		  i_set_zoom,           100 },
-//	{ 0,            XK_plus,          g_zoom,               +1 },
-//	{ 0,            XK_KP_Add,        g_zoom,               +1 },
-//	{ 0,            XK_KP_Subtract,   g_zoom,               -1 },
 
 				/* Marks */
 	{ 0,            XK_m,             g_toggle_image_mark,  None },
@@ -140,11 +118,8 @@ static const keymap_t keys[] = {
 	{ 0,  		XK_x,             g_unmark_all,         None },
 	{ 0,            XK_n,             g_navigate_marked,    +1 },
 	{ 0,            XK_N,             g_navigate_marked,    -1 },
-	{ 0,            XK_braceleft,     g_change_gamma,       -1 },
-	{ 0,            XK_braceright,    g_change_gamma,       +1 },
-	{ ControlMask,  XK_g,             g_change_gamma,        0 },
 
-				/* Thumbnail movement */
+				/* Thumbnail movement (needed?)*/
 	{ 0,            XK_h,             t_move_sel,           DIR_LEFT },
 	{ 0,            XK_Left,          t_move_sel,           DIR_LEFT },
 	{ 0,            XK_j,             t_move_sel,           DIR_DOWN },
@@ -178,17 +153,15 @@ static const keymap_t keys[] = {
 	{ 0,            XK_f,             g_toggle_fullscreen,  None },
 	{ 0,            XK_b,             g_toggle_bar,         None },
 	{ 0,            XK_Q,             g_dmenu_output,       None },
-//	{ ControlMask,  XK_x,             g_prefix_external,    None },
-//	{ 0,	        XK_comma,         g_prefix_external,    None },
 	{ 0,            XK_F5,            g_reload_image,       None },
 	{ ControlMask,  XK_R,             t_reload_all,         None },
-//	{ ControlMask,  XK_R,             t_reload_all,         None },
 	{ 0,            XK_D,             g_remove_image,       None },
 	{ 0,            XK_a,             i_toggle_antialias,   None },
 	{ 0,            XK_A,             i_toggle_alpha,       None },
+	{ 0,            XK_braceleft,     g_change_gamma,       -1 },
+	{ 0,            XK_braceright,    g_change_gamma,       +1 },
+	{ ControlMask,  XK_g,             g_change_gamma,        0 },
 	{ 0,            XK_S,             i_slideshow,          None },
-//	{ 0,            XK_s,             i_slideshow,          None },
-//	{ ControlMask,  XK_space,         i_toggle_animation,   None },
 	{ 0,		XK_p,      	  i_toggle_animation,   None },
 	{ 0,            XK_q,             g_quit,               None },
 };
