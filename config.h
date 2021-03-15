@@ -124,6 +124,7 @@ static const keymap_t keys[] = {
 //	{ ControlMask,  XK_j,             g_zoom,               -1 },
 //	{ 0,            XK_J,             g_zoom,               -1 },
 //	{ 0,            XK_equal,         i_set_zoom,           100 },
+//	{ 0,            XK_equal,         i_set_zoom,           100 },
 //	{ 0,            XK_9,		  i_set_zoom,           100 },
 //	{ 0,            XK_plus,          g_zoom,               +1 },
 //	{ 0,            XK_KP_Add,        g_zoom,               +1 },
