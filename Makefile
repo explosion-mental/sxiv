@@ -7,7 +7,7 @@ PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
 # autoreload backend: inotify/nop
-AUTORELOAD = inotify
+AUTORELOAD = nop
 
 # enable features requiring giflib (-lgif)
 HAVE_GIFLIB = 1
