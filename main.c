@@ -372,7 +372,7 @@ void bar_put(win_bar_t *bar, const char *fmt, ...)
 void update_info(void)
 {
 	unsigned int i, fn, fw;
-	char * mark;
+	const char * mark;
 	win_bar_t *l = &win.bar.l, *r = &win.bar.r;
 
 	/* update bar contents */
