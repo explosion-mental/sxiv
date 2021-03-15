@@ -141,7 +141,6 @@ void check_add_file(char *filename, bool given)
 	}
 
 	files[fileidx].name = estrdup(filename);
-// 	files[fileidx].marked = false;
 	files[fileidx].path = path;
 	if (given)
 		files[fileidx].flags |= FF_WARN;
@@ -372,7 +371,7 @@ void bar_put(win_bar_t *bar, const char *fmt, ...)
 void update_info(void)
 {
 	unsigned int i, fn, fw;
-	char * mark;
+	const char * mark;
 	win_bar_t *l = &win.bar.l, *r = &win.bar.r;
 
 	/* update bar contents */
@@ -380,26 +379,26 @@ void update_info(void)
 		return;
 	for (fw = 0, i = filecnt; i > 0; fw++, i /= 10);
 	mark = files[fileidx].flags & FF_MARK ? " " : "";
+//	mark = files[fileidx].flags & FF_MARK ? "¤ " : "";
+//	mark = files[fileidx].flags & FF_MARK ? "* " : "";
 	l->p = l->buf;
 	r->p = r->buf;
 	if (mode == MODE_THUMB) {
-			//show name even when caching
-		if (tns.loadnext < tns.end){
-			bar_put(r, "Loading...  %0*d" BAR_SEP, fw, tns.loadnext + 1);
-			strncpy(l->buf, basename((char *)files[fileidx].name), l->size); }
-	//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt, "Loading... %0*d", fw, tns.loadnext + 1);
-		else if (tns.initnext < filecnt){
-			bar_put(r, "Caching...  %0*d" BAR_SEP, fw, tns.initnext + 1);
-		strncpy(l->buf, basename((char *)files[fileidx].name), l->size);}
-			//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt, "Caching... %0*d", fw, tns.initnext + 1);
-		else {	//Show only the image basename() in titlebar, not the entire path(./)
+		if (tns.loadnext < tns.end)
+			bar_put(l, "Loading... %0*d", fw, tns.loadnext + 1);
+		else if (tns.initnext < filecnt)
+			bar_put(l, "Caching... %0*d", fw, tns.initnext + 1);
+		else
+			//Show only the image basename() in titlebar, not the entire path.
+			//strncpy(l->buf, files[fileidx].name, l->size);
 			strncpy(l->buf, basename((char *)files[fileidx].name), l->size);
-			bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
-			}
-	} else {//show marked imgs on bar(only if there's at least one image marked)
-		//But this doens't update...?
-		if (markcnt != 0)
-		bar_put(r, "[%s%d]" BAR_SEP, mark, markcnt);
+	//	bar_put(r, "%s%d %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+		bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+	} else {
+		//bar_put(r, "%s", mark);
+		//make the counted marks on bar on imagemode (only if there's at least one image marked)
+		//if (strlen(mark) > 0)
+			bar_put(r, "[%s%d]", mark, markcnt);
 		if (img.ss.on) {
 			if (img.ss.delay % 10 != 0)
 				bar_put(r, "%2.1fs" BAR_SEP, (float)img.ss.delay / 10);
@@ -408,6 +407,7 @@ void update_info(void)
 		}
 		if (img.gamma != 0)
 			bar_put(r, "Gamma%+d" BAR_SEP, img.gamma);
+			//bar_put(r, "G%+d" BAR_SEP, img.gamma);
 		bar_put(r, "%3d%%" BAR_SEP, (int) (img.zoom * 100.0));
 		if (img.multi.cnt > 0) {
 			for (fn = 0, i = img.multi.cnt; i > 0; fn++, i /= 10);
@@ -502,11 +502,7 @@ void run_key_handler(const char *key, unsigned int mask)
 {
 	pid_t pid;
 	FILE *pfs;
-//	bool marked = mode == MODE_THUMB && markcnt > 0;
-//change this so when there are multiple imgs marked and on image mode you can still run some action
-//(keyhandler or defaults) to those multiple images. The code before do this only on thumb mode
-	//bool marked = false; //mode == MODE_THUMB && markcnt > 0;
-	bool marked = markcnt > 0;
+	bool marked = mode == MODE_THUMB && markcnt > 0;
 	bool changed = false;
 	int f, i, pfd[2];
 	int fcnt = marked ? markcnt : 1;
@@ -536,7 +532,7 @@ void run_key_handler(const char *key, unsigned int mask)
 	oldst = emalloc(fcnt * sizeof(*oldst));
 
 	close_info();
-	strncpy(win.bar.l.buf, " Keyhandler...", win.bar.l.size);
+	strncpy(win.bar.l.buf, "[Keyhandler]...", win.bar.l.size);
 	//strncpy(win.bar.l.buf, "Running key handler...", win.bar.l.size);
 	win_draw(&win);
 	win_set_cursor(&win, CURSOR_WATCH);
@@ -1018,7 +1014,6 @@ int main(int argc, char **argv)
     // Set window title to Sxiv - [First file's directory's basename]
     strncpy(dirn, files[0].path, sizeof(dirn)-1);
     strncat(title, basename(dirname(dirn)), PATH_MAX);
-    //strncat(title, dirname(dirn), PATH_MAX);
     win.title = title;
 
 	if ((homedir = getenv("XDG_CONFIG_HOME")) == NULL || homedir[0] == '\0') {
