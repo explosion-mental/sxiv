@@ -5,7 +5,7 @@
 
 # Saved directory
 saved="$HOME/Media/Pictures/Saved"
-# List your directories here
+# List your directories here, or maybe read from a file?
 dirlist="~/Media/Pictures/Wallpapers\n~/Media/Pictures/Saved\n~/Media\n~/Downloads\n~/Docs"
 
 while read file
@@ -42,7 +42,7 @@ do
 	"4")
 		convert -flop "$file" "$file" ;;
 	"y")	# Clipboard, doesnt seem to work with xsel
-		printf '%s' "$file" | xsel -b -l /tmp/.xsel && notify-send "Clipboard📋" "<b><i>'$file'</i></b> copied" ;;
+		xsel -b -l /tmp/.xsel && notify-send "Clipboard📋" "<b><i>'$file'</i></b> copied" ;;
 		#echo -n "$file" | sed 's/^..//' | tr -d '\n' | xclip -selection clipboard &&
 	#	echo  "$file" | tr -d '\n' | xsel -b -l /tmp/.xsel &&
 		#printf '%s' "$file" | xsel -b -l /tmp/.xsel &&
