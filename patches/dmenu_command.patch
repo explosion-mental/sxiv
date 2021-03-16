@@ -1,0 +1,102 @@
+From 11ebfd29f29548a9e15350dfb7dcf9f84fae028f Mon Sep 17 00:00:00 2001
+From: yuri <macktrinz@googlemail.com>
+Date: Sun, 21 Jun 2020 10:08:30 +0200
+Subject: [PATCH] add option for dmenu like behaviour
+
+The -d option will overwrite the default XK_Enter behaviour.
+Instead of changing the mode sxiv will output the path to
+the currently fileindexed Image to stdout.
+In order to still be able to change modes ctrl+enter will
+irgnore -d flag and chnages modes as normaly.
+---
+ commands.c   | 7 ++++++-
+ config.def.h | 3 ++-
+ options.c    | 8 ++++++--
+ sxiv.h       | 1 +
+ 4 files changed, 15 insertions(+), 4 deletions(-)
+
+diff --git a/commands.c b/commands.c
+index f685bc0..065d782 100644
+--- a/commands.c
++++ b/commands.c
+@@ -65,8 +65,13 @@ bool cg_quit(arg_t _)
+ 	exit(EXIT_SUCCESS);
+ }
+
+-bool cg_switch_mode(arg_t _)
++bool cg_switch_mode(arg_t ignore_d)
+ {
++    if (options->like_dmenu && !ignore_d) {
++        printf("%s\n", files[fileidx].name);
++        exit(EXIT_SUCCESS);
++    }
++
+ 	if (mode == MODE_IMAGE) {
+ 		if (tns.thumbs == NULL)
+ 			tns_init(&tns, files, &filecnt, &fileidx, &win);
+diff --git a/config.def.h b/config.def.h
+index 9981ca3..8a968e6 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -60,7 +60,8 @@ static const int THUMB_SIZE = 3;
+ static const keymap_t keys[] = {
+ 	/* modifiers    key               function              argument */
+ 	{ 0,            XK_q,             g_quit,               None },
+-	{ 0,            XK_Return,        g_switch_mode,        None },
++	{ 0,            XK_Return,        g_switch_mode,        0 },
++	{ ControlMask,  XK_Return,        g_switch_mode,        1 },
+ 	{ 0,            XK_f,             g_toggle_fullscreen,  None },
+ 	{ 0,            XK_b,             g_toggle_bar,         None },
+ 	{ ControlMask,  XK_x,             g_prefix_external,    None },
+diff --git a/options.c b/options.c
+index de02407..7d319de 100644
+--- a/options.c
++++ b/options.c
+@@ -30,7 +30,7 @@ const opt_t *options = (const opt_t*) &_options;
+
+ void print_usage(void)
+ {
+-	printf("usage: sxiv [-abcfhiopqrtvZ] [-A FRAMERATE] [-e WID] [-G GAMMA] "
++	printf("usage: sxiv [-abcfhiodpqrtvZ] [-A FRAMERATE] [-e WID] [-G GAMMA] "
+ 	       "[-g GEOMETRY] [-N NAME] [-n NUM] [-S DELAY] [-s MODE] [-z ZOOM] "
+ 	       "FILES...\n");
+ }
+@@ -51,6 +51,7 @@ void parse_options(int argc, char **argv)
+
+ 	_options.from_stdin = false;
+ 	_options.to_stdout = false;
++	_options.like_dmenu = false;
+ 	_options.recursive = false;
+ 	_options.startnum = 0;
+
+@@ -72,7 +73,7 @@ void parse_options(int argc, char **argv)
+ 	_options.clean_cache = false;
+ 	_options.private_mode = false;
+
+-	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opqrS:s:tvZz:")) != -1) {
++	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:odpqrS:s:tvZz:")) != -1) {
+ 		switch (opt) {
+ 			case '?':
+ 				print_usage();
+@@ -128,6 +129,9 @@ void parse_options(int argc, char **argv)
+ 			case 'o':
+ 				_options.to_stdout = true;
+ 				break;
++            case 'd':
++                _options.like_dmenu = true;
++                break;
+ 			case 'p':
+ 				_options.private_mode = true;
+ 				break;
+diff --git a/sxiv.h b/sxiv.h
+index 707eba7..1329fba 100644
+--- a/sxiv.h
++++ b/sxiv.h
+@@ -261,6 +261,7 @@ struct opt {
+ 	char **filenames;
+ 	bool from_stdin;
+ 	bool to_stdout;
++	bool like_dmenu;
+ 	bool recursive;
+ 	int filecnt;
+ 	int startnum;

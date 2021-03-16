@@ -141,7 +141,6 @@ void check_add_file(char *filename, bool given)
 	}
 
 	files[fileidx].name = estrdup(filename);
-// 	files[fileidx].marked = false;
 	files[fileidx].path = path;
 	if (given)
 		files[fileidx].flags |= FF_WARN;
@@ -335,8 +334,6 @@ void load_image(int new)
 	open_info();
 	arl_setup(&arl, files[fileidx].path);
 
-//	ci_fit_to_win();	//reset scale on navigation
-				//from this fork conceptualspace/sxiv
 	if (img.multi.cnt > 0 && img.multi.animate)
 		set_timeout(animate, img.multi.frames[img.multi.sel].delay, true);
 	else
@@ -502,15 +499,11 @@ void run_key_handler(const char *key, unsigned int mask)
 {
 	pid_t pid;
 	FILE *pfs;
-//	bool marked = mode == MODE_THUMB && markcnt > 0;
-//change this so when there are multiple imgs marked and on image mode you can still run some action
-//(keyhandler or defaults) to those multiple images. The code before do this only on thumb mode
-	//bool marked = false; //mode == MODE_THUMB && markcnt > 0;
 	bool marked = markcnt > 0;
 	bool changed = false;
 	int f, i, pfd[2];
 	int fcnt = marked ? markcnt : 1;
-	char kstr[32];
+	char kstr[32], oldbar[BAR_L_LEN];
 	struct stat *oldst, st;
 	XEvent dump;
 
@@ -536,8 +529,8 @@ void run_key_handler(const char *key, unsigned int mask)
 	oldst = emalloc(fcnt * sizeof(*oldst));
 
 	close_info();
-	strncpy(win.bar.l.buf, " Keyhandler...", win.bar.l.size);
-	//strncpy(win.bar.l.buf, "Running key handler...", win.bar.l.size);
+	memcpy(oldbar, win.bar.l.buf, sizeof(oldbar));
+	snprintf(win.bar.l.buf, win.bar.l.size, "%s   Keyhandler...", oldbar);
 	win_draw(&win);
 	win_set_cursor(&win, CURSOR_WATCH);
 
@@ -655,46 +648,6 @@ void on_keypress(XKeyEvent *kev)
 	prefix = 0;
 	inputting_prefix = 0;
 }
-//void on_keypress(XKeyEvent *kev)
-//{
-//	int i;
-//	unsigned int sh = 0;
-//	KeySym ksym, shksym;
-//	char dummy, key;
-//	bool dirty = false;
-//
-//	XLookupString(kev, &key, 1, &ksym, NULL);
-//
-//	if (kev->state & ShiftMask) {
-//		kev->state &= ~ShiftMask;
-//		XLookupString(kev, &dummy, 1, &shksym, NULL);
-//		kev->state |= ShiftMask;
-//		if (ksym != shksym)
-//			sh = ShiftMask;
-//	}
-//	if (IsModifierKey(ksym))
-//		return;
-//	else if (extprefix) {
-//		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
-//		extprefix = False;
-//	} else if (key >= '0' && key <= '9') {
-//		/* number prefix for commands */
-//		prefix = prefix * 10 + (int) (key - '0');
-//		return;
-//	} else for (i = 0; i < ARRLEN(keys); i++) {
-//		if (keys[i].ksym == ksym &&
-//		    MODMASK(keys[i].mask | sh) == MODMASK(kev->state) &&
-//		    keys[i].cmd >= 0 && keys[i].cmd < CMD_COUNT &&
-//		    (cmds[keys[i].cmd].mode < 0 || cmds[keys[i].cmd].mode == mode))
-//		{
-//			if (cmds[keys[i].cmd].func(keys[i].arg))
-//				dirty = true;
-//		}
-//	}
-//	if (dirty)
-//		redraw();
-//	prefix = 0;
-//}
 
 void on_buttonpress(XButtonEvent *bev)
 {
@@ -1015,7 +968,7 @@ int main(int argc, char **argv)
 	img_init(&img, &win);
 	arl_init(&arl);
 
-    // Set window title to Sxiv - [First file's directory's basename]
+    /* Set window title to 'Sxiv - [First file's directory's basename]' */
     strncpy(dirn, files[0].path, sizeof(dirn)-1);
     strncat(title, basename(dirname(dirn)), PATH_MAX);
     //strncat(title, dirname(dirn), PATH_MAX);
