@@ -1,0 +1,15 @@
+Someone who knows diff make this a patch haha :(
+
+
+@@ -462,10 +462,8 @@ void run_key_handler(const char *key, unsigned int mask)
+-	char kstr[32];
++	char kstr[32], oldbar[BAR_L_LEN];
+
+	...
+
+
+        close_info();
++	memcpy(oldbar, win.bar.l.buf, sizeof(oldbar));
++	snprintf(win.bar.l.buf, win.bar.l.size, "[KeyHandling..] %s", oldbar);
+	win_draw(&win);
+	win_set_cursor(&win, CURSOR_WATCH);

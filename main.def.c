@@ -141,6 +141,7 @@ void check_add_file(char *filename, bool given)
 	}
 
 	files[fileidx].name = estrdup(filename);
+// 	files[fileidx].marked = false;
 	files[fileidx].path = path;
 	if (given)
 		files[fileidx].flags |= FF_WARN;
@@ -384,21 +385,50 @@ void update_info(void)
 	l->p = l->buf;
 	r->p = r->buf;
 	if (mode == MODE_THUMB) {
-		if (tns.loadnext < tns.end)
-			bar_put(l, "Loading... %0*d", fw, tns.loadnext + 1);
+			//show name even when caching
+		if (tns.loadnext < tns.end){
+			bar_put(r, "Loading... %0*d" BAR_SEP, fw, tns.loadnext + 1);
+			strncpy(l->buf, basename((char *)files[fileidx].name), l->size); }
+	//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt, "Loading... %0*d", fw, tns.loadnext + 1);
+			//bar_put(l, "Loading... %0*d", fw, tns.loadnext + 1);
 		else if (tns.initnext < filecnt)
-			bar_put(l, "Caching... %0*d", fw, tns.initnext + 1);
+			bar_put(r, "Caching... %0*d" BAR_SEP, fw, tns.initnext + 1);
+			//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt, "Caching... %0*d", fw, tns.initnext + 1);
+			//bar_put(l, "Loading... %0*d", fw, tns.loadnext + 1);
 		else
 			//Show only the image basename() in titlebar, not the entire path.
 			//strncpy(l->buf, files[fileidx].name, l->size);
 			strncpy(l->buf, basename((char *)files[fileidx].name), l->size);
+		//if (strlen(mark) != 0){
+		//	bar_put(r, "%d", markcnt);
+		//	bar_put(r, "%s %0*d/%d", mark, fw, fileidx + 1, filecnt);
+			bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+		//} else {
+		//	bar_put(r, "%s %0*d/%d", mark, fw, fileidx + 1, filecnt);
+			//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+		//}
+
 	//	bar_put(r, "%s%d %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
-		bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+		//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
 	} else {
 		//bar_put(r, "%s", mark);
+		if (markcnt > 0){
+		//	bar_put(r, "%d", markcnt);
+	//		bar_put(r, "%s %0*d/%d", mark, fw, fileidx + 1, filecnt);
+		bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+		} else {
+		bar_put(r, "%0*d/%d", fw, fileidx + 1, filecnt);
+		//	bar_put(r, "%s %0*d/%d", mark, fw, fileidx + 1, filecnt);
+		}
+			//	if (strlen(mark) > 0)
+
 		//make the counted marks on bar on imagemode (only if there's at least one image marked)
 		//if (strlen(mark) > 0)
-			bar_put(r, "[%s%d]", mark, markcnt);
+		//if (strlen(mark) != 0)
+	//		bar_put(r, "[%s%d]" BAR_SEP, mark, markcnt);
+		//bar_put(r, "%3d%%" BAR_SEP, (int) (img.zoom * 100.0));
+
+			//bar_put(r, "[%s%d]", mark, markcnt);
 		if (img.ss.on) {
 			if (img.ss.delay % 10 != 0)
 				bar_put(r, "%2.1fs" BAR_SEP, (float)img.ss.delay / 10);
@@ -502,7 +532,11 @@ void run_key_handler(const char *key, unsigned int mask)
 {
 	pid_t pid;
 	FILE *pfs;
-	bool marked = mode == MODE_THUMB && markcnt > 0;
+//	bool marked = mode == MODE_THUMB && markcnt > 0;
+//change this so when there are multiple imgs marked and on image mode you can still run some action
+//(keyhandler or defaults) to those multiple images. The code before do this only on thumb mode
+	//bool marked = false; //mode == MODE_THUMB && markcnt > 0;
+	bool marked = markcnt > 0;
 	bool changed = false;
 	int f, i, pfd[2];
 	int fcnt = marked ? markcnt : 1;
@@ -533,6 +567,15 @@ void run_key_handler(const char *key, unsigned int mask)
 
 	close_info();
 	strncpy(win.bar.l.buf, "[Keyhandler]...", win.bar.l.size);
+	//strncpy(win.bar.l.buf, "Running key handler...", win.bar.l.size);
+	//strncpy(win.bar.l.buf, " Keyhandler...", win.bar.l.size);
+	//bar_put(&win.bar.r, "   Keyhandler...", &win.bar.l.buf);
+	//strncpy(win.bar.r.buf, " Keyhandler...", win.bar.r.size);
+	//bar_put(&win.bar.l, "   Keyhandler...", win.bar.l.size);
+	//strncpy(win.bar.r.size, "   Keyhandler...", win.bar.r.buf);
+	//snprintf(win.bar.l.size, "   Keyhandler...", win.bar.l.buf);
+	//bar_put(r, "%2.1fs" BAR_SEP, (float)img.ss.delay / 10);
+	//snprintf(win.bar.l.buf, win.bar.l.size, "%c %i  [KeyHandling..]");
 	//strncpy(win.bar.l.buf, "Running key handler...", win.bar.l.size);
 	win_draw(&win);
 	win_set_cursor(&win, CURSOR_WATCH);
@@ -1014,6 +1057,7 @@ int main(int argc, char **argv)
     // Set window title to Sxiv - [First file's directory's basename]
     strncpy(dirn, files[0].path, sizeof(dirn)-1);
     strncat(title, basename(dirname(dirn)), PATH_MAX);
+    //strncat(title, dirname(dirn), PATH_MAX);
     win.title = title;
 
 	if ((homedir = getenv("XDG_CONFIG_HOME")) == NULL || homedir[0] == '\0') {

@@ -5,10 +5,15 @@ Subject: [PATCH] Always pass marked images to stdin of key-handler
 
 This simplifies the logic, and removes ambiguity WRT what is passed.
 The current image is always passed as the second argument.
-I did the same thing changing one line, is this one safer in some way?
 
 It's no more required to switch to thumbnail mode, and therefore to
 trigger caching, in order to pass the list of marked images.
+
+
+I did the same thing changing one line, is this one safer in some way?
+It's not what I need, it needs an image to be marked even if you are
+want to make an action on only one image(without mark keyhandler doesnt
+work)
 ---
  exec/key-handler |  6 +++---
  main.c           | 18 +++++++++---------
