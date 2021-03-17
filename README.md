@@ -1,5 +1,6 @@
 # sxiv
 My build of sxiv
+![Image](Screenshot.png "Screenshot")
 
 ## Key Handler
 - With the patch I made (someone who knows diff and all that please make it correct), there's no need for "modkey" to execute a command on keyhandler, pretty stuff!
