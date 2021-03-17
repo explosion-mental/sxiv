@@ -11,7 +11,6 @@ dirlist="~/Media/Pictures/Wallpapers\n~/Media/Pictures/Saved\n~/Media\n~/Downloa
 while read file
 do
         case "$1" in
-	#"apostrophe")
 	"semicolon")	# Information
 		notify-send "File informationℹ️ " "$(mediainfo --Output=file://$HOME/.local/Templates/mediainfo "$file")" ;;
 	"d")	# Delete
@@ -42,15 +41,11 @@ do
 	"4")
 		convert -flop "$file" "$file" ;;
 	"y")	# Clipboard, doesnt seem to work with xsel
-		xsel -b -l /tmp/.xsel && notify-send "Clipboard📋" "<b><i>'$file'</i></b> copied" ;;
-		#echo -n "$file" | sed 's/^..//' | tr -d '\n' | xclip -selection clipboard &&
-	#	echo  "$file" | tr -d '\n' | xsel -b -l /tmp/.xsel &&
-		#printf '%s' "$file" | xsel -b -l /tmp/.xsel &&
-		#notify-send -t 500 "$(basename "$file") copied to clipboard📋" & ;;
+		printf '%s' "$(basename $file)" | xclip -selection clipboard &&
+		notify-send -t 500 "Clipboard📋" "<b><i>'$file'</i></b> copied" ;;
 	"P")
-		#readlink -f "$file" | tr -d '\n' | xclip -selection clipboard &&
-		readlink -f "$file" | tr -d '\n' | xsel -l /dev/null &&
-		notify-send "$(readlink -f "$file") copied to clipboard📋" & ;;
+		readlink -f "$file" | tr -d '\n' | xclip -selection clipboard &&
+		notify-send "$(readlink -f "$file") copied to clipboard📋" ;;
 	"C")	# Copy
 		[ -z "$dirs" ] && dirs="$(echo "$dirlist" | dmenu -l 5 -i -p "Copy file(s) to where?"  | sed "s|~|$HOME|g")"
 		[ -z "$dirs" ] && exit
@@ -62,9 +57,7 @@ do
 		[ -z "$dirs" ] && dirs="$(echo "$dirlist" | dmenu -l 5 -i -p "Move file(s) to where?"  | sed "s|~|$HOME|g")"
 		[ -z "$dirs" ] && exit
 		[ ! -d "$dirs" ] && notify-send "$dirs is not a directory, cancelled." && exit
-		#mv "$file" "$dirs" && notify-send -i "$dirs/$(echo "$file" | sed 's/^..//')" "🚚 File moved" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
 		mv "$file" "$dirs" && notify-send -i "$dirs/$(noextname -f "$file")" "🚚 File moved" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
-		#xdotool key r		# reload sxiv
 		xdotool key control+R	# reload sxiv
 		;;
         esac
