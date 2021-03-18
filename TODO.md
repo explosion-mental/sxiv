@@ -13,4 +13,4 @@
 - after the padding patch I notice , I had an screenshot of my dwm bar it is really wide but not with that much height. When I mark it on thumbnail mode on some of the smalls zooms the image "dissapear" (the image was almost as thick as the marks)
 - Is there a way to not navigate (to scroll) on WIDTH mode? (usefull on some memes, an comics)
 - How to loop on the command 'cg_navigate_marked' ? (on marked images)
-- Actual support for clipboard, I use xsel just because clipmenu use it (I don't want to fork it now but some time I will in order to work with xclip)
+<s>- Actual support for clipboard, I use xsel just because clipmenu use it (I don't want to fork it now but some time I will in order to work with xclip)</s> I use xclip now 😁
