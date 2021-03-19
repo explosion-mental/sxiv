@@ -18,4 +18,5 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - Also, is there a way to maximaze space on thumbnail mode?(Maybe with square thumbnails dummy?)
 - See TODO if you wanna help
 
-Thanks and that's it ig
+![TODO](TODO.md "TODO")
+

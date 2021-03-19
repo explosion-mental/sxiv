@@ -18,14 +18,14 @@ index f685bc0..7546963 100644
 @@ -332,6 +332,21 @@ bool ci_scroll_to_edge(arg_t dir)
  	return img_pan_edge(&img, dir);
  }
- 
+
 +bool ci_scroll_or_navigate(arg_t dir)
 +{
 +  if (img_zoom_diff(&img, NULL) >= 0) {
 +    arg_t n;
 +    switch (dir) {
-+		case DIR_LEFT:  n = -1; break;
-+		case DIR_RIGHT: n =  1; break;
++		case DIR_UP:  n = -1; break;
++		case DIR_DOWN: n =  1; break;
 +    default:        n =  0; break;
 +    }
 +    return ci_navigate(n);
@@ -83,25 +83,25 @@ index 94cfc2d..1b0028b 100644
 @@ -391,13 +391,10 @@ void img_check_pan(img_t *img, bool moved)
  		img->dirty = true;
  }
- 
+
 -bool img_fit(img_t *img)
 +int img_zoom_diff(img_t *img, float *zptr)
  {
  	float z, zw, zh;
- 
+
 -	if (img->scalemode == SCALE_ZOOM)
 -		return false;
 -
  	zw = (float) img->win->w / (float) img->w;
  	zh = (float) img->win->h / (float) img->h;
- 
+
 @@ -413,8 +410,20 @@ bool img_fit(img_t *img)
  			break;
  	}
  	z = MIN(z, img->scalemode == SCALE_DOWN ? 1.0 : zoom_max);
 +  if (zptr != NULL)
 +    *zptr = z;
- 
+
 -	if (zoomdiff(img, z) != 0) {
 +  return zoomdiff(img, z);
 +}
@@ -126,6 +126,6 @@ index 140132f..c2a4348 100644
  bool img_frame_navigate(img_t*, int);
  bool img_frame_animate(img_t*);
 +int  img_zoom_diff(img_t*, float*);
- 
- 
+
+
  /* options.c */
