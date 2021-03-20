@@ -12,6 +12,7 @@ I'm trying the first option because, even I don't use the bar, the text saying _
 
 ## Fork
 I use someone's fork which I don't remember why I did it, but his fork I believe is on sxiv.1
+_Note:_ after looking for all the forks I could find, the [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) was really logic in the code that has been changed. Of course I would like more things that's why this exist, so thanks to that repo.
 
 ## Patches
 Just look them up, most of them aren't on this build.
@@ -29,7 +30,7 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - Add support for more embedded thumbnail formats. Right now, sxiv seems to use
   the smallest one. Issue #238.
 
-### My Build
+### My Build Todos
 
 - Autoreload feature  ( It needs to reload images when invoke keyhandler? the markcnt doesn't update after moving files to other directory with a keyhandler command )
 - Use the space better
@@ -39,3 +40,6 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - Is there a way to not navigate (to scroll) on WIDTH mode? (usefull on some memes, an comics)
 - How to loop on the command 'cg_navigate_marked' ? (on marked images)
 - <s>Actual support for clipboard, I use xsel just because clipmenu use it (I don't want to fork it now but some time I will in order to work with xclip)</s> I use xclip now 😁✅
+
+### Mayor improvements:
+- It feels more responsive after WM_HINTS patch
