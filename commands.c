@@ -52,6 +52,9 @@ extern int markidx;
 extern int prefix;
 extern bool extprefix;
 
+/* Customs */
+bool img_frame_goto(img_t *, int);
+
 bool cg_quit(arg_t _)
 {
 	unsigned int i;
@@ -60,6 +63,7 @@ bool cg_quit(arg_t _)
 		for (i = 0; i < filecnt; i++) {
 			if (files[i].flags & FF_MARK)
 				printf("%s\n", files[i].name);
+			 	//printf("%s\n", files[i].path);
 		}
 	}
 	exit(EXIT_SUCCESS);
@@ -232,7 +236,7 @@ bool cg_unmark_all(arg_t _)
 	return true;
 }
 
-bool cg_navigate_marked(arg_t n)
+bool cg_navigate_marked(arg_t n)//Loop?
 {
 	int d, i;
 	int new = fileidx;
@@ -240,7 +244,12 @@ bool cg_navigate_marked(arg_t n)
 	if (prefix > 0)
 		n *= prefix;
 	d = n > 0 ? 1 : -1;
-	for (i = fileidx + d; n != 0 && i >= 0 && i < filecnt; i += d) {
+	/* Loop through all marked images */
+	for (i = fileidx + d; n != 0; i += d) {
+ 		if (i < 0)
+ 			i += filecnt;
+ 		else if (i >= filecnt)
+ 			i -= filecnt;
 		if (files[i].flags & FF_MARK) {
 			n -= d;
 			new = i;
@@ -301,11 +310,22 @@ bool ci_alternate(arg_t _)
 	return true;
 }
 
-bool ci_navigate_frame(arg_t d)
+bool ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is activated?
 {
+	int frame;
 	if (prefix > 0)
 		d *= prefix;
+//	return !img.multi.animate && img_frame_navigate(&img, d);
+	if (img.multi.cnt > 0) {
+		frame = (img.multi.sel + d) % img.multi.cnt;
+		while (frame < 0)
+			frame += img.multi.cnt;
+		//return img_frame_goto(&img,frame);
+		return !img.multi.animate && img_frame_goto(&img, frame);
+	} else {
+	//return img_frame_navigate(&img, d);
 	return !img.multi.animate && img_frame_navigate(&img, d);
+	}
 }
 
 bool ci_toggle_animation(arg_t _)
@@ -329,18 +349,41 @@ bool ci_scroll(arg_t dir)
 	return img_pan(&img, dir, prefix);
 }
 
-bool ci_scroll_to_edge(arg_t dir) /* If not zoomed, zoom one float on the array of zoom (config.h) */
+bool ci_scroll_to_edge(arg_t dir)
+//If zoomed, then navigate else scroll to edge
+/* If not zoomed, zoom one float on the array of zoom on config.h */
 {
-  if (img_zoom_diff(&img, NULL) >= 0) {
-	return img_zoom(&img, 1);
-  } else {
+//	return img_pan_edge(&img, dir);
+	//if (img_zoom_diff(&img, NULL) >= 0) {
+	//return img_zoom(&img, 110.0 / 100.0) && img_pan_edge(&img, dir);
+	//return img_zoom_in(&img);
+	//return img_fit_win(&img, SCALE_WIDTH) && img_pan_edge(&img, dir);
+		//if (img_fit_win(&img, SCALE_WIDTH))
+		//return img_pan_edge(&img, dir);
+		//else return img_zoom(&img, 110.0 / 100.0) && img_pan_edge(&img, dir);
+//    arg_t n;
+//    switch (dir) {
+//		case DIR_UP:	n = -1; break;
+//		case DIR_DOWN:	n =  1; break;
+//		default:	n =  0; break;
+//    }
+//    return ci_navigate(n);
+//  } else {
+	//return ci_scroll(dir);
 	return img_pan_edge(&img, dir);
-  }
+  //}
 }
 
 bool ci_scroll_or_navigate(arg_t dir)
 {
+  //if (img_zoom_diff(&img, NULL) >= 0 || zoomdiff(&img, zh)) {
+  //if (img_zoom_diff(&img, NULL) >= 0 || img_zoom_diff == SCALE_WIDTH) {
+  //if (img_fit(img) == false)
+  //if (img_fit_win == SCALE_WIDTH) return ci_scroll(dir);
+  //else			{
   if (img_zoom_diff(&img, NULL) >= 0) {
+  //if (img_zoom_diff(&img, NULL) >= 0 || img_zoom_diff(img, &z) != 0 ) {
+  //if (img_zoom_diff(&img, NULL) >= 0 && img_fit(img->scalemode != SCALE_WID)) {
     arg_t n;
     switch (dir) {
 		case DIR_UP:	n = -1; break;
@@ -351,6 +394,7 @@ bool ci_scroll_or_navigate(arg_t dir)
   } else {
     return ci_scroll(dir);
   }
+ // 			}
 }
 
 bool ci_drag(arg_t mode)
@@ -478,6 +522,7 @@ bool ci_random_navigate(arg_t _)
 bool cg_dmenu_output(arg_t _)
 {
 	printf("%s\n", files[fileidx].name);
+	//printf("%s\n", files[fileidx].path);
         exit(EXIT_SUCCESS);
 }
 

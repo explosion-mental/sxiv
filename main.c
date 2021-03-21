@@ -530,7 +530,7 @@ void run_key_handler(const char *key, unsigned int mask)
 
 	close_info();
 	memcpy(oldbar, win.bar.l.buf, sizeof(oldbar));
-	snprintf(win.bar.l.buf, win.bar.l.size, "%s   Keyhandler...", oldbar);
+	snprintf(win.bar.l.buf, win.bar.l.size, "%s                    >_ Keyhandler...", oldbar);
 	win_draw(&win);
 	win_set_cursor(&win, CURSOR_WATCH);
 
