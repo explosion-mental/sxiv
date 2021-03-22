@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# Example for $XDG_CONFIG_HOME/sxiv/exec/image-info
 # Called by sxiv(1) whenever an image gets loaded.
 # The output is displayed in sxiv's status bar.
 # Arguments:
@@ -8,15 +7,12 @@
 #   $2: image width
 #   $3: image height
 
-s="  " # field separator
+s="  "	# field separator
 
-exec 2>/dev/null
+exec 2>/dev/null	# show no errors on output
 
 filesize=$(du -Hh -- "$1" | cut -f 1)
 geometry="${2}x${3}"
 filename=${1##*/}
 
 echo "${filename}${s}${geometry}${s}${filesize}"
-
-
-
