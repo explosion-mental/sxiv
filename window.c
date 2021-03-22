@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <unistd.h>
 #include <X11/cursorfont.h>
 #include <X11/Xatom.h>
 #include <X11/Xresource.h>
@@ -116,8 +117,9 @@ void win_init(win_t *win)
 	res_man = XResourceManagerString(e->dpy);
 	db = res_man != NULL ? XrmGetStringDatabase(res_man) : None;
 
+	f = win_res(db, RES_CLASS ".font", "unifont-9");
 //	f = win_res(db, RES_CLASS ".font", "monospace-8");
-	f = win_res(db, RES_CLASS ".font", "'SauceCodePro Nerd Font:pixelsize=12:antialias=true:autohint=true', 'Noto Color Emoji:pixelsize=12:antialias=true:autohint=true: style=Regular'");
+	//f = win_res(db, RES_CLASS ".font", "'SauceCodePro Nerd Font:pixelsize=12:antialias=true:autohint=true', 'Noto Color Emoji:pixelsize=12:antialias=true:autohint=true: style=Regular'");
 	win_init_font(e, f);
 
 //	bg = win_res(db, RES_CLASS ".background", "color15");
@@ -145,6 +147,7 @@ void win_init(win_t *win)
 	INIT_ATOM_(_NET_WM_ICON);
 	INIT_ATOM_(_NET_WM_STATE);
 	INIT_ATOM_(_NET_WM_STATE_FULLSCREEN);
+	INIT_ATOM_(_NET_WM_PID);
 }
 
 void win_open(win_t *win)
@@ -160,6 +163,7 @@ void win_open(win_t *win)
 	Pixmap none;
 	int gmask;
 	XSizeHints sizehints;
+	XWMHints hints;
 
 	e = &win->env;
 	parent = options->embed != 0 ? options->embed : RootWindow(e->dpy, e->scr);
@@ -206,7 +210,22 @@ void win_open(win_t *win)
 	                          e->depth, InputOutput, e->vis, 0, NULL);
 	if (win->xwin == None)
 		error(EXIT_FAILURE, 0, "Error creating X window");
+	    /* set the _NET_WM_PID */
+    pid_t pid = getpid();
+    XChangeProperty(e->dpy, win->xwin,
+                    atoms[ATOM__NET_WM_PID], XA_CARDINAL, sizeof(pid_t) * 8,
+                    PropModeReplace, (unsigned char *) &pid, 1);
 
+    /* set the WM_CLIENT_MACHINE */
+    char hostname[255];
+    if (gethostname(hostname, sizeof(hostname)) == 0) {
+      XTextProperty tp;
+      tp.value = (unsigned char *)hostname;
+      tp.nitems = strlen(hostname);
+      tp.encoding = XA_STRING;
+      tp.format = 8;
+      XSetWMClientMachine(e->dpy, win->xwin, &tp);
+    }
 	XSelectInput(e->dpy, win->xwin,
 	             ButtonReleaseMask | ButtonPressMask | KeyPressMask |
 	             PointerMotionMask | StructureNotifyMask);
@@ -257,6 +276,11 @@ void win_open(win_t *win)
 	sizehints.x = win->x;
 	sizehints.y = win->y;
 	XSetWMNormalHints(win->env.dpy, win->xwin, &sizehints);
+
+	hints.flags = InputHint | StateHint;
+	hints.input = 1;
+	hints.initial_state = NormalState;
+	XSetWMHints(win->env.dpy, win->xwin, &hints);
 
 	win->h -= win->bar.h;
 

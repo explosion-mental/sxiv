@@ -640,12 +640,18 @@ end:
 }
 
 #define MODMASK(mask) ((mask) & (ShiftMask|ControlMask|Mod1Mask))
+/* Read the Readme.md to understand about the prefix key and what
+ * fits you best.
+ */
+
+/* Option 1 */
 void on_keypress(XKeyEvent *kev)
 {
 	int i;
 	unsigned int sh = 0;
 	KeySym ksym, shksym;
 	char dummy, key;
+	bool bound = false;
 	bool dirty = false;
 
 	XLookupString(kev, &key, 1, &ksym, NULL);
@@ -659,22 +665,15 @@ void on_keypress(XKeyEvent *kev)
 	}
 	if (IsModifierKey(ksym))
 		return;
-
-	if (ksym == XK_Escape && MODMASK(kev->state) == 0){
-		inputting_prefix = true;
-		prefix = 0;
-		return;
-	}
-
-	if ((inputting_prefix == true) && (key >= '0' && key <= '9'))
-	{
+	else if (extprefix) {
+		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
+		extprefix = False;
+		/* I dont need this */
+	} else if (key >= '0' && key <= '9') {
 		/* number prefix for commands */
 		prefix = prefix * 10 + (int) (key - '0');
 		return;
 	} else for (i = 0; i < ARRLEN(keys); i++) {
-                if ((dirty == true) && (keys[i].ksym == 0))
-			break;
-
 		if (keys[i].ksym == ksym &&
 		    MODMASK(keys[i].mask | sh) == MODMASK(kev->state) &&
 		    keys[i].cmd >= 0 && keys[i].cmd < CMD_COUNT &&
@@ -682,18 +681,74 @@ void on_keypress(XKeyEvent *kev)
 		{
 			if (cmds[keys[i].cmd].func(keys[i].arg))
 				dirty = true;
+			bound = true;
 		}
 	}
-
-	if (i == ARRLEN(keys) && (!dirty))
+	if (!bound)
 		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
-
 	if (dirty)
 		redraw();
-
 	prefix = 0;
-	inputting_prefix = 0;
 }
+
+
+/* Option 2 */
+//void on_keypress(XKeyEvent *kev)
+//{
+//	int i;
+//	unsigned int sh = 0;
+//	KeySym ksym, shksym;
+//	char dummy, key;
+//	bool dirty = false;
+//
+//	XLookupString(kev, &key, 1, &ksym, NULL);
+//
+//	if (kev->state & ShiftMask) {
+//		kev->state &= ~ShiftMask;
+//		XLookupString(kev, &dummy, 1, &shksym, NULL);
+//		kev->state |= ShiftMask;
+//		if (ksym != shksym)
+//			sh = ShiftMask;
+//	}
+//	if (IsModifierKey(ksym))
+//		return;
+//
+//	if (ksym == XK_Escape && MODMASK(kev->state) == 0){
+//		inputting_prefix = true;
+//		prefix = 0;
+//		return;
+//	}
+//
+//	if ((inputting_prefix == true) && (key >= '0' && key <= '9'))
+//	{
+//		/* number prefix for commands */
+//		prefix = prefix * 10 + (int) (key - '0');
+//		return;
+//	} else for (i = 0; i < ARRLEN(keys); i++) {
+//                if ((dirty == true) && (keys[i].ksym == 0))
+//			break;
+//
+//		if (keys[i].ksym == ksym &&
+//		    MODMASK(keys[i].mask | sh) == MODMASK(kev->state) &&
+//		    keys[i].cmd >= 0 && keys[i].cmd < CMD_COUNT &&
+//		    (cmds[keys[i].cmd].mode < 0 || cmds[keys[i].cmd].mode == mode))
+//		{
+//			if (cmds[keys[i].cmd].func(keys[i].arg))
+//				dirty = true;
+//		}
+//	}
+//
+//	if (i == ARRLEN(keys) && (!dirty))
+//		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
+//
+//	if (dirty)
+//		redraw();
+//
+//	prefix = 0;
+//	inputting_prefix = 0;
+//}
+
+/* Default one */
 //void on_keypress(XKeyEvent *kev)
 //{
 //	int i;
@@ -742,7 +797,7 @@ void on_buttonpress(XButtonEvent *bev)
 	static Time firstclick;
 
 	if (mode == MODE_IMAGE) {
-		set_timeout(reset_cursor, TO_CURSOR_HIDE, true);
+		set_timeout(reset_cursor, TO_CURSOR_HIDE, true);	/* Cursor watch */
 		reset_cursor();
 
 		for (i = 0; i < ARRLEN(buttons); i++) {

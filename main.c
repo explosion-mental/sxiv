@@ -530,7 +530,8 @@ void run_key_handler(const char *key, unsigned int mask)
 
 	close_info();
 	memcpy(oldbar, win.bar.l.buf, sizeof(oldbar));
-	snprintf(win.bar.l.buf, win.bar.l.size, "%s                    >_ Keyhandler...", oldbar);
+	/* How to put the text on the midlle? */
+	snprintf(win.bar.l.buf, win.bar.l.size, "%s >_ Keyhandler...", oldbar);
 	win_draw(&win);
 	win_set_cursor(&win, CURSOR_WATCH);
 
@@ -617,12 +618,8 @@ void on_keypress(XKeyEvent *kev)
 	else if (extprefix) {
 		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
 		extprefix = False;
-		/* I dont need this */
-//	} else if (key >= '0' && key <= '9') {
-//		/* number prefix for commands */
-//		prefix = prefix * 10 + (int) (key - '0');
-//		return;
-	} else for (i = 0; i < ARRLEN(keys); i++) {
+	}
+	else for (i = 0; i < ARRLEN(keys); i++) {
 		if (keys[i].ksym == ksym &&
 		    MODMASK(keys[i].mask | sh) == MODMASK(kev->state) &&
 		    keys[i].cmd >= 0 && keys[i].cmd < CMD_COUNT &&
@@ -640,63 +637,6 @@ void on_keypress(XKeyEvent *kev)
 	prefix = 0;
 }
 
-
-
-//void on_keypress(XKeyEvent *kev)
-//{
-//	int i;
-//	unsigned int sh = 0;
-//	KeySym ksym, shksym;
-//	char dummy, key;
-//	bool dirty = false;
-//
-//	XLookupString(kev, &key, 1, &ksym, NULL);
-//
-//	if (kev->state & ShiftMask) {
-//		kev->state &= ~ShiftMask;
-//		XLookupString(kev, &dummy, 1, &shksym, NULL);
-//		kev->state |= ShiftMask;
-//		if (ksym != shksym)
-//			sh = ShiftMask;
-//	}
-//	if (IsModifierKey(ksym))
-//		return;
-//
-//	if (ksym == XK_Escape && MODMASK(kev->state) == 0){
-//		inputting_prefix = true;
-//		prefix = 0;
-//		return;
-//	}
-//
-//	if ((inputting_prefix == true) && (key >= '0' && key <= '9'))
-//	{
-//		/* number prefix for commands */
-//		prefix = prefix * 10 + (int) (key - '0');
-//		return;
-//	} else for (i = 0; i < ARRLEN(keys); i++) {
-//                if ((dirty == true) && (keys[i].ksym == 0))
-//			break;
-//
-//		if (keys[i].ksym == ksym &&
-//		    MODMASK(keys[i].mask | sh) == MODMASK(kev->state) &&
-//		    keys[i].cmd >= 0 && keys[i].cmd < CMD_COUNT &&
-//		    (cmds[keys[i].cmd].mode < 0 || cmds[keys[i].cmd].mode == mode))
-//		{
-//			if (cmds[keys[i].cmd].func(keys[i].arg))
-//				dirty = true;
-//		}
-//	}
-//
-//	if (i == ARRLEN(keys) && (!dirty))
-//		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
-//
-//	if (dirty)
-//		redraw();
-//
-//	prefix = 0;
-//	inputting_prefix = 0;
-//}
-
 void on_buttonpress(XButtonEvent *bev)
 {
 	int i, sel;
@@ -704,7 +644,7 @@ void on_buttonpress(XButtonEvent *bev)
 	static Time firstclick;
 
 	if (mode == MODE_IMAGE) {
-		set_timeout(reset_cursor, TO_CURSOR_HIDE, true);
+		set_timeout(reset_cursor, TO_CURSOR_HIDE, true);	/* Clock */
 		reset_cursor();
 
 		for (i = 0; i < ARRLEN(buttons); i++) {
@@ -961,18 +901,15 @@ int main(int argc, char **argv)
 		}
 		if (!S_ISDIR(fstats.st_mode)) {
 			char *path = check_and_get_path(filename);
-
-			// Set the first command line argument as the displayed file
+			/* Set the first command line argument as the displayed file */
 			if (fileidx == 0) memcpy(savedname, path, sizeof(savedname));
-
-			// If single file as argument, the whole directory will be scanned
+			/* If single file as argument, the whole directory will be scanned */
 			if (options->filecnt == 1) filename = dirname(filename);
 			else {
 				check_add_file(filename, true);
 				continue;
 			}
 		}
-
 		if (r_opendir(&dir, filename, options->recursive) < 0) {
 			error(0, errno, "%s", filename);
 			continue;
