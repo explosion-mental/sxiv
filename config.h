@@ -58,7 +58,7 @@ const int THUMB_MARGIN = 0;		//margins between images
 const int THUMB_PADDING = -4;		//padding of the highlight or mark
 
 #endif
-#ifdef _MAPPINGS_CONFIG
+#ifdef _MAPPINGS_CONFIG		/* Useless if? */
 
 /* keyboard mappings for image and thumbnail mode: */
 /* My sxiv doen't use a PREFIX KEY for the keyhandler, don't mix up bindings! */
@@ -101,7 +101,7 @@ static const keymap_t keys[] = {
 	{ ControlMask,  XK_Up,            g_scroll_screen,      DIR_UP },
 	{ ControlMask,  XK_Right,         g_scroll_screen,      DIR_RIGHT },
 
-					/* Zoom */
+				/* Zoom */
 	{ 0,            XK_o,             g_zoom,               +1 },
 	{ 0,            XK_i,             g_zoom,               -1 },
 	{ 0,            XK_equal,         g_zoom,               +1 },
@@ -119,7 +119,7 @@ static const keymap_t keys[] = {
 	{ 0,            XK_n,             g_navigate_marked,    +1 },
 	{ 0,            XK_N,             g_navigate_marked,    -1 },
 
-				/* Thumbnail movement (needed?)*/
+			/* Thumbnail movement (needed?)*/
 	{ 0,            XK_h,             t_move_sel,           DIR_LEFT },
 	{ 0,            XK_Left,          t_move_sel,           DIR_LEFT },
 	{ 0,            XK_j,             t_move_sel,           DIR_DOWN },

@@ -71,6 +71,7 @@ bool cg_quit(arg_t _)
 
 bool cg_switch_mode(arg_t _)
 {
+	win_toggle_bar(&win);	/* Always show bar on thumb mode */
 	if (mode == MODE_IMAGE) {
 		if (tns.thumbs == NULL)
 			tns_init(&tns, files, &filecnt, &fileidx, &win);
@@ -236,7 +237,7 @@ bool cg_unmark_all(arg_t _)
 	return true;
 }
 
-bool cg_navigate_marked(arg_t n)//Loop?
+bool cg_navigate_marked(arg_t n)
 {
 	int d, i;
 	int new = fileidx;
