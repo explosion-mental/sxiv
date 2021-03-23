@@ -28,12 +28,16 @@ FREETYPEINC = /usr/include/freetype2
 
 # includes and libs
 INCS = -I$(FREETYPEINC)
-ldlibs = $(LDLIBS) -lImlib2 -lX11 $(FREETYPELIBS) $(HAVE_LIBEXIF) $(HAVE_GIFLIB)
+LIBS = $(LDLIBS) -lImlib2 -lX11 $(FREETYPELIBS) $(HAVE_LIBEXIF) $(HAVE_GIFLIB)
+#ldlibs = $(LDLIBS) -lImlib2 -lX11 $(FREETYPELIBS) $(HAVE_LIBEXIF) $(HAVE_GIFLIB)
 
 # flags
-cflags = -std=c99 -Wall -pedantic $(CFLAGS)
-cppflags = -I. $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=700 \
+SXIVCPPFLAGS = -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=700 $(GIFLIBFLAGS) $(LIBEXIFFLAGS) $(INCS)
+SXIVCFLAGS = -std=c99 -pedantic -Wall $(INCS) $(SXIVCPPFLAGS) $(CPPFLAGS) $(CFLAGS)
+SXIVLDFLAGS = $(LIBS) $(LDFLAGS)
+#cflags = -std=c99 -Wall -pedantic $(CFLAGS)
+#cppflags = -I. $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=700 \
   $(GIFLIBFLAGS) $(LIBEXIFFLAGS) $(INCS)
 
 # compiler and linker
-#CC = cc
+CC = cc
