@@ -40,7 +40,7 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - If the bar is hidden when image mode, when switching modes toggle the bar (maybe bar always shown on thumbnail mode? 	cg_toggle_bar();)
 - after the padding patch I notice , I had an screenshot of my dwm bar it is really wide but not with that much height. When I mark it on thumbnail mode on some of the smalls zooms the image "dissapear" (the image was almost as thick as the marks)
 - Is there a way to not navigate (to scroll) on WIDTH mode? (usefull on some memes, an comics)
-- <s>How to loop on the command 'cg_navigate_marked' ? (on marked images)<s>Done✅
+- <s>How to loop on the command 'cg_navigate_marked' ? (on marked images)</s> Done✅
 - <s>Actual support for clipboard, I use xsel just because clipmenu use it (I don't want to fork it now but some time I will in order to work with xclip)</s> I use xclip now 😁✅
 - Is there a way to toggle square thumbnails?(I don't think I need/want this, just asking)
 - <s> version.h seems useless? </s> It was(?)✔️
