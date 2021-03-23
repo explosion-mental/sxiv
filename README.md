@@ -2,6 +2,8 @@
 My build of sxiv
 ![Image](Screenshot.png "Screenshot")
 
+# Features
+
 ## Key Handler
 With the patch I made (someone who knows diff and all that please make it correct), there's no need for "prefix-key" to execute a command on keyhandler, pretty stuff!
 There are **two** options tho:
@@ -10,27 +12,27 @@ There are **two** options tho:
 
 I'm trying the first option because, even I don't use the bar, the text saying _Keyhandler..._ annoys me and makes me think its searching on the keyhandler when it's not needed.
 
-## Fork
-I use someone's fork which I don't remember why I did it, but his fork I believe is on sxiv.1
-_Note:_ after looking for all the forks I could find, the [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) was really logic in the code that has been changed. Of course I would like more things that's why this exist, so thanks to that repo.
-
 ## Patches
 Just look them up, most of them aren't on this build.
 
-## Help...
+# Fork
+I use someone's fork which I don't remember why I did it, but his fork I believe is on sxiv.1
+_Note:_ after looking for all the forks I could find, the [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) was really logic in the code that has been changed. Of course I would like more things that's why this exist, so thanks to that repo.
+
+# Help...
 This is really the best image viewer and prob the fastest! After my changes it's even better for me. I have one issue
 - What's the best position/intuitive (preferably not with Shift, my pinky hurts) for some actions on sxiv?
 - Also, is there a way to maximaze space on thumbnail mode?(Maybe with square thumbnails dummy?)
 - See *[TODO](TODO.md)* if you wanna help
 
-## TODO (why have a separate file)
+# TODO (why have a separate file)
 - Load all frames from TIFF files. We have to write our own loader for this to
   happen--just like we did for GIF images--because Imlib2 does not support
   multiple frames. Issue #241.
 - Add support for more embedded thumbnail formats. Right now, sxiv seems to use
   the smallest one. Issue #238.
 
-### My Build Todos
+## My Build Todos
 
 - Autoreload feature  ( It needs to reload images when invoke keyhandler? the markcnt doesn't update after moving files to other directory with a keyhandler command )
 - Use the space better
@@ -41,6 +43,10 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - <s>How to loop on the command 'cg_navigate_marked' ? (on marked images)<s>Done✅
 - <s>Actual support for clipboard, I use xsel just because clipmenu use it (I don't want to fork it now but some time I will in order to work with xclip)</s> I use xclip now 😁✅
 - Is there a way to toggle square thumbnails?(I don't think I need/want this, just asking)
+- version.h seems useless?
 
-### Mayor improvements:
+## Mayor improvements:
 - It feels more responsive after WM_HINTS patch
+- version.h not needed (one file less) _**Note**_: I have no idea what that file was doing, looking at the **Makefile** says something about .git/index or whatever, I have no idea if that broke something external (not the program), maybe it was a little sync with the github main repo?
+- Compile even if sxiv is active _(cp -f)_
+- Not an improment but for my standards on understadings this: I make a config.mk _just like st and dwm_ so you can configure it I guess, also the autoreload_inotify/nop was annoying so I just change it to _inotify/nop_ if you want the autoreload before it add it on the Makefile.
