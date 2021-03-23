@@ -9,39 +9,42 @@ all: options sxiv
 
 options:
 	@echo sxiv build options:
-	@echo "AUTORELOAD   = $(AUTORELOAD)"
-	@echo "HAVE_GIFLIB  = $(HAVE_GIFLIB)"
-	@echo "HAVE_LIBEXIF = $(HAVE_LIBEXIF)"
-	@echo "cflags       = $(cflags)"
-	@echo "cppflags     = $(cppflags)"
-	@echo "CC           = $(CC)"
+#	@echo "AUTORELOAD   = $(AUTORELOAD)"
+#	@echo "HAVE_GIFLIB  = $(HAVE_GIFLIB)"
+#	@echo "HAVE_LIBEXIF = $(HAVE_LIBEXIF)"
+	@echo "CFLAGS  = $(SXIVCFLAGS)"
+	@echo "LDFLAGS = $(SXIVLDFLAGS)"
+	@echo "CC      = $(CC)"
 
 #.SUFFIXES:
 #.SUFFIXES: .c .o
 #$(V).SILENT:
 
-sxiv: $(OBJ)
-	$(CC) -o $@ $(OBJ) $(ldlibs) $(LDFLAGS)
-
-$(OBJ): commands.lst sxiv.h config.h config.mk
 #options.o: version.h
-window.o: icon/data.h
-
-.c.o:
-	$(CC) $(cflags) $(cppflags) -c -o $@ $<
-
 config.h:
 	cp config.def.h $@
 
-#version.h: Makefile .git/index
-#	@echo "GEN $@"
-#	v="$$(cd $(srcdir); git describe 2>/dev/null)"; \
-#	echo "#define VERSION \"$$(v:-$(version))\"" >$@
 
-.git/index:
+.c.o:
+	$(CC) $(SXIVCFLAGS) -c -o $@ $<
+
+window.o: icon/data.h
+
+$(OBJ): commands.lst sxiv.h config.h config.mk
+
+sxiv: $(OBJ)
+	$(CC) -o $@ $(OBJ) $(SXIVLDFLAGS)
 
 clean:
-	rm -f sxiv $(OBJ) sxiv-$(VERSION).tar.gz
+	rm -f sxiv $(OBJ) sxiv-$(VERSION).tar.gz *.o *.orig *.rej
+
+dist: clean
+	mkdir -p sxiv-${VERSION}
+	cp -R LICENSE Makefile README config.def.h config.mk\
+		sxiv.1 sxiv.h util8.h util.h ${SRC} sxiv.png sxiv-${VERSION}
+	tar -cf sxiv-${VERSION}.tar sxiv-${VERSION}
+	gzip sxiv-${VERSION}.tar
+	rm -rf sxiv-${VERSION}
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
@@ -58,5 +61,13 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/sxiv\
 		rm -f $(DESTDIR)$(MANPREFIX)/man1/sxiv.1\
 		rm -rf $(DESTDIR)$(PREFIX)/share/sxiv
+# What is this?
+#version.h: Makefile .git/index
+#	@echo "GEN $@"
+#	v="$$(cd $(srcdir); git describe 2>/dev/null)"; \
+#	echo "#define VERSION \"$$(v:-$(version))\"" >$@
+
+#.git/index:
+
 
 .PHONY: all clean install uninstall
