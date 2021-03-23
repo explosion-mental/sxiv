@@ -43,7 +43,7 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - <s>How to loop on the command 'cg_navigate_marked' ? (on marked images)<s>Done✅
 - <s>Actual support for clipboard, I use xsel just because clipmenu use it (I don't want to fork it now but some time I will in order to work with xclip)</s> I use xclip now 😁✅
 - Is there a way to toggle square thumbnails?(I don't think I need/want this, just asking)
-- version.h seems useless?
+- <s> version.h seems useless? </s> It was(?)✔️
 
 ## Mayor improvements:
 - It feels more responsive after WM_HINTS patch

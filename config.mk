@@ -12,8 +12,12 @@ MANPREFIX = $(PREFIX)/share/man
 AUTORELOAD = inotify
 
 # giflib and libexif, comment if you don't want them
+# why the "HAVE_", remove them next commit?
 HAVE_GIFLIB = -lgif
+GIFLIBFLAGS = -DHAVE_GIFLIB
 HAVE_LIBEXIF = -lexif
+LIBEXIFFLAGS = -DHAVE_LIBEXIF
+#HAVE_ = -DHAVE_GIFLIB -DHAVE_LIBEXIF
 
 # freetype
 FREETYPELIBS = -lfontconfig -lXft
@@ -29,7 +33,7 @@ ldlibs = $(LDLIBS) -lImlib2 -lX11 $(FREETYPELIBS) $(HAVE_LIBEXIF) $(HAVE_GIFLIB)
 # flags
 cflags = -std=c99 -Wall -pedantic $(CFLAGS)
 cppflags = -I. $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=700 \
-  -DHAVE_GIFLIB=$(HAVE_GIFLIB) -DHAVE_LIBEXIF=$(HAVE_LIBEXIF) $(INCS)
+  $(GIFLIBFLAGS) $(LIBEXIFFLAGS) $(INCS)
 
 # compiler and linker
-CC = cc
+#CC = cc
