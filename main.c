@@ -15,11 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "sxiv.h"
-#define _MAPPINGS_CONFIG
-#include "config.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
@@ -34,6 +29,9 @@
 #include <time.h>
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
+
+#include "sxiv.h"
+#include "config.h"
 
 typedef struct {
 	struct timeval when;
@@ -928,7 +926,7 @@ int main(int argc, char **argv)
 		error(EXIT_FAILURE, 0, "No valid image file given, aborting");
 
 	filecnt = fileidx;
-	// If -n has been given, use it. Else, display the first argument file
+	/* If -n has been given, use it. Else, display the first argument file */
 	if (options->startnum > 0)
 		fileidx = options->startnum < filecnt ? options->startnum : 0;
 	else {
@@ -965,7 +963,7 @@ int main(int argc, char **argv)
 	}
 	if (homedir != NULL) {
 		extcmd_t *cmd[] = { &info.f, &keyhandler.f };
-		//cool
+		/* Name */
 		const char *name[] = { "image-info", "key-handler" };
 
 		for (i = 0; i < ARRLEN(cmd); i++) {

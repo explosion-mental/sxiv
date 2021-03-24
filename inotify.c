@@ -15,14 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "sxiv.h"
-
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/inotify.h>
+
+#include "sxiv.h"
 
 void arl_init(arl_t *arl)
 {

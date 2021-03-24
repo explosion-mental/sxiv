@@ -15,13 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "sxiv.h"
-#define _WINDOW_CONFIG
-#include "config.h"
-#include "icon/data.h"
-#include "utf8.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
@@ -29,6 +22,11 @@
 #include <X11/cursorfont.h>
 #include <X11/Xatom.h>
 #include <X11/Xresource.h>
+
+#include "sxiv.h"
+#include "config.h"
+#include "icon/data.h"
+#include "utf8.h"
 
 #define RES_CLASS "Sxiv"
 
@@ -125,9 +123,8 @@ void win_init(win_t *win)
 //	bg = win_res(db, RES_CLASS ".background", "color15");
 //	fg = win_res(db, RES_CLASS ".foreground", "color8");
 	bg = win_res(db, RES_CLASS ".background", "color0");
-	fg = win_res(db, RES_CLASS ".color2", "color8");	//works with pywal
+	fg = win_res(db, RES_CLASS ".color2", "color8");	/* pywal colors */
 	mark = win_res(db, RES_CLASS ".mark", "red");
-//	mark = win_res(db, RES_CLASS ".color2", "red");
 	win_alloc_color(e, bg, &win->bg);
 	win_alloc_color(e, fg, &win->fg);
  	win_alloc_color(e, mark, &win->markcol);

@@ -15,11 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "sxiv.h"
-#define _IMAGE_CONFIG
-#include "config.h"
-
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,14 +22,17 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "sxiv.h"
+#include "config.h"
+
 #if HAVE_LIBEXIF
 #include <libexif/exif-data.h>
-#endif
+#endif	/* HAVE_LIBEXIF */
 
 #if HAVE_GIFLIB
 #include <gif_lib.h>
 enum { DEF_GIF_DELAY = 75 };
-#endif
+#endif	/* HAVE_GIFLIB */
 
 float zoom_min;
 float zoom_max;
@@ -113,7 +111,7 @@ void exif_auto_orientate(const fileinfo_t *file)
 			break;
 	}
 }
-#endif
+#endif	/* HAVE_LIBEXIF */
 
 #if HAVE_GIFLIB
 bool img_load_gif(img_t *img, const fileinfo_t *file)
@@ -147,7 +145,7 @@ bool img_load_gif(img_t *img, const fileinfo_t *file)
 	gif = DGifOpenFileName(file->path, NULL);
 #else
 	gif = DGifOpenFileName(file->path);
-#endif
+#endif	/* HAVE_GIFLIB */
 	if (gif == NULL) {
 		error(0, 0, "%s: Error opening gif image", file->name);
 		return false;
@@ -272,7 +270,7 @@ bool img_load_gif(img_t *img, const fileinfo_t *file)
 	DGifCloseFile(gif, NULL);
 #else
 	DGifCloseFile(gif);
-#endif
+#endif	/* HAVE_GIFLIB */
 
 	if (err && (file->flags & FF_WARN))
 		error(0, 0, "%s: Corrupted gif file", file->name);
@@ -326,18 +324,20 @@ bool img_load(img_t *img, const fileinfo_t *file)
 
 #if HAVE_LIBEXIF
 	exif_auto_orientate(file);
-#endif
+#endif	/* HAVE_LIBEXIF */
 
 	if ((fmt = imlib_image_format()) != NULL) {
 #if HAVE_GIFLIB
 		if (STREQ(fmt, "gif"))
 			img_load_gif(img, file);
-#endif
+#endif	/* HAVE_GIFLIB */
 	}
 	img->w = imlib_image_get_width();
 	img->h = imlib_image_get_height();
 	img->checkpan = true;
 	img->dirty = true;
+
+//	img_fit_win(img, SCALE_DOWN);
 
 	return true;
 }
@@ -391,6 +391,7 @@ void img_check_pan(img_t *img, bool moved)
 		img->dirty = true;
 }
 
+//Is there a way to not navigate (to scroll) on WIDTH mode? (usefull on some memes, comics, anime)
 int img_zoom_diff(img_t *img, float *zptr)
 {
 	float z, zw, zh;
@@ -412,20 +413,30 @@ int img_zoom_diff(img_t *img, float *zptr)
 			z = MIN(zw, zh);
 			break;
 	}
-//	z = MIN(z, img->scalemode == SCALE_DOWN ? 1.0 : zoom_max);
-  if (zptr != NULL)
-    *zptr = z;
+	//z = MIN(z, img->scalemode == SCALE_DOWN ? 1.0 : zoom_max);
+	if (zptr != NULL)
+	*zptr = z;
 
   return zoomdiff(img, z);
 }
 
-//Is there a way to not navigate (to scroll) on WIDTH mode? (usefull on some memes)
 bool img_fit(img_t *img)
 {
   float z;
 
 	if (img->scalemode == SCALE_ZOOM)
 		return false;
+
+//	if (img->scalemode == SCALE_WIDTH) {
+//		//img->zoom = z;
+//		img->dirty = true;
+//		return true;}
+
+//	if (img->scalemode == SCALE_WIDTH){
+//		//ci_scroll_to_edge(img, DIR_UP);
+//		return img_pan_edge(img, DIR_UP);
+//		img->dirty = true;
+//		return true;}
 
 	if (img_zoom_diff(img, &z) != 0) {
 		img->zoom = z;
