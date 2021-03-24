@@ -4,19 +4,19 @@ My build of sxiv
 
 # Features
 
-- You can navigate with j/k and scroll with h/j/k/l (when zommed, you can scroll; else navigate to the next/prev image)
-- Square marks and highlighted images on thumbnail mode
-- It syncs with pywal by default
-- More thumbnail adjustment on config.h
-- With Q you quit sxiv and output the name of the image that was selected
-- Navigate on random image
-- Scale to fill the window
+* You can navigate with j/k and scroll with h/j/k/l (when zommed, you can scroll; else navigate to the next/prev image)
+* Square marks and highlighted images on thumbnail mode
+* It syncs with pywal by default
+* More thumbnail adjustment on config.h
+* With Q you quit sxiv and output the name of the image that was selected
+* Navigate on random image
+* Scale to fill the window
 
 ## Key Handler
 With the patch I made (someone who knows diff and all that please make it correct), there's no need for "prefix-key" to execute a command on keyhandler, pretty stuff!
 There are **two** options tho:
-- With the default one, on main.c, you will **only** be able to execute something on the keyhandler if that key isn't bound on config.h (config.h predominates).
-- The other option is have them _simultaneous_ (I don't know how to call it or explain it), if that key that you press is on config.h try to execute the command that is on command.c (basically normal sxiv commands) else search it on the keyhandler (that's why on whatever key it will be always searching for it, you can see it on the bar when pressing keys that aren't on the keyhandler, sometimes it executes faster so it seems like it doesn't show up). With this kind of handling the handler you can do pretty stuff like bind SCALE_FIT to "w" and, on the key-handler, bound also "w" to [setbg](https://github.com/explosion-mental/scripts/blob/main/setbg). The result would be, if SCALE_FIT can be executed then run it else search on key-handler, basically if the image is zoomed in/out or in other SCALE mode (if it can be SCALEd to FIT) do it, but if it's already "fit" then set the img as a wallpaper (setbg script).
+* With the default one, on main.c, you will **only** be able to execute something on the keyhandler if that key isn't bound on config.h (config.h predominates).
+* The other option is have them _simultaneous_ (I don't know how to call it or explain it), if that key that you press is on config.h try to execute the command that is on command.c (basically normal sxiv commands) else search it on the keyhandler (that's why on whatever key it will be always searching for it, you can see it on the bar when pressing keys that aren't on the keyhandler, sometimes it executes faster so it seems like it doesn't show up). With this kind of handling the handler you can do pretty stuff like bind SCALE_FIT to "w" and, on the key-handler, bound also "w" to [setbg](https://github.com/explosion-mental/scripts/blob/main/setbg). The result would be, if SCALE_FIT can be executed then run it else search on key-handler, basically if the image is zoomed in/out or in other SCALE mode (if it can be SCALEd to FIT) do it, but if it's already "fit" then set the img as a wallpaper (setbg script).
 
 I'm trying the first option because, even I don't use the bar, the text saying _Keyhandler..._ annoys me and makes me think its searching on the keyhandler when it's not needed.
 
@@ -25,6 +25,8 @@ Just look them up, most of them aren't on this build.
 
 # Fork
 I use someone's fork which I don't remember why I did it, but his fork I believe is on sxiv.1
+Escape key can be mapped in config.h., it is now `Sxiv - [Directory's basename]`... go to [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) for more
+
 _Note:_ after looking for all the forks I could find, the [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) was really logic in the code that has been changed. Of course I would like more things that's why this exist, so thanks to that repo.
 
 # Help...
