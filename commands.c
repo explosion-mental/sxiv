@@ -17,7 +17,7 @@
  */
 
 #include "sxiv.h"
-#define _IMAGE_CONFIG
+//#define _IMAGE_CONFIG
 #include "config.h"
 
 #include <stdlib.h>
@@ -246,7 +246,7 @@ bool cg_navigate_marked(arg_t n)
 		n *= prefix;
 	d = n > 0 ? 1 : -1;
 	/* Loop through all marked images */
-	for (i = fileidx + d; n != 0; i += d) {
+	for (i = fileidx + d; n != 0 && i >= 0 && i < filecnt; i += d) {
  		if (i < 0)
  			i += filecnt;
  		else if (i >= filecnt)
@@ -321,8 +321,8 @@ bool ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is ac
 		frame = (img.multi.sel + d) % img.multi.cnt;
 		while (frame < 0)
 			frame += img.multi.cnt;
-		//return img_frame_goto(&img,frame);
-		return !img.multi.animate && img_frame_goto(&img, frame);
+		//return img_frame_goto(&img,frame);	/* This one doen't care if it's playing the animaton */
+		return !img.multi.animate && img_frame_goto(&img, frame);	/* This one cares if it's playing, so will only navigate if animation is paused */
 	} else {
 	//return img_frame_navigate(&img, d);
 	return !img.multi.animate && img_frame_navigate(&img, d);
