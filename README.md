@@ -1,6 +1,6 @@
 # sxiv
 My build of sxiv
-![Image](Screenshot.png "Screenshot")
+![Image](screenshot.png "screenshot")
 
 # Features
 
