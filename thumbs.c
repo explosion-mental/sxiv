@@ -15,11 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "sxiv.h"
-#define _THUMBS_CONFIG
-#include "config.h"
-
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,10 +23,13 @@
 #include <unistd.h>
 #include <utime.h>
 
+#include "sxiv.h"
+#include "config.h"
 #if HAVE_LIBEXIF
 #include <libexif/exif-data.h>
 void exif_auto_orientate(const fileinfo_t*);
-#endif
+#endif	/* HAVE_LIBEXIF */
+
 Imlib_Image img_open(const fileinfo_t*);
 
 static char *cache_dir;
@@ -318,7 +316,7 @@ bool tns_load(tns_t *tns, int n, bool force, bool cache_only)
 				}
 				exif_data_unref(ed);
 			}
-#endif
+#endif	/* HAVE_LIBEXIF */
 		}
 	}
 
@@ -331,7 +329,7 @@ bool tns_load(tns_t *tns, int n, bool force, bool cache_only)
 	if (!cache_hit) {
 #if HAVE_LIBEXIF
 		exif_auto_orientate(file);
-#endif
+#endif	/* HAVE_LIBEXIF */
 		im = tns_scale_down(im, maxwh);
 		imlib_context_set_image(im);
 		if (imlib_image_get_width() == maxwh || imlib_image_get_height() == maxwh)
@@ -414,8 +412,6 @@ void tns_render(tns_t *tns)
 	win_clear(win);
 	imlib_context_set_drawable(win->buf.pm);
 
-//	tns->cols = MAX(1, win->w / tns->dim);
-//	tns->rows = MAX(1, win->h / tns->dim);
 	tns->cols = MAX(1, (win->w - 2 * abs(THUMB_MARGIN)) / tns->dim);
 	tns->rows = MAX(1, (win->h - 2 * abs(THUMB_MARGIN)) / tns->dim);
 
@@ -431,8 +427,6 @@ void tns_render(tns_t *tns)
 			cnt -= r % tns->cols;
 	}
 	r = cnt % tns->cols ? 1 : 0;
-//	tns->x = x = (win->w - MIN(cnt, tns->cols) * tns->dim) / 2 + tns->bw + 3;
-//	tns->y = y = (win->h - (cnt / tns->cols + r) * tns->dim) / 2 + tns->bw + 3;
 	tns->x = x = (win->w - MIN(cnt, tns->cols) * tns->dim) / 2 + tns->bw + THUMB_PADDING + THUMB_MARGIN;
 	tns->y = y = (win->h - (cnt / tns->cols + r) * tns->dim) / 2 + tns->bw + THUMB_PADDING + THUMB_MARGIN;
 	tns->loadnext = *tns->cnt;
@@ -485,7 +479,12 @@ void tns_mark(tns_t *tns, int n, bool mark)
         if (mark) col = win->markcol.pixel;
 //	win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
 //	              false, tns->bw, col);
+	//funny thing switching it to true colors the image
+	//win_draw_rect(win, x - 1, y - 1, w - 1, h - 1, false, tns->bw, col);
 	win_draw_rect(win, x, y, w, h, false, tns->bw, col);
+	//tns->dirty = true;
+	//we can stack them wow (yeah i don't know what im doing) so it appears the little square also
+//	win_draw_rect(win, x, y, 2 * tns->bw, 2 * tns->bw, true, tns->bw, col);
 
 		if (!mark && n == *tns->sel)
 			tns_highlight(tns, n, true);
@@ -507,6 +506,8 @@ void tns_highlight(tns_t *tns, int n, bool hl)
 		    w = t->w + 2 * THUMB_PADDING + tns->bw,
 		    h = t->h + 2 * THUMB_PADDING + tns->bw;
 
+		/* This one is perfect so highlight > marks */
+	//	win_draw_rect(win, x - 1 , y - 1, w +2 , h + 2, false, tns->bw, col);
 		win_draw_rect(win, x, y, w, h, false, tns->bw, col);
 
 		if (tns->files[n].flags & FF_MARK)

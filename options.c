@@ -15,14 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "sxiv.h"
-#define _IMAGE_CONFIG
-#include "config.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "sxiv.h"
+#include "config.h"
 
 opt_t _options;
 const opt_t *options = (const opt_t*) &_options;
