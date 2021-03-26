@@ -12,7 +12,7 @@ while read file
 do
         case "$1" in
 	"semicolon")	# Information
-		notify-send "File informationℹ️ " "$(mediainfo --Output=file://$HOME/.local/Templates/mediainfo "$file")" ;;
+		notify-send "File informationℹ️ " "$(mediainfo --Output=file://"$HOME"/.local/Templates/mediainfo "$file")" ;;
 	"d")	# Delete
 		[ "$(printf "Yes\\nNo" | dmenu -i -p "Really delete $file?")" = "Yes" ] && rm "$file" && notify-send "$(noextname "$file") deleted.❌" ;;
 

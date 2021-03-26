@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
+//#define _MAPPINGS_CONFIG
+
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
@@ -301,6 +303,16 @@ end:
 	win_draw(&win);
 	close_info();
 }
+/*
+int evaluate_prefix()
+{
+	extern int prefix;
+
+	if (prefix_keys)
+		return -1;
+	else
+		return prefix;
+}*/
 
 void load_image(int new)
 {
@@ -613,10 +625,17 @@ void on_keypress(XKeyEvent *kev)
 	}
 	if (IsModifierKey(ksym))
 		return;
+#ifdef ENABLE_PREFIX_KEYS
+		/* I dont need this */
 	else if (extprefix) {
 		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
 		extprefix = False;
+	} else if (key >= '0' && key <= '9') {
+		/* number prefix for commands */
+		prefix = prefix * 10 + (int) (key - '0');
+		return;
 	}
+#endif /* ENABLE_PREFIX_KEYS */
 	else for (i = 0; i < ARRLEN(keys); i++) {
 		if (keys[i].ksym == ksym &&
 		    MODMASK(keys[i].mask | sh) == MODMASK(kev->state) &&
@@ -957,6 +976,7 @@ int main(int argc, char **argv)
     //strncat(title, dirname(dirn), PATH_MAX);
     win.title = title;
 
+    	/* The executable files shouldn't be always on '.config/' but on the current dir */
 	if ((homedir = getenv("XDG_CONFIG_HOME")) == NULL || homedir[0] == '\0') {
 		homedir = getenv("HOME");
 		dsuffix = "/.config";

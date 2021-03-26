@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #ifndef SXIV_H
 #define SXIV_H
 
@@ -27,10 +26,10 @@
 #include <Imlib2.h>
 #include <X11/Xlib.h>
 
-/*
+/*******************************************************************
  * Annotation for functions called in cleanup().
  * These functions are not allowed to call error(!0, ...) or exit().
- */
+ ********************************************************************/
 #define CLEANUP
 
 #ifndef MIN
@@ -245,7 +244,11 @@ bool img_zoom_in(img_t*);
 bool img_zoom_out(img_t*);
 bool img_pos(img_t*, float, float);
 bool img_move(img_t*, float, float);
+#ifdef ENABLE_PREFIX_KEYS
 bool img_pan(img_t*, direction_t, int);
+#else
+bool img_pan(img_t*, direction_t);
+#endif /* ENABLE_PREFIX_KEYS */
 bool img_pan_edge(img_t*, direction_t);
 void img_rotate(img_t*, degree_t);
 void img_flip(img_t*, flipdir_t);
@@ -324,6 +327,10 @@ struct tns {
 	int zl;
 	int bw;
 	int dim;
+	/* Customs */
+	//int max_scale;
+	//int autozoom_threshold;
+
 
 	bool dirty;
 };
@@ -340,7 +347,8 @@ bool tns_move_selection(tns_t*, direction_t, int);
 bool tns_scroll(tns_t*, direction_t, bool);
 bool tns_zoom(tns_t*, int);
 int tns_translate(tns_t*, int, int);
-
+/* Customs */
+//bool tns_zoom(tns_t*, int);
 
 /* util.c */
 
