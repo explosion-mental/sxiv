@@ -1,5 +1,5 @@
 # sxiv version (adding +1 on every big change I make)
-VERSION = 26.2
+VERSION = 26.1
 
 # Customize below to fit your preferences
 
@@ -16,7 +16,9 @@ HAVE_GIFLIB = -lgif
 GIFLIBFLAGS = -DHAVE_GIFLIB
 HAVE_LIBEXIF = -lexif
 LIBEXIFFLAGS = -DHAVE_LIBEXIF
-####HAVE_ = -DHAVE_GIFLIB -DHAVE_LIBEXIF
+# Prefix-keys, see readme
+ENABLE_PREFIX_KEYS = -DENABLE_PREFIX_KEYS
+#HAVE_ = -DHAVE_GIFLIB -DHAVE_LIBEXIF
 
 # freetype
 FREETYPELIBS = -lfontconfig -lXft
@@ -29,9 +31,13 @@ INCS = -I$(FREETYPEINC)
 LIBS = $(LDLIBS) -lImlib2 -lX11 $(FREETYPELIBS) $(HAVE_LIBEXIF) $(HAVE_GIFLIB)
 
 # flags
-SXIVCPPFLAGS = -D_XOPEN_SOURCE=700 -DVERSION=\"$(VERSION)\" $(GIFLIBFLAGS) $(LIBEXIFFLAGS)
+SXIVCPPFLAGS = -D_XOPEN_SOURCE=700 -DVERSION=\"$(VERSION)\" $(GIFLIBFLAGS) $(LIBEXIFFLAGS) $(ENABLE_PREFIX_KEYS)
 SXIVCFLAGS = -std=c99 -pedantic -Wall $(INCS) $(SXIVCPPFLAGS) $(CPPFLAGS) $(CFLAGS)
 SXIVLDFLAGS = $(LIBS) $(LDFLAGS)
+#cflags = -std=c99 -Wall -pedantic $(CFLAGS)
+#cppflags = -I. $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=700 \
+  $(GIFLIBFLAGS) $(LIBEXIFFLAGS) $(INCS)
 
 # compiler and linker
 CC = cc
+#CC = gcc

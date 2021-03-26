@@ -20,6 +20,11 @@ There are **two** options tho:
 
 I'm trying the first option because, even I don't use the bar, the text saying _Keyhandler..._ annoys me and makes me think its searching on the keyhandler when it's not needed.
 
+##Prefix-keys
+Basically the way you say(by pressing) '1' + '0' and, for example, 'G' (which is for the "n" or last image) that makes it so you will go to the 10th image. say you type '5' and now you press '}', this would add '+5' to the Gamma and so on. Of couse not all commands have that but some of them do. I don't really use this 'feature', I actually notice it's a bit slow (It's probably just me don't worry) but you can toggle it on/off by uncommentting/commenting on config.mk. I don't know any other way to do this, hopefully it's not a terrible thing. Also you need to change the number keys on the key-handler so letters or whatever you want, to make no conflics.
+
+_Note:_ I don't know how to call this sets of keys, on the code they called it prefix so thats what I'm calling it.
+
 ## Patches
 Just look them up, most of them aren't on this build.
 
@@ -33,16 +38,16 @@ _Note:_ after looking for all the forks I could find, the [qsmodo fork](https://
 This is really the best image viewer and prob the fastest! After my changes it's even better for me. I have one issue
 - What's the best position/intuitive (preferably not with Shift, my pinky hurts) for some actions on sxiv?
 - Also, is there a way to maximaze space on thumbnail mode?(Maybe with square thumbnails dummy?)
-- See *[TODO](TODO.md)* if you wanna help
+- See *[TODO](patches/TODO.md)* if you wanna help
 
-# TODO (why have a separate file)
+# TODO
 - Load all frames from TIFF files. We have to write our own loader for this to
   happen--just like we did for GIF images--because Imlib2 does not support
   multiple frames. Issue #241.
 - Add support for more embedded thumbnail formats. Right now, sxiv seems to use
   the smallest one. Issue #238.
 
-## My Build Todos
+# My Build Todos
 
 - Autoreload feature? ( It needs to reload images when invoke keyhandler? the markcnt doesn't update after moving files to other directory with a keyhandler command )
 - Use the space better
@@ -56,11 +61,13 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - Is there a way to toggle square thumbnails?(I don't think I need/want this, just asking)
 - <s> version.h seems useless? </s> It was(?)✔️
 - When searching recursively (search all images on the directory and subdirs), images names on the bar are displayed. I would like to know on which directory am I (dirname), so how to show the subdirectory of the directory in which sxiv was called to be recursive.
-- Make if stament (either '#if' or 'if') on a value or definition on the config.mk in order to make "prefix" (this is: let's say you pres '1' and '0' on the keyboard, sxiv default behaviour would be to wait for the next command. Let's say, again, after those two keys you press G (which is bounded to the command 'n_or_last') that means you would go '10' images "down". I don't really use this but I supposed that there are people who find this usefull, so I'm thinking a way to make that optional (user decides).
+- <s>Make if stament (either '#if' or 'if') on a value or definition on the config.mk in order to make "prefix" (this is: let's say you pres '1' and '0' on the keyboard, sxiv default behaviour would be to wait for the next command. Let's say, again, after those two keys you press G (which is bounded to the command 'n_or_last') that means you would go '10' images "down". I don't really use this but I supposed that there are people who find this usefull, so I'm thinking a way to make that optional (user decides).</s> Done✅. You decide if you want that or not(which i believe is just there for some reason) See the `Prefix-keys`.
+- How to make '#ifdef' on tns_move_selection, basically how to remove the 'cnt' var.
 
-## Mayor improvements:
+# Mayor improvements:
 - It feels more responsive after WM_HINTS patch
 - Compile even if sxiv is active _(cp -f)_
 - version.h not needed (one file less) _**Note**_: I have no idea what that file was doing, looking at the **Makefile** says something about .git/index or whatever, I have no idea if that broke something external (not the program), maybe it was a little sync with the github main repo?
 - Not an improment but for my standards on understading: I make a config.mk _just like st, dwm and dmenu_ so you can configure it I guess, also the autoreload_inotify/nop was annoying so I just change it to _inotify/nop_ if you want the autoreload before it add it on the Makefile. Because of this 'suckless' style, the compile messages are alike (I'm debating this, the initial messages where really clean and I like them, suggest something maybe?)
 - Saner config.h (Mar 24)
+- On/off Prefix-keys on *some* commands(Mar 25)

@@ -24,7 +24,6 @@
 
 #include "sxiv.h"
 #include "config.h"
-
 #if HAVE_LIBEXIF
 #include <libexif/exif-data.h>
 #endif	/* HAVE_LIBEXIF */
@@ -630,6 +629,7 @@ bool img_move(img_t *img, float dx, float dy)
 	return img_pos(img, img->x + dx, img->y + dy);
 }
 
+#ifdef ENABLE_PREFIX_KEYS
 bool img_pan(img_t *img, direction_t dir, int d)
 {
 	/* d < 0: screen-wise
@@ -644,6 +644,14 @@ bool img_pan(img_t *img, direction_t dir, int d)
 		x = img->win->w / (d < 0 ? 1 : PAN_FRACTION);
 		y = img->win->h / (d < 0 ? 1 : PAN_FRACTION);
 	}
+#else
+bool img_pan(img_t *img, direction_t dir)
+{
+	float x, y;
+
+	x = img->win->w / (PAN_FRACTION);
+	y = img->win->h / (PAN_FRACTION);
+#endif /* ENABLE_PREFIX_KEYS */
 
 	switch (dir) {
 		case DIR_LEFT:

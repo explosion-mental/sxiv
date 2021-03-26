@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -48,8 +47,10 @@ extern int alternate;
 extern int markcnt;
 extern int markidx;
 
+#ifdef ENABLE_PREFIX_KEYS
 extern int prefix;
-extern bool extprefix;
+#endif /* ENABLE_PREFIX_KEYS */
+//extern bool extprefix;	/* Not needed! */
 
 /* Customs */
 bool img_frame_goto(img_t *, int);
@@ -62,7 +63,6 @@ bool cg_quit(arg_t _)
 		for (i = 0; i < filecnt; i++) {
 			if (files[i].flags & FF_MARK)
 				printf("%s\n", files[i].name);
-			 	//printf("%s\n", files[i].path);
 		}
 	}
 	exit(EXIT_SUCCESS);
@@ -92,8 +92,7 @@ bool cg_switch_mode(arg_t _)
 bool cg_toggle_fullscreen(arg_t _)
 {
 	win_toggle_fullscreen(&win);
-	/* redraw after next ConfigureNotify event */
-	set_timeout(redraw, TO_REDRAW_RESIZE, false);
+	set_timeout(redraw, TO_REDRAW_RESIZE, false);	/* redraw after next ConfigureNotify event */
 	if (mode == MODE_IMAGE)
 		img.checkpan = img.dirty = true;
 	else
@@ -115,13 +114,13 @@ bool cg_toggle_bar(arg_t _)
 	}
 	return true;
 }
-
-bool cg_prefix_external(arg_t _)
+/* Not needed lol
+bool cg_prefix_external(arg_t _) // Not needed
 {
 	extprefix = true;
 	return false;
 }
-
+*/
 bool cg_reload_image(arg_t _)
 {
 	if (mode == MODE_IMAGE) {
@@ -162,13 +161,20 @@ bool cg_first(arg_t _)
 
 bool cg_n_or_last(arg_t _)
 {
+#ifdef ENABLE_PREFIX_KEYS
 	int n = prefix != 0 && prefix - 1 < filecnt ? prefix - 1 : filecnt - 1;
-
 	if (mode == MODE_IMAGE && fileidx != n) {
 		load_image(n);
 		return true;
 	} else if (mode == MODE_THUMB && fileidx != n) {
 		fileidx = n;
+#else
+	if (mode == MODE_IMAGE) {
+		load_image(filecnt - 1);
+		return true;
+	} else if (mode == MODE_THUMB && fileidx != -1) {
+		fileidx = filecnt - 1;
+#endif /* ENABLE_PREFIX_KEYS */
 		tns.dirty = true;
 		return true;
 	} else {
@@ -179,7 +185,11 @@ bool cg_n_or_last(arg_t _)
 bool cg_scroll_screen(arg_t dir)
 {
 	if (mode == MODE_IMAGE)
+#ifdef ENABLE_PREFIX_KEYS
 		return img_pan(&img, dir, -1);
+#else
+		return img_pan(&img, dir);
+#endif /* ENABLE_PREFIX_KEYS */
 	else
 		return tns_scroll(&tns, dir, true);
 }
@@ -241,8 +251,11 @@ bool cg_navigate_marked(arg_t n)
 	int d, i;
 	int new = fileidx;
 
+#ifdef ENABLE_PREFIX_KEYS
 	if (prefix > 0)
 		n *= prefix;
+#endif /* ENABLE_PREFIX_KEYS */
+
 	d = n > 0 ? 1 : -1;
 	/* Loop through all marked images */
 	for (i = fileidx + d; n != 0 && i >= 0 && i < filecnt; i += d) {
@@ -270,7 +283,11 @@ bool cg_navigate_marked(arg_t n)
 
 bool cg_change_gamma(arg_t d)
 {
+#ifdef ENABLE_PREFIX_KEYS
 	if (img_change_gamma(&img, d * (prefix > 0 ? prefix : 1))) {
+#else
+	if (img_change_gamma(&img, d)) {
+#endif /* ENABLE_PREFIX_KEYS */
 		if (mode == MODE_THUMB)
 			tns.dirty = true;
 		return true;
@@ -281,15 +298,15 @@ bool cg_change_gamma(arg_t d)
 
 bool ci_navigate(arg_t n)
 {
+#ifdef ENABLE_PREFIX_KEYS
 	if (prefix > 0)
 		n *= prefix;
+#endif /* ENABLE_PREFIX_KEYS */
 	n += fileidx;
 	if (n < 0)
 		n = filecnt - 1;
-//		n = 0;
 	if (n >= filecnt)
 		n = 0;
-//		n = filecnt - 1;
 
 	if (n != fileidx) {
 		load_image(n);
@@ -313,8 +330,10 @@ bool ci_alternate(arg_t _)
 bool ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is activated?
 {
 	int frame;
+#ifdef ENABLE_PREFIX_KEYS
 	if (prefix > 0)
 		d *= prefix;
+#endif /* ENABLE_PREFIX_KEYS */
 //	return !img.multi.animate && img_frame_navigate(&img, d);
 	if (img.multi.cnt > 0) {
 		frame = (img.multi.sel + d) % img.multi.cnt;
@@ -346,7 +365,11 @@ bool ci_toggle_animation(arg_t _)
 
 bool ci_scroll(arg_t dir)
 {
+#ifdef ENABLE_PREFIX_KEYS
 	return img_pan(&img, dir, prefix);
+#else
+	return img_pan(&img, dir);
+#endif /* ENABLE_PREFIX_KEYS */
 }
 
 bool ci_scroll_to_edge(arg_t dir)
@@ -445,7 +468,11 @@ bool ci_drag(arg_t mode)
 
 bool ci_set_zoom(arg_t zl)
 {
+#ifdef ENABLE_PREFIX_KEYS
 	return img_zoom(&img, (prefix ? prefix : zl) / 100.0);
+#else
+	return img_zoom(&img, zl / 100.0);
+#endif /* ENABLE_PREFIX_KEYS */
 }
 
 bool ci_fit_to_win(arg_t sm)
@@ -480,11 +507,14 @@ bool ci_toggle_alpha(arg_t _)
 
 bool ci_slideshow(arg_t _)
 {
+#ifdef ENABLE_PREFIX_KEYS
 	if (prefix > 0) {
 		img.ss.on = true;
 		img.ss.delay = prefix * 10;
 		set_timeout(slideshow, img.ss.delay * 100, true);
-	} else if (img.ss.on) {
+	} else
+#endif /* ENABLE_PREFIX_KEYS */
+	if (img.ss.on) {
 		img.ss.on = false;
 		reset_timeout(slideshow);
 	} else {
@@ -495,7 +525,11 @@ bool ci_slideshow(arg_t _)
 
 bool ct_move_sel(arg_t dir)
 {
+#ifdef ENABLE_PREFIX_KEYS
 	return tns_move_selection(&tns, dir, prefix);
+#else
+	return tns_move_selection(&tns, dir, -1); //How to disable 'prefix' function on this command?
+#endif /* ENABLE_PREFIX_KEYS */
 }
 
 bool ct_reload_all(arg_t _)
@@ -586,4 +620,3 @@ bool cg_dmenu_output(arg_t _)
 const cmd_t cmds[CMD_COUNT] = {
 #include "commands.lst"
 };
-
