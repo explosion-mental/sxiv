@@ -223,7 +223,7 @@ Imlib_Image tns_scale_down(Imlib_Image im, int dim)
 
 bool tns_load(tns_t *tns, int n, bool force, bool cache_only)
 {
-	int maxwh = thumb_sizes[ARRLEN(thumb_sizes)-1];
+	int maxwh = thumb_sizes[ARRLEN(thumb_sizes) - 1];
 	bool cache_hit = false;
 	char *cfile;
 	thumb_t *t;
@@ -467,7 +467,8 @@ void tns_mark(tns_t *tns, int n, bool mark)
 	if (n >= 0 && n < *tns->cnt && tns->thumbs[n].im != NULL) {
 		win_t *win = tns->win;
 		thumb_t *t = &tns->thumbs[n];
-		unsigned long col = win->bg.pixel;
+		//unsigned long col = win->bg.pixel;
+		unsigned long col = mark ? win->markcol.pixel : win->bg.pixel;
      //   int oxy = (tns->bw + 1) / 2, owh = tns->bw;
 		int x = t->x - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
 		    y = t->y - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
@@ -475,8 +476,9 @@ void tns_mark(tns_t *tns, int n, bool mark)
 		    h = t->h + 2 * THUMB_PADDING + tns->bw;
 
 
+			//win_draw_rect(win, x, y, w, h, false, tns->bw, col);
 
-        if (mark) col = win->markcol.pixel;
+        //if (mark) col = win->markcol.pixel;
 //	win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
 //	              false, tns->bw, col);
 	//funny thing switching it to true colors the image
@@ -496,8 +498,11 @@ void tns_highlight(tns_t *tns, int n, bool hl)
 	if (n >= 0 && n < *tns->cnt && tns->thumbs[n].im != NULL) {
 		win_t *win = tns->win;
 		thumb_t *t = &tns->thumbs[n];
-		unsigned long col = hl ? win->fg.pixel : win->bg.pixel;
+		unsigned long col = hl ? win->selcol.pixel : win->bg.pixel;
+		/* if passed close to a mark image win->markcol.pixel?? */
 //		int oxy = (tns->bw + 1) / 2 + 1, owh = tns->bw + 2;
+//		int oxy = THUMB_PADDING, owh = THUMB_PADDINGr
+
 
 //		win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
 //		              false, tns->bw, col);
@@ -583,7 +588,7 @@ bool tns_zoom(tns_t *tns, int d)
 //	tns->bw = ((thumb_sizes[tns->zl] - 1) >> 5) + 1;
 //	tns->bw = MIN(tns->bw, 4);
 //	tns->dim = thumb_sizes[tns->zl] + 2 * tns->bw + 6;
-	tns->bw = THUMB_BORDERS[tns->zl];
+	tns->bw  = THUMB_BORDERS[tns->zl];
 	tns->dim = thumb_sizes[tns->zl] + 2 * (tns->bw + THUMB_PADDING + THUMB_MARGIN);
 
 	if (tns->zl != oldzl) {

@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
@@ -24,12 +25,10 @@
 #include <X11/Xresource.h>
 
 #include "sxiv.h"
+//#define _WINDOW_CONFIG
 #include "config.h"
 #include "icon/data.h"
 #include "utf8.h"
-
-#define RES_CLASS "Sxiv"
-
 enum {
 	H_TEXT_PAD = 5,
 	V_TEXT_PAD = 1
@@ -82,16 +81,18 @@ const char* win_res(XrmDatabase db, const char *name, const char *def)
 		return ret.addr;
 	} else {
 		return def;
+		//if (def == NULL)
+		//defaults colors in case 'x'_COLOR is not defined...
 	}
 }
 
 #define INIT_ATOM_(atom) \
 	atoms[ATOM_##atom] = XInternAtom(e->dpy, #atom, False);
-
+#define RES_CLASS "Sxiv"
 void win_init(win_t *win)
 {
 	win_env_t *e;
-	const char *bg, *fg, *mark, *f;
+	const char *bg, *fg, *mark, *sel, *f;
 	char *res_man;
 	XrmDatabase db;
 
@@ -115,19 +116,19 @@ void win_init(win_t *win)
 	res_man = XResourceManagerString(e->dpy);
 	db = res_man != NULL ? XrmGetStringDatabase(res_man) : None;
 
-	f = win_res(db, RES_CLASS ".font", "unifont-9");
-//	f = win_res(db, RES_CLASS ".font", "monospace-8");
-	//f = win_res(db, RES_CLASS ".font", "'SauceCodePro Nerd Font:pixelsize=12:antialias=true:autohint=true', 'Noto Color Emoji:pixelsize=12:antialias=true:autohint=true: style=Regular'");
+	f = win_res(db, RES_CLASS "unifont-9", "monospace-8");
+	//f = win_res(db, RES_CLASS ".font", "unifont-9", "monospace-8");
 	win_init_font(e, f);
 
-//	bg = win_res(db, RES_CLASS ".background", "color15");
 //	fg = win_res(db, RES_CLASS ".foreground", "color8");
-	bg = win_res(db, RES_CLASS ".background", "color0");
-	fg = win_res(db, RES_CLASS ".color2", "color8");	/* pywal colors */
-	mark = win_res(db, RES_CLASS ".mark", "red");
+	bg   = win_res(db, RES_CLASS ".background", "black");	/* background */
+	fg   = win_res(db, RES_CLASS ".color2", "green");	/* bar */
+	mark = win_res(db, RES_CLASS ".color2", "red");		/* mark */
+	sel  = win_res(db, RES_CLASS ".color8", "blue");		/* mark */
 	win_alloc_color(e, bg, &win->bg);
 	win_alloc_color(e, fg, &win->fg);
  	win_alloc_color(e, mark, &win->markcol);
+ 	win_alloc_color(e, sel, &win->selcol);
 
 	win->bar.l.size = BAR_L_LEN;
 	win->bar.r.size = BAR_R_LEN;
@@ -455,8 +456,7 @@ void win_draw(win_t *win)
 	XFlush(win->env.dpy);
 }
 
-void win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw,
-                   unsigned long col)
+void win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw, unsigned long col)
 {
 	XGCValues gcval;
 
@@ -464,9 +464,9 @@ void win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw,
 	gcval.foreground = col;
 	XChangeGC(win->env.dpy, gc, GCForeground | GCLineWidth, &gcval);
 
-	if (fill)
-		XFillRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
-	else
+//	if (fill)
+//		XFillRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
+//	else
 		XDrawRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
 }
 

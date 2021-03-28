@@ -5,8 +5,10 @@ static const float zoom_levels[] = {
 	100.0, 125.0,  150.0, 200.0, 400.0, 800.0
 };
 
-static const double GAMMA_MAX   = 10.0;	/* gamma correction: the user-visible ranges [-GAMMA_RANGE, 0] and*/
-static const int    GAMMA_RANGE = 32;	/* (0, GAMMA_RANGE] are mapped to the ranges [0, 1], and (1, GAMMA_MAX]. */
+/* gamma correction: the user-visible ranges [-GAMMA_RANGE, 0] and
+ * (0, GAMMA_RANGE] are mapped to the ranges [0, 1], and (1, GAMMA_MAX]. */
+static const double GAMMA_MAX   = 10.0;
+static const int    GAMMA_RANGE = 32;
 
 enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
 enum 	{ SLIDESHOW_DELAY = 4 };	/* slideshow delay in seconds (overwritten via -S option) */
@@ -15,20 +17,18 @@ static const bool ANTI_ALIAS  = true;	/* if false, pixelate images at zoom level
 static const bool ALPHA_LAYER = false;	/* if true, use a checkerboard background for alpha layer */
 /* thumbnail sizes in pixels (width == height): */
 static const int thumb_sizes[] = { 32, 64, 116, 145, 181, 286, 361, 412 };
-static const int THUMB_SIZE    = 3;	/* thumbnail size at startup, index into thumb_sizes[]: */
-/* added configurable box model with thumbnail padding, margin and borders */
-static const int THUMB_MARGIN    =  -4;		/* margins between images */
-static const int THUMB_PADDING   =   0;		/* padding of the highlight or mark */
-static const int THUMB_BORDERS[] = { 7 };/* thickness of the selction and mark color(an array in case you want different sizes on differents zoom levels) */
+static const int THUMB_BORDERS[] = { 7 }; /* How does this work? */
+static const int THUMB_MARGIN    = -4;	/* margins between images, buggy with marks */
+static const int THUMB_PADDING   = 0;	/* padding of the highlight or mark */
+static const int THUMB_SIZE      = 3;	/* thumbnail size at startup, index into thumb_sizes[]: */
 
 /* colors and font are configured with 'background', 'foreground' and
  * 'font' (default unicode) X resource properties overwritten by using wal (pywal).
  * See X(7) section Resources, xrdb(1) and wall(1) for more information. */
 
 /* keyboard mappings.
- * I patch sxiv so it doesn't need a 'prefix-key' to use external commands,
- * You can't bind the same key (without modifiers) here and on key-handler,
- * config.h is prioritized */
+ * Disable all keys that I don't need and are on the key-handler since
+ * I patch sxiv so it doesn't need a 'prefix-key' to use external commands */
 static const keymap_t keys[] = {
 	/* modifiers    key               function              argument */
 
@@ -41,6 +41,8 @@ static const keymap_t keys[] = {
 	{ 0,            XK_comma,         i_scroll_to_edge,     DIR_LEFT | DIR_UP },
 	{ 0,            XK_period,        i_navigate,           -1 },
 	{ 0,            XK_period,        i_scroll_to_edge,     DIR_LEFT | DIR_UP },
+//	{ 0,            XK_space,         i_navigate,           +1 },
+//	{ 0,            XK_BackSpace,     i_navigate,           -1 },
 	{ 0,            XK_bracketright,  i_navigate,           +3 },
 	{ 0,            XK_bracketleft,   i_navigate,           -3 },
 	{ 0,		XK_Tab,           i_alternate,          None },
@@ -60,6 +62,10 @@ static const keymap_t keys[] = {
 	{ 0,            XK_K,             i_scroll_to_edge,     DIR_UP },
 	{ 0,            XK_L,             i_scroll_to_edge,     DIR_RIGHT },
 	//what are these?? useless?
+//	{ ControlMask,  XK_l,             g_scroll_screen,      DIR_RIGHT },
+//	{ ControlMask,  XK_k,             g_scroll_screen,      DIR_UP },
+//	{ ControlMask,  XK_h,             g_scroll_screen,      DIR_LEFT },
+//	{ ControlMask,  XK_j,             g_scroll_screen,      DIR_DOWN },
 	{ ControlMask,  XK_Left,          g_scroll_screen,      DIR_LEFT },
 	{ ControlMask,  XK_Down,          g_scroll_screen,      DIR_DOWN },
 	{ ControlMask,  XK_Up,            g_scroll_screen,      DIR_UP },
@@ -112,11 +118,14 @@ static const keymap_t keys[] = {
 				/* Rotation */
 	{ 0,            XK_less,          i_rotate,             DEGREE_270 },
 	{ 0,            XK_greater,       i_rotate,             DEGREE_90 },
+//	{ 0,            XK_question,      i_rotate,             DEGREE_180 },
 	{ 0,            XK_u,	          i_rotate,             DEGREE_180 },
+//	{ 0,            XK_bar,           i_flip,               FLIP_HORIZONTAL },
 	{ 0,            XK_backslash,     i_flip,               FLIP_HORIZONTAL },
 	{ 0,            XK_bar,           i_flip,               FLIP_VERTICAL },
 
 				/* Miscelaneous */
+//	{ 0,            XK_Return,        g_switch_mode,        None },
 	{ 0,            XK_space,         g_switch_mode,        None },
 	{ 0,            XK_f,             g_toggle_fullscreen,  None },
 	{ 0,            XK_b,             g_toggle_bar,         None },
@@ -135,8 +144,8 @@ static const keymap_t keys[] = {
 static const button_t buttons[] = {
 	/* modifiers    button            function              argument */
 	{ 0,            1,                i_cursor_navigate,    None },
-	{ 0,            2,                i_drag,               DRAG_ABSOLUTE },
-	{ 0,            3,                g_switch_mode,        None },
+	{ 0,            2,                g_switch_mode,        None },
+	{ 0,            3,                i_drag,               DRAG_ABSOLUTE },
 	{ 0,            4,                g_zoom,               +1 },
 	{ 0,            5,                g_zoom,               -1 },
 };

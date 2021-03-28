@@ -420,7 +420,8 @@ struct win {
 
 	XftColor bg;
 	XftColor fg;
-    XftColor markcol;
+	XftColor selcol;
+	XftColor markcol;
 
     const char *title;
 
