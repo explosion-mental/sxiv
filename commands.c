@@ -255,10 +255,12 @@ bool cg_navigate_marked(arg_t n)
 	if (prefix > 0)
 		n *= prefix;
 #endif /* ENABLE_PREFIX_KEYS */
-
 	d = n > 0 ? 1 : -1;
+	if (markcnt == 0)	/* Preventing crash if no image is mark */
+		return false;
 	/* Loop through all marked images */
-	for (i = fileidx + d; n != 0 && i >= 0 && i < filecnt; i += d) {
+	//for (i = fileidx + d; n != 0 && i >= 0 && i < filecnt; i += d) { /*This doen't work?*/
+	for (i = fileidx + d; n != 0; i += d) {
  		if (i < 0)
  			i += filecnt;
  		else if (i >= filecnt)
