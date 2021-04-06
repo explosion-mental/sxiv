@@ -1,5 +1,5 @@
 # sxiv version (adding +1 on every big change I make)
-VERSION = 26.1
+VERSION = 26.2
 
 # Customize below to fit your preferences
 
@@ -7,18 +7,17 @@ VERSION = 26.1
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
-# autoreload backend (inotify/nop)
-AUTORELOAD = inotify
+# autoreload backend (INOTIFY/NOP)
+AUTORELOAD = INOTIFY
 
 # giflib and libexif, comment if you don't want them
-# why the "HAVE_", remove them next commit?
 HAVE_GIFLIB = -lgif
 GIFLIBFLAGS = -DHAVE_GIFLIB
 HAVE_LIBEXIF = -lexif
 LIBEXIFFLAGS = -DHAVE_LIBEXIF
+
 # Prefix-keys, see readme
-ENABLE_PREFIX_KEYS = -DENABLE_PREFIX_KEYS
-#HAVE_ = -DHAVE_GIFLIB -DHAVE_LIBEXIF
+#ENABLE_PREFIX_KEYS = -DENABLE_PREFIX_KEYS
 
 # freetype
 FREETYPELIBS = -lfontconfig -lXft
@@ -31,13 +30,10 @@ INCS = -I$(FREETYPEINC)
 LIBS = $(LDLIBS) -lImlib2 -lX11 $(FREETYPELIBS) $(HAVE_LIBEXIF) $(HAVE_GIFLIB)
 
 # flags
-SXIVCPPFLAGS = -D_XOPEN_SOURCE=700 -DVERSION=\"$(VERSION)\" $(GIFLIBFLAGS) $(LIBEXIFFLAGS) $(ENABLE_PREFIX_KEYS)
+SXIVCPPFLAGS = -D_XOPEN_SOURCE=700 -DVERSION=\"$(VERSION)\" $(GIFLIBFLAGS) -DAUTO_$(AUTORELOAD) $(LIBEXIFFLAGS) $(ENABLE_PREFIX_KEYS)
 SXIVCFLAGS = -std=c99 -pedantic -Wall $(INCS) $(SXIVCPPFLAGS) $(CPPFLAGS) $(CFLAGS)
 SXIVLDFLAGS = $(LIBS) $(LDFLAGS)
-#cflags = -std=c99 -Wall -pedantic $(CFLAGS)
-#cppflags = -I. $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=700 \
-  $(GIFLIBFLAGS) $(LIBEXIFFLAGS) $(INCS)
 
 # compiler and linker
-CC = cc
-#CC = gcc
+CC = gcc
+#CC = cc

@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-//#define _MAPPINGS_CONFIG
-
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
@@ -59,11 +57,13 @@ int filecnt, fileidx;
 int alternate;
 int markcnt;
 int markidx;
-
+#ifdef ENABLE_PREFIX_KEYS
 int prefix;
+#endif /* ENABLE_PREFIX_KEYS */
+/*What is this?
 bool extprefix;
 bool inputting_prefix;
-
+*/
 bool resized = false;
 
 typedef struct {
@@ -303,7 +303,7 @@ end:
 	win_draw(&win);
 	close_info();
 }
-/*
+#ifdef ENABLE_PREFIX_KEYS
 int evaluate_prefix()
 {
 	extern int prefix;
@@ -312,8 +312,8 @@ int evaluate_prefix()
 		return -1;
 	else
 		return prefix;
-}*/
-
+}
+#endif /* ENABLE_PREFIX_KEYS */
 void load_image(int new)
 {
 	bool prev = new < fileidx;
@@ -651,7 +651,9 @@ void on_keypress(XKeyEvent *kev)
 		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
 	if (dirty)
 		redraw();
+#ifdef ENABLE_PREFIX_KEYS
 	prefix = 0;
+#endif /* ENABLE_PREFIX_KEYS */
 }
 
 void on_buttonpress(XButtonEvent *bev)
@@ -722,7 +724,9 @@ void on_buttonpress(XButtonEvent *bev)
 				break;
 		}
 	}
+#ifdef ENABLE_PREFIX_KEYS
 	prefix = 0;
+#endif /* ENABLE_PREFIX_KEYS */
 }
 
 const struct timespec ten_ms = {0, 10000000};

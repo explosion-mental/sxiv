@@ -140,7 +140,7 @@ bool img_load_gif(img_t *img, const fileinfo_t *file)
 	img->multi.cnt = img->multi.sel = 0;
 	img->multi.length = 0;
 
-#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
+#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5	/* What? */
 	gif = DGifOpenFileName(file->path, NULL);
 #else
 	gif = DGifOpenFileName(file->path);
