@@ -21,6 +21,10 @@ static const int THUMB_BORDERS[] = { 7 }; /* How does this work? */
 static const int THUMB_MARGIN    = -4;	/* margins between images, buggy with marks */
 static const int THUMB_PADDING   = 0;	/* padding of the highlight or mark */
 static const int THUMB_SIZE      = 3;	/* thumbnail size at startup, index into thumb_sizes[]: */
+static const int squarethumb     = 1;	/* 0 means normal thumbs (default) */
+//static int squarethumb     = 1;	/* no constant yells compilation error, but I need this to make it toggleABLE (on a command) */
+//Original take with `#define` and `#ifdef` (easier on the eyes)
+//#define SQUARETHUMBS
 
 /* colors and font are configured with 'background', 'foreground' and
  * 'font' (default unicode) X resource properties overwritten by using wal (pywal).
@@ -82,6 +86,7 @@ static const keymap_t keys[] = {
 
 				/* Marks */
 	{ 0,            XK_m,             g_toggle_image_mark,  None },
+//	{ 0,            XK_z,             g_toggle_squarethumb, None },
 //	{ 0,            XK_M,             g_mark_range,         None },
 //	{ ControlMask,  XK_m,             g_reverse_marks,      None },
 	{ 0,            XK_t,             g_mark_range,         None },

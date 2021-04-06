@@ -1,5 +1,5 @@
 # sxiv version (adding +1 on every big change I make)
-VERSION = 26.2
+VERSION = 26.25
 
 # Customize below to fit your preferences
 
