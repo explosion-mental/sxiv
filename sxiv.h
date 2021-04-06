@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* Why have this file? */
 #ifndef SXIV_H
 #define SXIV_H
 

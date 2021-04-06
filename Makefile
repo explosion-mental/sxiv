@@ -2,25 +2,17 @@
 
 include config.mk
 
-SRC = $(AUTORELOAD).c commands.c image.c main.c options.c thumbs.c util.c window.c
+SRC = autoreload.c commands.c image.c main.c options.c thumbs.c util.c window.c
 OBJ = $(SRC:.c=.o)
 
 all: options sxiv
 
 options:
 	@echo sxiv build options:
-#	@echo "AUTORELOAD   = $(AUTORELOAD)"
-#	@echo "HAVE_GIFLIB  = $(HAVE_GIFLIB)"
-#	@echo "HAVE_LIBEXIF = $(HAVE_LIBEXIF)"
 	@echo "CFLAGS  = $(SXIVCFLAGS)"
 	@echo "LDFLAGS = $(SXIVLDFLAGS)"
 	@echo "CC      = $(CC)"
 
-#.SUFFIXES:
-#.SUFFIXES: .c .o
-#$(V).SILENT:
-
-#options.o: version.h
 config.h:
 	cp config.def.h $@
 
@@ -61,13 +53,4 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/sxiv\
 		rm -f $(DESTDIR)$(MANPREFIX)/man1/sxiv.1\
 		rm -rf $(DESTDIR)$(PREFIX)/share/sxiv
-# What is this?
-#version.h: Makefile .git/index
-#	@echo "GEN $@"
-#	v="$$(cd $(srcdir); git describe 2>/dev/null)"; \
-#	echo "#define VERSION \"$$(v:-$(version))\"" >$@
-
-#.git/index:
-
-
 .PHONY: all clean install uninstall

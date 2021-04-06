@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "sxiv.h"
+#ifdef AUTO_INOTIFY
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/inotify.h>
-
-#include "sxiv.h"
 
 void arl_init(arl_t *arl)
 {
@@ -108,4 +108,28 @@ bool arl_handle(arl_t *arl)
 	}
 	return reload;
 }
+#endif /* AUTO_INOTIFY */
 
+#ifdef AUTO_NOP
+void arl_init(arl_t *arl)
+{
+	arl->fd = -1;
+}
+
+void arl_cleanup(arl_t *arl)
+{
+	(void) arl;
+}
+
+void arl_setup(arl_t *arl, const char *filepath)
+{
+	(void) arl;
+	(void) filepath;
+}
+
+bool arl_handle(arl_t *arl)
+{
+	(void) arl;
+	return false;
+}
+#endif /* AUTO_NOP */
