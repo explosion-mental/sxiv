@@ -561,7 +561,13 @@ bool cg_dmenu_output(arg_t _)
 	//printf("%s\n", files[fileidx].path);
         exit(EXIT_SUCCESS);
 }
-
+/*
+bool cg_toggle_squarethumb(arg_t _)
+{
+	squarethumb = !squarethumb;
+	//return false;
+}
+*/
 
 /*bool it_shell_cmd(arg_t a)
 {

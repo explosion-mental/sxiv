@@ -39,3 +39,4 @@ T_CMD(reload_all)
 /* Customs */
 I_CMD(random_navigate)
 G_CMD(dmenu_output)
+//G_CMD(toggle_squarethumb)

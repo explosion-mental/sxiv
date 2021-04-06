@@ -197,30 +197,84 @@ CLEANUP void tns_free(tns_t *tns)
 	cache_dir = NULL;
 }
 
+
 Imlib_Image tns_scale_down(Imlib_Image im, int dim)
 {
 	int w, h;
-	float z, zw, zh;
-
 	imlib_context_set_image(im);
 	w = imlib_image_get_width();
 	h = imlib_image_get_height();
+
+	if (squarethumb) {
+		int x = (w < h) ? 0 : (w - h) / 2;
+		int y = (w > h) ? 0 : (h - w) / 2;
+		int s = (w < h) ? w : h;
+
+		if (dim < w || dim < h) {
+			imlib_context_set_anti_alias(1);
+			im = imlib_create_cropped_scaled_image(x, y, s, s, dim, dim);
+			if (im == NULL)
+				error(EXIT_FAILURE, ENOMEM, NULL);
+			imlib_free_image_and_decache();
+		}
+	} else {
+		float z, zw, zh;
+		zw = (float) dim / (float) w;
+		zh = (float) dim / (float) h;
+		z = MIN(zw, zh);
+		z = MIN(z, 1.0);
+
+		if (z < 1.0) {
+			imlib_context_set_anti_alias(1);
+			im = imlib_create_cropped_scaled_image(0, 0, w, h,
+			                                       MAX(z * w, 1), MAX(z * h, 1));
+			if (im == NULL)
+				error(EXIT_FAILURE, ENOMEM, NULL);
+			imlib_free_image_and_decache();
+		}
+	}
+	return im;
+}
+//ORIGINAL
+/*
+Imlib_Image tns_scale_down(Imlib_Image im, int dim)
+{
+	int w, h;
+#ifndef SQUARETHUMBS
+		float z, zw, zh;
+#endif
+	imlib_context_set_image(im);
+	w = imlib_image_get_width();
+	h = imlib_image_get_height();
+#ifndef SQUARETHUMBS
 	zw = (float) dim / (float) w;
 	zh = (float) dim / (float) h;
 	z = MIN(zw, zh);
 	z = MIN(z, 1.0);
-
 	if (z < 1.0) {
+#endif
+
+#ifdef SQUARETHUMBS
+		int x = (w < h) ? 0 : (w - h) / 2;
+		int y = (w > h) ? 0 : (h - w) / 2;
+		int s = (w < h) ? w : h;
+		if (dim < w || dim < h) {
+#endif
 		imlib_context_set_anti_alias(1);
+#ifndef SQUARETHUMBS
 		im = imlib_create_cropped_scaled_image(0, 0, w, h,
 		                                       MAX(z * w, 1), MAX(z * h, 1));
+#endif
+#ifdef SQUARETHUMBS
+		im = imlib_create_cropped_scaled_image(x, y, s, s, dim, dim);
+#endif
 		if (im == NULL)
 			error(EXIT_FAILURE, ENOMEM, NULL);
 		imlib_free_image_and_decache();
 	}
 	return im;
 }
-
+*/
 bool tns_load(tns_t *tns, int n, bool force, bool cache_only)
 {
 	int maxwh = thumb_sizes[ARRLEN(thumb_sizes) - 1];
