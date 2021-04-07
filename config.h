@@ -1,40 +1,37 @@
-/* percent of levels to use when zooming:
- * (first/last value is used as min/max zoom level) */
+/* See LICENSE file for copyright and license details. */
+
+/* global */
+enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
+enum { SLIDESHOW_DELAY = 4 };		/* slideshow delay in seconds (overwritten via -S option) */
+static const double GAMMA_MAX 	= 10.0; /* [-GAMMA_RANGE, 0] and (0, GAMMA_RANGE] are mapped.. */
+static const int GAMMA_RANGE 	= 32;	/* to the ranges [0, 1], and (1, GAMMA_MAX] */
+static const int PAN_FRACTION 	= 8;	/* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
+static const bool ANTI_ALIAS  	= true;	/* false means pixelate images at zoom level != 100% */
+static const bool ALPHA_LAYER 	= false;/* true means use a checkerboard background for alpha layer */
 static const float zoom_levels[] = {
+ /* first/last value is used as min/max zoom percent level */
 	 12.5,  25.0,  35.0,  45.0,  50.0,  75.0,
 	100.0, 125.0,  150.0, 200.0, 400.0, 800.0
 };
 
-/* gamma correction: the user-visible ranges [-GAMMA_RANGE, 0] and
- * (0, GAMMA_RANGE] are mapped to the ranges [0, 1], and (1, GAMMA_MAX]. */
-static const double GAMMA_MAX   = 10.0;
-static const int    GAMMA_RANGE = 32;
-
-enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
-enum 	{ SLIDESHOW_DELAY = 4 };	/* slideshow delay in seconds (overwritten via -S option) */
-static const int PAN_FRACTION = 8;	/* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
-static const bool ANTI_ALIAS  = true;	/* if false, pixelate images at zoom level != 100% */
-static const bool ALPHA_LAYER = false;	/* if true, use a checkerboard background for alpha layer */
-/* thumbnail sizes in pixels (width == height): */
-static const int thumb_sizes[] = { 32, 64, 116, 145, 181, 286, 361, 412 };
+/* thumbnail */
 static const int THUMB_BORDERS[] = { 7 }; /* How does this work? */
 static const int THUMB_MARGIN    = -4;	/* margins between images, buggy with marks */
 static const int THUMB_PADDING   = 0;	/* padding of the highlight or mark */
 static const int THUMB_SIZE      = 3;	/* thumbnail size at startup, index into thumb_sizes[]: */
 static const int squarethumb     = 1;	/* 0 means normal thumbs (default) */
-//static int squarethumb     = 1;	/* no constant yells compilation error, but I need this to make it toggleABLE (on a command) */
-//Original take with `#define` and `#ifdef` (easier on the eyes)
-//#define SQUARETHUMBS
+static const int thumb_sizes[] = {
+	/* thumbnail sizes in pixels (width == height) */
+	32, 64, 116, 145, 181, 286, 361, 412
+};
+//static int squarethumb = 1; /* no constant yells compilation error, but I need this to make it toggleABLE (on a command) */
 
 /* colors and font are configured with 'background', 'foreground' and
  * 'font' (default unicode) X resource properties overwritten by using wal (pywal).
  * See X(7) section Resources, xrdb(1) and wall(1) for more information. */
 
-/* keyboard mappings.
- * Disable all keys that I don't need and are on the key-handler since
- * I patch sxiv so it doesn't need a 'prefix-key' to use external commands */
 static const keymap_t keys[] = {
-	/* modifiers    key               function              argument */
+	/* modifier(s)    key               function              argument */
 
 				/* Navigation */
 	{ 0,            XK_h,             i_scroll_or_navigate, DIR_LEFT },
@@ -145,7 +142,7 @@ static const keymap_t keys[] = {
 	{ 0,            XK_q,             g_quit,               None },
 };
 
-/* mouse button mappings */
+/* button definitions */
 static const button_t buttons[] = {
 	/* modifiers    button            function              argument */
 	{ 0,            1,                i_cursor_navigate,    None },

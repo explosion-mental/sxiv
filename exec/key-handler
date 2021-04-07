@@ -12,26 +12,30 @@ while read file
 do
         case "$1" in
 	"semicolon")	# Information
-		notify-send "File informationℹ️ " "$(mediainfo --Output=file://"$HOME"/.local/Templates/mediainfo "$file")" ;;
-	"d")	# Delete
+		notify-send "File informationℹ️ " "$(mediainfo "$file")" ;;
+
+	"d")	# Remove
 		[ "$(printf "Yes\\nNo" | dmenu -i -p "Really delete $file?")" = "Yes" ] && rm "$file" && notify-send "$(noextname "$file") deleted.❌" ;;
 
-	"w")	# Wallpaper (on image mode, if it's zoomed or scaled, "w" changes scale mode to FIT)
+	"w")	# Wallpaper
 		setbg "$file" & ;;
 	"6")	# GIMP
 		setsid -f gimp "$file" & notify-send "Opening on gimp...✏️ 🖼️" ;;
-	"s")	# "Save", usefull when looking for wallpapers, memes, etc...
+
+	"s")	# 'Save', usefull to save a wallpaper, meme, comic page, etc...
 		[ ! -d "$saved" ] && notify-send "$saved is not a directory, cancelled." && exit
 		[ "$PWD" = "$saved" ] && notify-send "You are on the SAVED DIR🤦" && exit
 		mv "$file" "$saved" && notify-send "Successfully saved🌟" "$(basename "$file")✅" &
 		;;
 	"2")
 		notify-send " hi $PWD"	;;
+
 	"c")	# Rename
 		[ -z "$name" ] && name=$(dmenu -i -p "New name:")
 		[ -z "$name" ] && exit
 		[ -f "$name.$(noextname -e "$file")" ] && notify-send "There's already a file with that name😠" && exit
 		mv "$file" "$name.${file##*.}" && notify-send "'$(noextname -b "$file")' renamed📝 to '$name'" &	;;
+
 	"r")	# Rotations
 		convert -rotate 90 "$file" "$file"	;;
 	"R")
@@ -40,6 +44,7 @@ do
 		convert -rotate 180 "$file" "$file"	;;
 	"4")
 		convert -flop "$file" "$file" ;;
+
 	"y")	# Clipboard, doesnt seem to work with xsel
 		printf '%s' "$(basename $file)" | xclip -selection clipboard &&
 		notify-send -t 500 "Clipboard📋" "<b><i>'$file'</i></b> copied" ;;
@@ -53,6 +58,7 @@ do
 		cp "$file" "$dirs" && notify-send -i "$dirs/$(noextname -f "$file")" "🚚 File copied" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
 		xdotool key control+R	# reload sxiv
 		;;
+
         "v")	# Move an img
 		[ -z "$dirs" ] && dirs="$(echo "$dirlist" | dmenu -l 5 -i -p "Move file(s) to where?"  | sed "s|~|$HOME|g")"
 		[ -z "$dirs" ] && exit
