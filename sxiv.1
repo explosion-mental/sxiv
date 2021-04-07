@@ -114,7 +114,7 @@ Set zoom level to ZOOM percent.
 .SS General
 The following keyboard commands are available in both image and thumbnail mode:
 .TP
-.BR 0 \- 9
+.BR 0 \- 9 (optional)
 Prefix the next command with a number (denoted via
 .IR count ).
 .TP
@@ -124,7 +124,7 @@ Quit sxiv.
 .B Q
 Quit sxiv and output the name of the selected file. (Usefull when scripting but you don't need to use this).
 .TP
-.B Return
+.B Space
 Switch to thumbnail mode / open selected image in image mode.
 .TP
 .B f
@@ -133,7 +133,7 @@ Toggle fullscreen mode.
 .B b
 Toggle visibility of info bar on bottom of window.
 .TP
-.B Ctrl-x
+.B Ctrl-x (optional)
 See section EXTERNAL KEY HANDLER
 .TP
 .B g
@@ -161,10 +161,10 @@ Scroll up one screen height.
 .BR Ctrl-l ", " Ctrl-Right
 Scroll right one screen width.
 .TP
-.BR +
+.BR + / o
 Zoom in.
 .TP
-.B \-
+.B \- / i
 Zoom out.
 .TP
 .B m
@@ -406,12 +406,15 @@ There is also an example script installed together with sxiv as
 .SH EXTERNAL KEY HANDLER
 Additional external keyboard commands can be defined using a handler program
 located in
-.IR $XDG_CONFIG_HOME/sxiv/exec/key-handler .
+.IR $XDG_CONFIG_HOME/sxiv/exec/key-handler.
 The handler is invoked by pressing
-.BR "Your Binding"
-In this build you can simply call the handler by the key you assing it on the executable, remember to be carefull if there's inconsitecy between the handler and config.h bindings. Passed via stdin are the
-images to act upon, one path per line: all marked images, if in thumbnail mode
-and at least one image has been marked, otherwise the current image.
+.BR "Your Binding" " ."
+In this build you can simply call the handler by the key you assing it on the executable,
+remember to be carefull if there's inconsitecy between the handler and config.h bindings;
+although this is not mandatory because now all bindings on the keyhandler are ignored if they
+are defined first on config.h. Passed via stdin are theimages to act upon, one path per line:
+all marked images, if in thumbnail mode and at least one image has been marked, otherwise the
+current image.
 sxiv(1) will block until the handler terminates. It then checks which images
 have been modified and reloads them.
 
@@ -436,6 +439,10 @@ find . \-depth \-type d \-empty ! \-name '.' \-exec rmdir {} \\;
 .SH AUTHOR
 .EX
 Bert Muennich   <ber.t at posteo.de>
+.EE
+.SH FORK AUTHOR
+.EX
+explosion-mental
 .EE
 .SH CONTRIBUTORS
 .EX
