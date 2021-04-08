@@ -16,7 +16,7 @@ GIFLIBFLAGS = -DHAVE_GIFLIB
 HAVE_LIBEXIF = -lexif
 LIBEXIFFLAGS = -DHAVE_LIBEXIF
 
-# Prefix-keys, see readme
+# Prefix-keys ("count", see readme)
 #ENABLE_PREFIX_KEYS = -DENABLE_PREFIX_KEYS
 
 # freetype
