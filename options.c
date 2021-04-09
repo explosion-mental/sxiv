@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -27,14 +28,14 @@ const opt_t *options = (const opt_t*) &_options;
 
 void print_usage(void)
 {
-	printf("usage: sxiv [-abcfhiopqrtvZ] [-A FRAMERATE] [-e WID] [-G GAMMA] "
-	       "[-g GEOMETRY] [-N NAME] [-n NUM] [-S DELAY] [-s MODE] [-z ZOOM] "
+	printf("usage: sxiv [-abcfhiopqrtvZ] [-A framerate] [-e wid] [-G gamma] "
+	       "[-g geometry] [-N name] [-n num] [-S delay] [-s mode] [-z zoom] "
 	       "FILES...\n");
 }
 
 void print_version(void)
 {
-	puts("sxiv " VERSION);
+	puts("sxiv-"VERSION);
 }
 
 void parse_options(int argc, char **argv)

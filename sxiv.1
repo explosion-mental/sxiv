@@ -5,23 +5,23 @@ sxiv \- Simple X Image Viewer
 .B sxiv
 .RB [ \-abcfhiopqrtvZ ]
 .RB [ \-A
-.IR FRAMERATE ]
+.IR framerate ]
 .RB [ \-e
-.IR WID ]
+.IR wid ]
 .RB [ \-G
-.IR GAMMA ]
+.IR gamma ]
 .RB [ \-g
-.IR GEOMETRY ]
+.IR geometry ]
 .RB [ \-N
-.IR NAME ]
+.IR name ]
 .RB [ \-n
-.IR NUM ]
+.IR num ]
 .RB [ \-S
-.IR DELAY ]
+.IR delay ]
 .RB [ \-s
-.IR MODE ]
+.IR mode ]
 .RB [ \-z
-.IR ZOOM ]
+.IR zoom ]
 .IR FILE ...
 .SH DESCRIPTION
 sxiv is a simple image viewer for X.
@@ -34,38 +34,44 @@ Please note, that the fullscreen mode requires an EWMH/NetWM compliant window
 manager.
 .SH OPTIONS
 .TP
-.BI "\-A " FRAMERATE
+.BI "\-A " framerate
 Play animations with a constant frame rate set to
-.IR FRAMERATE .
+.IR framerate .
 .TP
 .B \-a
 Play animations of multi-frame images.
 .TP
 .B \-b
-Do not show info bar on bottom of window.
+Do not show info bar.
 .TP
 .B \-c
 Remove all orphaned cache files from the thumbnail cache directory and exit.
 .TP
-.BI "\-e " WID
+.BI "\-e " wid
 Embed sxiv's window into window whose ID is
-.IR WID .
+.IR wid .
 .TP
 .B \-f
 Start in fullscreen mode.
 .TP
-.BI "\-G " GAMMA
-Set image gamma to GAMMA (-32..32).
+.BI "\-G " gamma
+Set image gamma to
+.I gamma
+(-32..32).
 .TP
-.BI "\-g " GEOMETRY
+.BI "\-g " geometry
 Set window position and size. See section GEOMETRY SPECIFICATIONS of X(7) for
-more information on GEOMETRY argument.
+more information on
+.I geometry
+argument.
 .TP
-.BI "\-N " NAME
-Set the resource name of sxiv's X window to NAME.
+.BI "\-N " name
+Set the resource name of sxiv's X window to
+.IR name .
 .TP
-.BI "\-n " NUM
-Start at picture number NUM.
+.BI "\-n " num
+Start at picture number
+.IR num.
 .TP
 .B \-h
 Print brief usage information to standard output and exit.
@@ -88,15 +94,13 @@ Be quiet, disable warnings to standard error stream.
 .B \-r
 Search the given directories recursively for images to view.
 .TP
-.BI "\-S " DELAY
+.BI "\-S " delay
 Start in slideshow mode. Set the delay between images to
-.I DELAY
-seconds.
-.I DELAY
-may be a floating point number.
+.I delay
+seconds (may be a floating point number).
 .TP
-.BI "\-s " MODE
-Set scale mode according to MODE character. Supported modes are: [d]own,
+.BI "\-s " mode
+Set scale mode according to mode character. Supported modes are: [d]own,
 [f]it, [w]idth, [h]eight.
 .TP
 .B \-t
@@ -108,15 +112,11 @@ Print version information to standard output and exit.
 .B \-Z
 The same as `\-z 100'.
 .TP
-.BI "\-z " ZOOM
-Set zoom level to ZOOM percent.
+.BI "\-z " zoom
+Set zoom level to zoom percent.
 .SH KEYBOARD COMMANDS
 .SS General
 The following keyboard commands are available in both image and thumbnail mode:
-.TP
-.BR 0 \- 9 (optional)
-Prefix the next command with a number (denoted via
-.IR count ).
 .TP
 .B q
 Quit sxiv.
@@ -132,9 +132,6 @@ Toggle fullscreen mode.
 .TP
 .B b
 Toggle visibility of info bar on bottom of window.
-.TP
-.B Ctrl-x (optional)
-See section EXTERNAL KEY HANDLER
 .TP
 .B g
 Go to the first image.
@@ -161,10 +158,10 @@ Scroll up one screen height.
 .BR Ctrl-l ", " Ctrl-Right
 Scroll right one screen width.
 .TP
-.BR + / o
+.BR +
 Zoom in.
 .TP
-.B \- / i
+.B \-
 Zoom out.
 .TP
 .B m
@@ -190,15 +187,19 @@ Go
 .I count
 marked images backward.
 .TP
+.B j
+Next image / Scroll image down
+.TP
+.B k
+Previous image  / Scroll image up
+.TP
 .B {
-Decrease gamma correction by
-.I count
-steps.
+Decrease gamma
+.I (count)
 .TP
 .B }
-Increase gamma correction by
-.I count
-steps.
+Increase gamma
+.I (count)
 .TP
 .B Ctrl-g
 Reset gamma correction.
@@ -206,24 +207,24 @@ Reset gamma correction.
 The following keyboard commands are only available in thumbnail mode:
 .TP
 .BR h ", " Left
-Move selection left
-.I count
-times.
+Move left
+.I (count
+times).
 .TP
 .BR j ", " Down
-Move selection down
-.I count
-times.
+Move down
+.I (count
+times).
 .TP
 .BR k ", " Up
-Move selection up
-.I count
-times.
+Move up
+.I (count
+times).
 .TP
 .BR l ", " Right
-Move selection right
-.I count
-times.
+Move right
+.I (count
+times).
 .TP
 .B R
 Reload all thumbnails.
@@ -377,6 +378,15 @@ Zoom in.
 .TP
 .B ScrollDown
 Zoom out.
+.SS OPTIONAL
+The following keyboard commands are optional:
+.TP
+.BR 0 \- 9
+Prefix the next command with a number (denoted via
+.IR count ).
+.TP
+.B Ctrl-x
+See section EXTERNAL KEY HANDLER
 .SH CONFIGURATION
 The following X resources are supported:
 .TP
@@ -406,15 +416,12 @@ There is also an example script installed together with sxiv as
 .SH EXTERNAL KEY HANDLER
 Additional external keyboard commands can be defined using a handler program
 located in
-.IR $XDG_CONFIG_HOME/sxiv/exec/key-handler.
+.IR $XDG_CONFIG_HOME/sxiv/exec/key-handler .
 The handler is invoked by pressing
-.BR "Your Binding" " ."
-In this build you can simply call the handler by the key you assing it on the executable,
-remember to be carefull if there's inconsitecy between the handler and config.h bindings;
-although this is not mandatory because now all bindings on the keyhandler are ignored if they
-are defined first on config.h. Passed via stdin are theimages to act upon, one path per line:
-all marked images, if in thumbnail mode and at least one image has been marked, otherwise the
-current image.
+.BR "Your Binding"
+In this build you can simply call the handler by the key you assing it on the executable, remember to be carefull if there's inconsitecy between the handler and config.h bindings. Passed via stdin are the
+images to act upon, one path per line: all marked images, if in thumbnail mode
+and at least one image has been marked, otherwise the current image.
 sxiv(1) will block until the handler terminates. It then checks which images
 have been modified and reloads them.
 
@@ -439,10 +446,6 @@ find . \-depth \-type d \-empty ! \-name '.' \-exec rmdir {} \\;
 .SH AUTHOR
 .EX
 Bert Muennich   <ber.t at posteo.de>
-.EE
-.SH FORK AUTHOR
-.EX
-explosion-mental
 .EE
 .SH CONTRIBUTORS
 .EX
