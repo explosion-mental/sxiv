@@ -70,7 +70,6 @@ bool cg_quit(arg_t _)
 
 bool cg_switch_mode(arg_t _)
 {
-	win_toggle_bar(&win);	/* Always show bar on thumb mode */
 	if (mode == MODE_IMAGE) {
 		if (tns.thumbs == NULL)
 			tns_init(&tns, files, &filecnt, &fileidx, &win);
