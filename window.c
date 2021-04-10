@@ -372,8 +372,7 @@ void win_clear(win_t *win)
 	XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
 }
 
-#define TEXTWIDTH(win, text, len) \
-	win_draw_text(win, NULL, NULL, 0, 0, text, len, 0)
+#define TEXTWIDTH(win, text, len) win_draw_text(win, NULL, NULL, 0, 0, text, len, 0)
 
 int win_draw_text(win_t *win, XftDraw *d, const XftColor *color, int x, int y,
                   char *text, int len, int w)
