@@ -38,7 +38,6 @@ _Note:_ after looking for all the forks I could find, the [qsmodo fork](https://
 This is really the best image viewer and prob the fastest! After my changes it's even better for me. I have one issue
 - What's the best position/intuitive (preferably not with Shift, my pinky hurts) for some actions on sxiv?
 - Also, is there a way to maximaze space on thumbnail mode?(Maybe with square thumbnails dummy?)
-- See *[TODO](patches/TODO.md)* if you wanna help
 
 # TODO
 - Load all frames from TIFF files. We have to write our own loader for this to
@@ -68,6 +67,6 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - It feels more responsive after WM_HINTS patch
 - Compile even if sxiv is active _(cp -f)_
 - version.h not needed (one file less) _**Note**_: I have no idea what that file was doing, looking at the **Makefile** says something about .git/index or whatever, I have no idea if that broke something external (not the program), maybe it was a little sync with the github main repo?
-- Not an improment but for my standards on understading: I make a config.mk _just like st, dwm and dmenu_ so you can configure it I guess, also the autoreload_inotify/nop was annoying so I just change it to _inotify/nop_ if you want the autoreload before it add it on the Makefile. Because of this 'suckless' style, the compile messages are alike (I'm debating this, the initial messages where really clean and I like them, suggest something maybe?)
+- Not an improment but for my standards on understadings: I make a config.mk _just like st, dwm and dmenu_ so you can configure it I guess, also the autoreload_inotify/nop was annoying so I combine them into **one** file, if you want the autoreload before it add it on the Makefile. Because of this 'suckless' style, the compile messages are alike (I'm debating this, the initial messages where really clean and I like them, suggest something maybe?)
 - Saner config.h (Mar 24)
 - On/off Prefix-keys on *some* commands(Mar 25)
