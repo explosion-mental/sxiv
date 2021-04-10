@@ -117,14 +117,14 @@ void win_init(win_t *win)
 	db = res_man != NULL ? XrmGetStringDatabase(res_man) : None;
 
 	//f = win_res(db, RES_CLASS "unifont-9", "monospace-8");
-	f = win_res(db, RES_CLASS ".font", "unifont-9");
+	f = win_res(db, RES_CLASS ".font", leterfont);
 	win_init_font(e, f);
 
 //	fg = win_res(db, RES_CLASS ".foreground", "color8");
-	bg   = win_res(db, RES_CLASS ".background", "black");	/* background */
-	fg   = win_res(db, RES_CLASS ".color2", "green");	/* bar */
-	mark = win_res(db, RES_CLASS ".color2", "red");		/* mark */
-	sel  = win_res(db, RES_CLASS ".color8", "blue");	/* highlight */
+	bg   = win_res(db, RES_CLASS ".background", bgcolor);	/* background */
+	fg   = win_res(db, RES_CLASS ".color2",     fgcolor);	/* bar */
+	mark = win_res(db, RES_CLASS ".color2",   markcolor);	/* mark */
+	sel  = win_res(db, RES_CLASS ".color8",    selcolor);	/* highlight */
 	win_alloc_color(e, bg, &win->bg);
 	win_alloc_color(e, fg, &win->fg);
  	win_alloc_color(e, mark, &win->markcol);

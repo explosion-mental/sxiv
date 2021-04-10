@@ -1,5 +1,12 @@
 /* See LICENSE file for copyright and license details. */
 
+/* appearance */
+static const char bgcolor[]   = "#222222";	/* background */
+static const char fgcolor[]   = "#444444";	/* bar */
+static const char markcolor[] = "#bbbbbb";	/* mark */
+static const char selcolor[]  = "#eeeeee";	/* highlight */
+static const char leterfont[] = "unifont-9";	//multiple fonts?
+
 /* global */
 enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
 enum { SLIDESHOW_DELAY = 4 };		/* slideshow delay in seconds (overwritten via -S option) */
