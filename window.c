@@ -64,11 +64,9 @@ void win_alloc_color(const win_env_t *e, const char *name, XftColor *col)
 {
 	if (!XftColorAllocName(e->dpy, DefaultVisual(e->dpy, e->scr),
 	                       DefaultColormap(e->dpy, e->scr), name, col))
-	{
 		error(EXIT_FAILURE, 0, "Error allocating color '%s'", name);
-	}
 }
-
+		/* database          */
 const char* win_res(XrmDatabase db, const char *name, const char *def)
 {
 	char *type;
@@ -86,8 +84,7 @@ const char* win_res(XrmDatabase db, const char *name, const char *def)
 	}
 }
 
-#define INIT_ATOM_(atom) \
-	atoms[ATOM_##atom] = XInternAtom(e->dpy, #atom, False);
+#define INIT_ATOM_(atom) atoms[ATOM_##atom] = XInternAtom(e->dpy, #atom, False);
 #define RES_CLASS "Sxiv"
 void win_init(win_t *win)
 {
@@ -189,9 +186,9 @@ void win_open(win_t *win)
 			sizehints.win_gravity = NorthEastGravity;
 		}
 		sizehints.flags |= USPosition;
-	} else {
+	} else
 		win->x = 0;
-	}
+
 	if ((gmask & YValue) != 0) {
 		if ((gmask & YNegative) != 0) {
 			win->y += e->scrh - win->h;
@@ -199,9 +196,8 @@ void win_open(win_t *win)
 			                      ? SouthEastGravity : SouthWestGravity;
 		}
 		sizehints.flags |= USPosition;
-	} else {
+	} else
 		win->y = 0;
-	}
 
 	win->xwin = XCreateWindow(e->dpy, parent,
 	                          win->x, win->y, win->w, win->h, 0,
@@ -240,6 +236,7 @@ void win_open(win_t *win)
 	none = XCreateBitmapFromData(e->dpy, win->xwin, none_data, 8, 8);
 	*cnone = XCreatePixmapCursor(e->dpy, none, none, &col, &col, 0, 0);
 
+	// GC
 	gc = XCreateGC(e->dpy, win->xwin, 0, None);
 
 	n = icons[ARRLEN(icons)-1].size;
@@ -280,6 +277,9 @@ void win_open(win_t *win)
 	hints.initial_state = NormalState;
 	XSetWMHints(win->env.dpy, win->xwin, &hints);
 
+//	if (topbar)
+		//win->h += win->bar.h;
+//	else
 	win->h -= win->bar.h;
 
 	win->buf.w = e->scrw;
@@ -305,7 +305,6 @@ CLEANUP void win_close(win_t *win)
 		XFreeCursor(win->env.dpy, cursors[i].icon);
 
 	XFreeGC(win->env.dpy, gc);
-
 	XDestroyWindow(win->env.dpy, win->xwin);
 	XCloseDisplay(win->env.dpy);
 }
@@ -346,12 +345,22 @@ void win_toggle_fullscreen(win_t *win)
 
 void win_toggle_bar(win_t *win)
 {
-	if (win->bar.h != 0) {
-		win->h += win->bar.h;
-		win->bar.h = 0;
+	if (topbar) {
+		if (win->bar.h != 0) {
+			win->h -= win->bar.h;
+			win->bar.h = 0;
+		} else {
+			win->bar.h = barheight;
+			win->h += win->bar.h;
+		}
 	} else {
-		win->bar.h = barheight;
-		win->h -= win->bar.h;
+		if (win->bar.h != 0) {
+			win->h += win->bar.h;
+			win->bar.h = 0;
+		} else {
+			win->bar.h = barheight;
+			win->h -= win->bar.h;
+		}
 	}
 }
 
@@ -372,7 +381,8 @@ void win_clear(win_t *win)
 	XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
 }
 
-#define TEXTWIDTH(win, text, len) win_draw_text(win, NULL, NULL, 0, 0, text, len, 0)
+#define TEXTWIDTH(win, text, len) \
+	win_draw_text(win, NULL, NULL, 0, 0, text, len, 0)
 
 int win_draw_text(win_t *win, XftDraw *d, const XftColor *color, int x, int y,
                   char *text, int len, int w)
@@ -419,17 +429,28 @@ void win_draw_bar(win_t *win)
 		return;
 
 	e = &win->env;
-	y = win->h + font->ascent + V_TEXT_PAD;
+	if (topbar)
+		y = font->ascent + V_TEXT_PAD;
+	else
+		y = win->h + font->ascent + V_TEXT_PAD;
 	w = win->w - 2*H_TEXT_PAD;
 	d = XftDrawCreate(e->dpy, win->buf.pm, DefaultVisual(e->dpy, e->scr),
-	                  DefaultColormap(e->dpy, e->scr));
+			DefaultColormap(e->dpy, e->scr));
 
 	XSetForeground(e->dpy, gc, win->fg.pixel);
-	XFillRectangle(e->dpy, win->buf.pm, gc, 0, win->h, win->w, win->bar.h);
+	/* bar */
+	if (topbar)
+			    /*display	drawable    gc  x	y	wid     height	*/
+		XFillRectangle(e->dpy, win->buf.pm, gc,
+				0, 0, win->w, win->bar.h);
+	else
+		XFillRectangle(e->dpy, win->buf.pm, gc,
+				0, win->h, win->w, win->bar.h);
 
 	XSetForeground(e->dpy, gc, win->bg.pixel);
 	XSetBackground(e->dpy, gc, win->fg.pixel);
 
+	/* right text */
 	if ((len = strlen(r->buf)) > 0) {
 		if ((tw = TEXTWIDTH(win, r->buf, len)) > w)
 			return;
@@ -437,6 +458,7 @@ void win_draw_bar(win_t *win)
 		w -= tw;
 		win_draw_text(win, d, &win->bg, x, y, r->buf, len, tw);
 	}
+	/* left text */
 	if ((len = strlen(l->buf)) > 0) {
 		x = H_TEXT_PAD;
 		w -= 2 * H_TEXT_PAD; /* gap between left and right parts */
@@ -455,6 +477,7 @@ void win_draw(win_t *win)
 	XFlush(win->env.dpy);
 }
 
+//Highlight thumb
 void win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw, unsigned long col)
 {
 	XGCValues gcval;
@@ -499,4 +522,3 @@ void win_cursor_pos(win_t *win, int *x, int *y)
 	if (!XQueryPointer(win->env.dpy, win->xwin, &w, &w, &i, &i, x, y, &ui))
 		*x = *y = 0;
 }
-
