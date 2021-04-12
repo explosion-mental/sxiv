@@ -6,6 +6,7 @@ static const char fgcolor[]   = "#444444";	/* bar */
 static const char markcolor[] = "#bbbbbb";	/* mark */
 static const char selcolor[]  = "#eeeeee";	/* highlight */
 static const char leterfont[] = "unifont-9";	//multiple fonts?
+static const int topbar       = 1;		/* 0 means bottom bar (default) */
 
 /* global */
 enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
@@ -32,10 +33,6 @@ static const int thumb_sizes[] = {
 	32, 64, 116, 145, 181, 286, 361, 412
 };
 //static int squarethumb = 1; /* no constant yells compilation error, but I need this to make it toggleABLE (on a command) */
-
-/* colors and font are configured with 'background', 'foreground' and
- * 'font' (default unicode) X resource properties overwritten by using wal (pywal).
- * See X(7) section Resources, xrdb(1) and wall(1) for more information. */
 
 static const keymap_t keys[] = {
 	/* modifier(s)    key               function              argument */
@@ -79,7 +76,7 @@ static const keymap_t keys[] = {
 	{ ControlMask,  XK_Up,            g_scroll_screen,      DIR_UP },
 	{ ControlMask,  XK_Right,         g_scroll_screen,      DIR_RIGHT },
 
-					/* Zoom */
+				/* Zoom */
 	{ 0,            XK_o,             g_zoom,               +1 },
 	{ 0,            XK_i,             g_zoom,               -1 },
 	{ 0,            XK_equal,         g_zoom,               +1 },
