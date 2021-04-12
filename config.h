@@ -6,7 +6,7 @@ static const char fgcolor[]   = "#444444";	/* bar */
 static const char markcolor[] = "#bbbbbb";	/* mark */
 static const char selcolor[]  = "#eeeeee";	/* highlight */
 static const char leterfont[] = "unifont-9";	//multiple fonts?
-static const int topbar       = 1;		/* 0 means bottom bar (default) */
+static const int topbar       = 0;		/* 0 means bottom bar (default) */
 
 /* global */
 enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
