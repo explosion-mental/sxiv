@@ -2,6 +2,16 @@
 My build of sxiv
 ![Image](sxiv.png "sxiv")
 
+# Instalation
+```
+sudo make install clean
+```
+
+_NOTE:_ If you are comming from a minimal set up, only packages that you need, and you haven't install sxiv before (no binary) you may need these (since I installed VoidLinux I searched the packages) :
+```
+xbps-install imlib2-devel libexif-devel giflib-devel
+```
+
 # Features
 
 * You can navigate with j/k and scroll with h/j/k/l (when zommed, you can scroll; else navigate to the next/prev image)
