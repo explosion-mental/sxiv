@@ -629,7 +629,7 @@ bool img_move(img_t *img, float dx, float dy)
 	return img_pos(img, img->x + dx, img->y + dy);
 }
 
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 bool img_pan(img_t *img, direction_t dir, int d)
 {
 	/* d < 0: screen-wise
@@ -651,7 +651,7 @@ bool img_pan(img_t *img, direction_t dir)
 
 	x = img->win->w / (PAN_FRACTION);
 	y = img->win->h / (PAN_FRACTION);
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 
 	switch (dir) {
 		case DIR_LEFT:

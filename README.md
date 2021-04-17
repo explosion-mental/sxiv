@@ -30,8 +30,10 @@ There are **two** options tho:
 
 I'm trying the first option because, even I don't use the bar, the text saying _Keyhandler..._ annoys me and makes me think its searching on the keyhandler when it's not needed.
 
-## Prefix-keys
+## [Count]
 Basically the way you say(by pressing) '1' + '0' and, for example, 'G' (which is for the "n" or last image) that makes it so you will go to the 10th image. say you type '5' and now you press '}', this would add '+5' to the Gamma and so on. Of couse not all commands have that but some of them do. I don't really use this 'feature', I actually notice it's a bit slow (It's probably just me don't worry) but you can toggle it on/off by uncommentting/commenting on config.mk. I don't know any other way to do this, hopefully it's not a terrible thing. Also you need to change the number keys on the key-handler so letters or whatever you want, to make no conflics.
+
+_Edit:_ How did I miss this? Of course this is vim inspired, denoted `count`
 
 _Note:_ I don't know how to call this sets of keys, on the code they called it prefix so thats what I'm calling it.
 

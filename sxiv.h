@@ -236,11 +236,11 @@ bool img_zoom_in(img_t*);
 bool img_zoom_out(img_t*);
 bool img_pos(img_t*, float, float);
 bool img_move(img_t*, float, float);
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 bool img_pan(img_t*, direction_t, int);
 #else
 bool img_pan(img_t*, direction_t);
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 bool img_pan_edge(img_t*, direction_t);
 void img_rotate(img_t*, degree_t);
 void img_flip(img_t*, flipdir_t);
