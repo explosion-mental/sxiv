@@ -47,9 +47,9 @@ extern int alternate;
 extern int markcnt;
 extern int markidx;
 
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 extern int prefix;
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 //extern bool extprefix;	/* Not needed! */
 
 /* Customs */
@@ -160,7 +160,7 @@ bool cg_first(arg_t _)
 
 bool cg_n_or_last(arg_t _)
 {
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	int n = prefix != 0 && prefix - 1 < filecnt ? prefix - 1 : filecnt - 1;
 	if (mode == MODE_IMAGE && fileidx != n) {
 		load_image(n);
@@ -173,7 +173,7 @@ bool cg_n_or_last(arg_t _)
 		return true;
 	} else if (mode == MODE_THUMB && fileidx != -1) {
 		fileidx = filecnt - 1;
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 		tns.dirty = true;
 		return true;
 	} else {
@@ -184,11 +184,11 @@ bool cg_n_or_last(arg_t _)
 bool cg_scroll_screen(arg_t dir)
 {
 	if (mode == MODE_IMAGE)
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 		return img_pan(&img, dir, -1);
 #else
 		return img_pan(&img, dir);
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 	else
 		return tns_scroll(&tns, dir, true);
 }
@@ -250,10 +250,10 @@ bool cg_navigate_marked(arg_t n)
 	int d, i;
 	int new = fileidx;
 
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	if (prefix > 0)
 		n *= prefix;
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 	d = n > 0 ? 1 : -1;
 	if (markcnt == 0)	/* Preventing crash if no image is mark */
 		return false;
@@ -284,11 +284,11 @@ bool cg_navigate_marked(arg_t n)
 
 bool cg_change_gamma(arg_t d)
 {
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	if (img_change_gamma(&img, d * (prefix > 0 ? prefix : 1))) {
 #else
 	if (img_change_gamma(&img, d)) {
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 		if (mode == MODE_THUMB)
 			tns.dirty = true;
 		return true;
@@ -299,10 +299,10 @@ bool cg_change_gamma(arg_t d)
 
 bool ci_navigate(arg_t n)
 {
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	if (prefix > 0)
 		n *= prefix;
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 	n += fileidx;
 	if (n < 0)
 		n = filecnt - 1;
@@ -331,10 +331,10 @@ bool ci_alternate(arg_t _)
 bool ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is activated?
 {
 	int frame;
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	if (prefix > 0)
 		d *= prefix;
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 //	return !img.multi.animate && img_frame_navigate(&img, d);
 	if (img.multi.cnt > 0) {
 		frame = (img.multi.sel + d) % img.multi.cnt;
@@ -366,11 +366,11 @@ bool ci_toggle_animation(arg_t _)
 
 bool ci_scroll(arg_t dir)
 {
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	return img_pan(&img, dir, prefix);
 #else
 	return img_pan(&img, dir);
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 }
 
 bool ci_scroll_to_edge(arg_t dir)
@@ -469,11 +469,11 @@ bool ci_drag(arg_t mode)
 
 bool ci_set_zoom(arg_t zl)
 {
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	return img_zoom(&img, (prefix ? prefix : zl) / 100.0);
 #else
 	return img_zoom(&img, zl / 100.0);
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 }
 
 bool ci_fit_to_win(arg_t sm)
@@ -508,13 +508,13 @@ bool ci_toggle_alpha(arg_t _)
 
 bool ci_slideshow(arg_t _)
 {
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	if (prefix > 0) {
 		img.ss.on = true;
 		img.ss.delay = prefix * 10;
 		set_timeout(slideshow, img.ss.delay * 100, true);
 	} else
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 	if (img.ss.on) {
 		img.ss.on = false;
 		reset_timeout(slideshow);
@@ -526,11 +526,11 @@ bool ci_slideshow(arg_t _)
 
 bool ct_move_sel(arg_t dir)
 {
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	return tns_move_selection(&tns, dir, prefix);
 #else
 	return tns_move_selection(&tns, dir, -1); //How to disable 'prefix' function on this command?
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 }
 
 bool ct_reload_all(arg_t _)

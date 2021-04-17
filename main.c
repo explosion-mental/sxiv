@@ -57,9 +57,9 @@ int filecnt, fileidx;
 int alternate;
 int markcnt;
 int markidx;
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 int prefix;
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 /*What is this?
 bool extprefix;
 bool inputting_prefix;
@@ -303,7 +303,7 @@ end:
 	win_draw(&win);
 	close_info();
 }
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 int evaluate_prefix()
 {
 	extern int prefix;
@@ -313,7 +313,7 @@ int evaluate_prefix()
 	else
 		return prefix;
 }
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 void load_image(int new)
 {
 	bool prev = new < fileidx;
@@ -625,7 +625,7 @@ void on_keypress(XKeyEvent *kev)
 	}
 	if (IsModifierKey(ksym))
 		return;
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 		/* I dont need this */
 	else if (extprefix) {
 		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
@@ -635,7 +635,7 @@ void on_keypress(XKeyEvent *kev)
 		prefix = prefix * 10 + (int) (key - '0');
 		return;
 	}
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 	else for (i = 0; i < ARRLEN(keys); i++) {
 		if (keys[i].ksym == ksym &&
 		    MODMASK(keys[i].mask | sh) == MODMASK(kev->state) &&
@@ -651,9 +651,9 @@ void on_keypress(XKeyEvent *kev)
 		run_key_handler(XKeysymToString(ksym), kev->state & ~sh);
 	if (dirty)
 		redraw();
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	prefix = 0;
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 }
 
 void on_buttonpress(XButtonEvent *bev)
@@ -724,9 +724,9 @@ void on_buttonpress(XButtonEvent *bev)
 				break;
 		}
 	}
-#ifdef ENABLE_PREFIX_KEYS
+#ifdef ENABLE_COUNT
 	prefix = 0;
-#endif /* ENABLE_PREFIX_KEYS */
+#endif /* ENABLE_COUNT */
 }
 
 const struct timespec ten_ms = {0, 10000000};
