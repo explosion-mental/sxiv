@@ -52,18 +52,18 @@ do
 		readlink -f "$file" | tr -d '\n' | xclip -selection clipboard &&
 		notify-send "$(readlink -f "$file") copied to clipboard📋" ;;
 	"C")	# Copy
-		[ -z "$dirs" ] && dirs="$(echo "$dirlist" | dmenu -l 5 -i -p "Copy file(s) to where?"  | sed "s|~|$HOME|g")"
+		[ -z "$dirs" ] && dirs="$(printf "$dirlist" | dmenu -l 5 -i -p "Copy file(s) to where?"  | sed "s|~|$HOME|g")"
 		[ -z "$dirs" ] && exit
 		[ ! -d "$dirs" ] && notify-send "$dirs is not a directory, cancelled." && exit
-		cp "$file" "$dirs" && notify-send -i "$dirs/$(noextname -f "$file")" "🚚 File copied" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
+		cp "$file" "$dirs" && notify-send -i "$dirs/$(noextname -f "$file")" "🚚 File copied" "$(noextname "$file") moved to $(printf "$dirs" | sed "s|$HOME|~|g")" &
 		xdotool key control+R	# reload sxiv
 		;;
 
         "v")	# Move an img
-		[ -z "$dirs" ] && dirs="$(echo "$dirlist" | dmenu -l 5 -i -p "Move file(s) to where?"  | sed "s|~|$HOME|g")"
+		[ -z "$dirs" ] && dirs="$(printf "$dirlist" | dmenu -l 5 -i -p "Move file(s) to where?"  | sed "s|~|$HOME|g")"
 		[ -z "$dirs" ] && exit
 		[ ! -d "$dirs" ] && notify-send "$dirs is not a directory, cancelled." && exit
-		mv "$file" "$dirs" && notify-send -i "$dirs/$(noextname -f "$file")" "🚚 File moved" "$(noextname "$file") moved to $(echo "$dirs" | sed "s|$HOME|~|g")" &
+		mv "$file" "$dirs" && notify-send -i "$dirs/$(noextname -f "$file")" "🚚 File moved" "$(noextname "$file") moved to $(printf "$dirs" | sed "s|$HOME|~|g")" &
 		xdotool key control+R	# reload sxiv
 		;;
         esac

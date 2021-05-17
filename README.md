@@ -72,8 +72,9 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - Is there a way to toggle square thumbnails?(I don't think I need/want this, just asking)
 - <s> version.h seems useless? </s> It was(?)✔️
 - When searching recursively (search all images on the directory and subdirs), images names on the bar are displayed. I would like to know on which directory am I (dirname), so how to show the subdirectory of the directory in which sxiv was called to be recursive.
-- <s>Make if stament (either '#if' or 'if') on a value or definition on the config.mk in order to make "prefix" (this is: let's say you pres '1' and '0' on the keyboard, sxiv default behaviour would be to wait for the next command. Let's say, again, after those two keys you press G (which is bounded to the command 'n_or_last') that means you would go '10' images "down". I don't really use this but I supposed that there are people who find this usefull, so I'm thinking a way to make that optional (user decides).</s> Done✅. You decide if you want that or not(which i believe is just there for some reason) See the `Prefix-keys`.
+- <s>Make if stament (either '#if' or 'if') on a value or definition on the config.mk in order to make `count` (this is: let's say you pres '1' and '0' on the keyboard, sxiv default behaviour would be to wait for the next command. Let's say, again, after those two keys you press G (which is bounded to the command 'n_or_last') that means you would go '10' images "down". I don't really use this but I supposed that there are people who find this usefull, so I'm thinking a way to make that optional (user decides).</s> Done✅. You decide if you want that or not(which i believe is just there for some reason) See the `[Count]`
 - How to make '#ifdef' on tns_move_selection, basically how to remove the 'cnt' var.
+- remove all position modificacion (zoom, rotation) RESTORE to default?, so reload image
 
 # Mayor improvements:
 - It feels more responsive after WM_HINTS patch
