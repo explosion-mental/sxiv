@@ -110,6 +110,9 @@ typedef enum {
 typedef struct {
 	const char *name; /* as given by user */
 	const char *path; /* always absolute */
+#ifdef HAVE_LIBCURL
+        const char *url;
+#endif /* HAVE_LIBCURL */
 	fileflags_t flags;
 } fileinfo_t;
 
@@ -369,6 +372,13 @@ int r_closedir(r_dir_t*);
 char* r_readdir(r_dir_t*, bool);
 int r_mkdir(char*);
 
+
+/* url.c */
+
+#ifdef HAVE_LIBCURL
+bool is_url(const char *url);
+int get_url(const char *url, char **out);
+#endif /* HAVE_LIBCURL */
 
 /* window.c */
 

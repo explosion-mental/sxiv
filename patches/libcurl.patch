@@ -1,0 +1,382 @@
+From 079988a38fb9df1a5c6cac4985a24c5aac8e74c2 Mon Sep 17 00:00:00 2001
+From: Louis Solofrizzo <lsolofrizzo@online.net>
+Date: Wed, 6 Nov 2019 01:05:55 +0100
+Subject: [PATCH] sxiv: Add support for remote links with libcurl
+
+THe binary now supports the displays of remote images with libcurl
+bindings. One can pass the url to the binary like a local file.
+HAVE_LIBCURL must be set as 1 in the Makefile in order to use this
+feature.
+
+Signed-off-by: Louis Solofrizzo <lsolofrizzo@online.net>
+---
+ Makefile  | 11 +++++--
+ main.c    | 77 +++++++++++++++++++++++++++++++++++++++++++---
+ options.c |  4 +++
+ sxiv.1    |  4 ++-
+ sxiv.h    |  3 ++
+ url.c     | 92 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ url.h     | 24 +++++++++++++++
+ 7 files changed, 207 insertions(+), 8 deletions(-)
+ create mode 100644 url.c
+ create mode 100644 url.h
+
+diff --git a/Makefile b/Makefile
+index da6c209..8a27510 100644
+--- a/Makefile
++++ b/Makefile
+@@ -15,20 +15,27 @@ HAVE_GIFLIB = 1
+ # enable features requiring libexif (-lexif)
+ HAVE_LIBEXIF = 1
+
++# enable features requiring libcurl (-lcurl)
++HAVE_LIBCURL = 1
++
+ cflags = -std=c99 -Wall -pedantic $(CFLAGS)
+ cppflags = -I. $(CPPFLAGS) -D_XOPEN_SOURCE=700 \
+   -DHAVE_GIFLIB=$(HAVE_GIFLIB) -DHAVE_LIBEXIF=$(HAVE_LIBEXIF) \
++  -DHAVE_LIBCURL=$(HAVE_LIBCURL) \
+   -I/usr/include/freetype2 -I$(PREFIX)/include/freetype2
+
+ lib_exif_0 =
+ lib_exif_1 = -lexif
+ lib_gif_0 =
+ lib_gif_1 = -lgif
++lib_curl_0 =
++lib_curl_1 = -lcurl
+ ldlibs = $(LDLIBS) -lImlib2 -lX11 -lXft -lfontconfig \
+-  $(lib_exif_$(HAVE_LIBEXIF)) $(lib_gif_$(HAVE_GIFLIB))
++  $(lib_exif_$(HAVE_LIBEXIF)) $(lib_gif_$(HAVE_GIFLIB)) \
++  ${lib_curl_$(HAVE_LIBCURL)}
+
+ objs = autoreload_$(AUTORELOAD).o commands.o image.o main.o options.o \
+-  thumbs.o util.o window.o
++  thumbs.o util.o window.o url.o
+
+ all: sxiv
+
+diff --git a/main.c b/main.c
+index 593e1c1..658358b 100644
+--- a/main.c
++++ b/main.c
+@@ -19,6 +19,7 @@
+ #include "sxiv.h"
+ #define _MAPPINGS_CONFIG
+ #include "config.h"
++#include "url.h"
+
+ #include <stdlib.h>
+ #include <string.h>
+@@ -58,6 +59,8 @@ int filecnt, fileidx;
+ int alternate;
+ int markcnt;
+ int markidx;
++char **rmfiles;
++int rmcnt, rmidx;
+
+ int prefix;
+ bool extprefix;
+@@ -93,15 +96,22 @@ cursor_t imgcursor[3] = {
+ 	CURSOR_ARROW, CURSOR_ARROW, CURSOR_ARROW
+ };
+
++
++CLEANUP void tmp_unlink(char **rmfiles, int n) {
++	while (n--)
++		unlink(rmfiles[n]);
++}
++
+ void cleanup(void)
+ {
++	tmp_unlink(rmfiles, rmidx);
+ 	img_close(&img, false);
+ 	arl_cleanup(&arl);
+ 	tns_free(&tns);
+ 	win_close(&win);
+ }
+
+-void check_add_file(char *filename, bool given)
++static void internal_check_add_file(char *filename, char *url, bool given)
+ {
+ 	char *path;
+
+@@ -124,11 +134,34 @@ void check_add_file(char *filename, bool given)
+
+ 	files[fileidx].name = estrdup(filename);
+ 	files[fileidx].path = path;
++#if HAVE_LIBCURL == 1
++	if (url != NULL)
++	{
++		files[fileidx].url = estrdup(url);
++		if (rmidx == rmcnt) {
++			rmcnt *= 2;
++			rmfiles = erealloc(rmfiles, rmcnt * sizeof(char*));
++			memset(&rmfiles[rmcnt/2], 0, rmcnt/2 * sizeof(char*));
++		}
++		rmfiles[rmidx++] = path;
++	}
++#endif /* HAVE_LIBCURL */
+ 	if (given)
+ 		files[fileidx].flags |= FF_WARN;
+ 	fileidx++;
+ }
+
++
++void check_add_file(char *filename, bool given)
++{
++	internal_check_add_file(filename, NULL, given);
++}
++
++void check_add_url(char *filename, char *url, bool given)
++{
++	internal_check_add_file(filename, url, given);
++}
++
+ void remove_file(int n, bool manual)
+ {
+ 	if (n < 0 || n >= filecnt)
+@@ -365,8 +398,17 @@ void update_info(void)
+ 			bar_put(l, "Loading... %0*d", fw, tns.loadnext + 1);
+ 		else if (tns.initnext < filecnt)
+ 			bar_put(l, "Caching... %0*d", fw, tns.initnext + 1);
+-		else
+-			strncpy(l->buf, files[fileidx].name, l->size);
++		else {
++#if HAVE_LIBCURL == 1
++			if (files[fileidx].url != NULL) {
++				strncpy(l->buf, files[fileidx].url, l->size);
++			} else {
++#endif /* HAVE_LIBCURL */
++				strncpy(l->buf, files[fileidx].name, l->size);
++#if HAVE_LIBCURL == 1
++			}
++#endif /* HAVE_LIBCURL */
++		}
+ 		bar_put(r, "%s%0*d/%d", mark, fw, fileidx + 1, filecnt);
+ 	} else {
+ 		bar_put(r, "%s", mark);
+@@ -384,8 +426,17 @@ void update_info(void)
+ 			bar_put(r, "%0*d/%d" BAR_SEP, fn, img.multi.sel + 1, img.multi.cnt);
+ 		}
+ 		bar_put(r, "%0*d/%d", fw, fileidx + 1, filecnt);
+-		if (info.f.err)
+-			strncpy(l->buf, files[fileidx].name, l->size);
++		if (info.f.err) {
++#if HAVE_LIBCURL == 1
++			if (files[fileidx].url != NULL) {
++				strncpy(l->buf, files[fileidx].url, l->size);
++			} else {
++#endif /* HAVE_LIBCURL */
++				strncpy(l->buf, files[fileidx].name, l->size);
++#if HAVE_LIBCURL == 1
++			}
++#endif /* HAVE_LIBCURL */
++		}
+ 	}
+ }
+
+@@ -853,6 +904,9 @@ int main(int argc, char **argv)
+ 	files = emalloc(filecnt * sizeof(*files));
+ 	memset(files, 0, filecnt * sizeof(*files));
+ 	fileidx = 0;
++	rmcnt = 16;
++	rmfiles = emalloc(rmcnt * sizeof(char*));
++	rmidx = 0;
+
+ 	if (options->from_stdin) {
+ 		n = 0;
+@@ -869,6 +923,19 @@ int main(int argc, char **argv)
+ 		filename = options->filenames[i];
+
+ 		if (stat(filename, &fstats) < 0) {
++#if HAVE_LIBCURL == 1
++			if (is_url(filename)) {
++				char *tmp;
++
++				if (get_url(filename, &tmp) == 0) {
++					check_add_url(tmp, filename, true);
++					free(tmp);
++					continue;
++				} else {
++					error(0, errno, "%s", filename);
++				}
++			}
++#endif /* HAVE_LIBCURL */
+ 			error(0, errno, "%s", filename);
+ 			continue;
+ 		}
+diff --git a/options.c b/options.c
+index de02407..fb0ab50 100644
+--- a/options.c
++++ b/options.c
+@@ -32,7 +32,11 @@ void print_usage(void)
+ {
+ 	printf("usage: sxiv [-abcfhiopqrtvZ] [-A FRAMERATE] [-e WID] [-G GAMMA] "
+ 	       "[-g GEOMETRY] [-N NAME] [-n NUM] [-S DELAY] [-s MODE] [-z ZOOM] "
++#if HAVE_LIBCURL == 1
++	       "FILES / URLS...\n");
++#else
+ 	       "FILES...\n");
++#endif /* HAVE_LIBCURL */
+ }
+
+ void print_version(void)
+diff --git a/sxiv.1 b/sxiv.1
+index eff3d66..b50594f 100644
+--- a/sxiv.1
++++ b/sxiv.1
+@@ -22,7 +22,9 @@ sxiv \- Simple X Image Viewer
+ .IR MODE ]
+ .RB [ \-z
+ .IR ZOOM ]
+-.IR FILE ...
++.IR FILE
++.RB /
++.IR URL ...
+ .SH DESCRIPTION
+ sxiv is a simple image viewer for X.
+ .P
+diff --git a/sxiv.h b/sxiv.h
+index 707eba7..e9a0cc9 100644
+--- a/sxiv.h
++++ b/sxiv.h
+@@ -118,6 +118,9 @@ typedef enum {
+ typedef struct {
+ 	const char *name; /* as given by user */
+ 	const char *path; /* always absolute */
++#ifdef HAVE_LIBCURL
++        const char *url;
++#endif /* HAVE_LIBCURL */
+ 	fileflags_t flags;
+ } fileinfo_t;
+
+diff --git a/url.c b/url.c
+new file mode 100644
+index 0000000..a65cec7
+--- /dev/null
++++ b/url.c
+@@ -0,0 +1,92 @@
++/* Copyright 2011-2013 Bert Muennich
++ *
++ * This file is part of sxiv.
++ *
++ * sxiv is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published
++ * by the Free Software Foundation; either version 2 of the License,
++ * or (at your option) any later version.
++ *
++ * sxiv is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#if HAVE_LIBCURL == 1
++
++#include "sxiv.h"
++
++#include <stdlib.h>
++#include <errno.h>
++#include <stdio.h>
++#include <unistd.h>
++#include <curl/curl.h>
++
++bool is_url(const char *url) {
++	CURLU       *h = curl_url();
++	int         rc;
++
++	rc = curl_url_set(h, CURLUPART_URL, url, 0);
++	curl_url_cleanup(h);
++	return rc == 0;
++}
++
++static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
++	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
++	return written;
++}
++
++int get_url(const char *url, char **out) {
++	CURL        *curl_handle;
++	CURLcode    ret;
++	char        tmp[] = "/tmp/sxiv-XXXXXX";
++	FILE        *file = NULL;
++	int         fd;
++
++	fd = mkstemp(tmp);
++	if (fd == -1)
++		return -1;
++	close(fd);
++
++	file = fopen(tmp, "wb");
++
++	if (file == NULL) {
++		return -1;
++	}
++
++	*out = strdup(tmp);
++	if (*out == NULL) {
++		return -1;
++	}
++
++	curl_global_init(CURL_GLOBAL_ALL);
++	curl_handle = curl_easy_init();
++
++	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
++	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
++	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, file);
++
++	ret = curl_easy_perform(curl_handle);
++
++	if (ret != CURLE_OK) {
++		printf("Error: %s\n", curl_easy_strerror(ret));
++		return -1;
++	}
++
++	fclose(file);
++	curl_easy_cleanup(curl_handle);
++	curl_global_cleanup();
++
++	return 0;
++}
++
++#else
++
++/* Don't raise warnings */
++void __useless(void) {}
++
++#endif /* HAVE_LIBCURL */
+diff --git a/url.h b/url.h
+new file mode 100644
+index 0000000..2d25481
+--- /dev/null
++++ b/url.h
+@@ -0,0 +1,24 @@
++/* Copyright 2011-2013 Bert Muennich
++ *
++ * This file is part of sxiv.
++ *
++ * sxiv is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published
++ * by the Free Software Foundation; either version 2 of the License,
++ * or (at your option) any later version.
++ *
++ * sxiv is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#ifdef HAVE_LIBCURL
++
++bool is_url(const char *url);
++int get_url(const char *url, char **out);
++
++#endif /* HAVE_LIBCURL */
+--
+2.25.2

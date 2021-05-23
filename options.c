@@ -30,7 +30,12 @@ void print_usage(void)
 {
 	printf("usage: sxiv [-abcfhiopqrtvZ] [-A framerate] [-e wid] [-G gamma] "
 	       "[-g geometry] [-N name] [-n num] [-S delay] [-s mode] [-z zoom] "
-	       "FILES...\n");
+	//       "FILES...\n");
+#if HAVE_LIBCURL
+	       "FILES / URLS...\n");
+#else
+ 	       "FILES...\n");
+#endif /* HAVE_LIBCURL */
 }
 
 void print_version(void)
