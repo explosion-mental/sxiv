@@ -6,7 +6,7 @@ static const char fgcolor[]   = "#444444";	/* bar */
 static const char markcolor[] = "#bbbbbb";	/* mark */
 static const char selcolor[]  = "#eeeeee";	/* highlight */
 static const char leterfont[] = "unifont-9";	//multiple fonts?
-static const int topbar       = 1;		/* 0 means bottom bar (default) */
+static const int  topbar       = 0;		/* 0 means bottom bar (default) */
 
 /* global */
 enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
@@ -32,7 +32,6 @@ static const int thumb_sizes[] = {
 	/* thumbnail sizes in pixels (width == height) */
 	32, 64, 116, 145, 181, 286, 361, 412
 };
-//static int squarethumb = 1; /* no constant yells compilation error, but I need this to make it toggleABLE (on a command) */
 
 static const keymap_t keys[] = {
 	/* modifier(s)    key               function              argument */

@@ -57,6 +57,12 @@ int filecnt, fileidx;
 int alternate;
 int markcnt;
 int markidx;
+
+#if HAVE_LIBCURL
+char **rmfiles;
+int rmcnt, rmidx;
+#endif /* HAVE_LIBCURL */
+
 #ifdef ENABLE_COUNT
 int prefix;
 #endif /* ENABLE_COUNT */
@@ -95,8 +101,19 @@ cursor_t imgcursor[3] = {
 	CURSOR_ARROW, CURSOR_ARROW, CURSOR_ARROW
 };
 
+#if HAVE_LIBCURL
+CLEANUP void tmp_unlink(char **rmfiles, int n) {
+	while (n--)
+		unlink(rmfiles[n]);
+}
+#endif /* HAVE_LIBCURL */
+
+
 void cleanup(void)
 {
+#if HAVE_LIBCURL
+	tmp_unlink(rmfiles, rmidx);
+#endif /* HAVE_LIBCURL */
 	img_close(&img, false);
 	arl_cleanup(&arl);
 	tns_free(&tns);
@@ -112,7 +129,11 @@ char *check_and_get_path(char *filename)
 	return(path);
 }
 
+#if HAVE_LIBCURL
+static void internal_check_add_file(char *filename, char *url, bool given)
+#else
 void check_add_file(char *filename, bool given)
+#endif /* HAVE_LIBCURL */
 {
 	char *path;
 	int i;
@@ -142,10 +163,35 @@ void check_add_file(char *filename, bool given)
 
 	files[fileidx].name = estrdup(filename);
 	files[fileidx].path = path;
+#if HAVE_LIBCURL
+	if (url != NULL)
+	{
+		files[fileidx].url = estrdup(url);
+		if (rmidx == rmcnt) {
+			rmcnt *= 2;
+			rmfiles = erealloc(rmfiles, rmcnt * sizeof(char*));
+			memset(&rmfiles[rmcnt/2], 0, rmcnt/2 * sizeof(char*));
+		}
+		rmfiles[rmidx++] = path;
+	}
+#endif /* HAVE_LIBCURL */
 	if (given)
 		files[fileidx].flags |= FF_WARN;
 	fileidx++;
 }
+
+
+#if HAVE_LIBCURL
+void check_add_file(char *filename, bool given)
+{
+	internal_check_add_file(filename, NULL, given);
+}
+
+void check_add_url(char *filename, char *url, bool given)
+{
+	internal_check_add_file(filename, url, given);
+}
+#endif /* HAVE_LIBCURL */
 
 void remove_file(int n, bool manual)
 {
@@ -400,9 +446,23 @@ void update_info(void)
 		strncpy(l->buf, basename((char *)files[fileidx].name), l->size);}
 			//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt, "Caching... %0*d", fw, tns.initnext + 1);
 		else {	//Show only the image basename() in titlebar, not the entire path(./)
+
+#if HAVE_LIBCURL
+			if (files[fileidx].url != NULL) {
+				strncpy(l->buf, files[fileidx].url, l->size);
+			} else {
+#endif /* HAVE_LIBCURL */
+				//strncpy(l->buf, files[fileidx].name, l->size);
 			strncpy(l->buf, basename((char *)files[fileidx].name), l->size);
 			bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+#if HAVE_LIBCURL
 			}
+#endif /* HAVE_LIBCURL */
+		}
+
+//			strncpy(l->buf, basename((char *)files[fileidx].name), l->size);
+//			bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt);
+//			}
 	} else {//show marked imgs on bar(only if there's at least one image marked)
 		//But this doens't update...?
 		if (markcnt != 0)
@@ -421,10 +481,98 @@ void update_info(void)
 			bar_put(r, "%0*d/%d" BAR_SEP, fn, img.multi.sel + 1, img.multi.cnt);
 		}
 		bar_put(r, "%0*d/%d", fw, fileidx + 1, filecnt);
-		if (info.f.err)
-			strncpy(l->buf, files[fileidx].name, l->size);
+//		if (info.f.err)
+		//	strncpy(l->buf, files[fileidx].name, l->size);
+		if (info.f.err) {
+#if HAVE_LIBCURL
+			if (files[fileidx].url != NULL) {
+				strncpy(l->buf, files[fileidx].url, l->size);
+			} else {
+#endif /* HAVE_LIBCURL */
+				strncpy(l->buf, files[fileidx].name, l->size);
+#if HAVE_LIBCURL
+			}
+#endif /* HAVE_LIBCURL */
+		}
 	}
 }
+
+
+/* url.c */
+#if HAVE_LIBCURL
+//#include "sxiv.h"
+//
+//#include <stdlib.h>
+//#include <errno.h>
+//#include <stdio.h>
+//#include <unistd.h>
+#include <curl/curl.h>
+
+bool is_url(const char *url) {
+	CURLU       *h = curl_url();
+	int         rc;
+
+	rc = curl_url_set(h, CURLUPART_URL, url, 0);
+	curl_url_cleanup(h);
+	return rc == 0;
+}
+
+static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
+	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+	return written;
+}
+
+int get_url(const char *url, char **out) {
+	CURL        *curl_handle;
+	CURLcode    ret;
+	char        tmp[] = "/tmp/sxiv-XXXXXX";
+	FILE        *file = NULL;
+	int         fd;
+
+	fd = mkstemp(tmp);
+	if (fd == -1)
+		return -1;
+	close(fd);
+
+	file = fopen(tmp, "wb");
+
+	if (file == NULL) {
+		return -1;
+	}
+
+	*out = strdup(tmp);
+	if (*out == NULL) {
+		return -1;
+	}
+
+	curl_global_init(CURL_GLOBAL_ALL);
+	curl_handle = curl_easy_init();
+
+	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, file);
+
+	ret = curl_easy_perform(curl_handle);
+
+	if (ret != CURLE_OK) {
+		printf("Error: %s\n", curl_easy_strerror(ret));
+		return -1;
+	}
+
+	fclose(file);
+	curl_easy_cleanup(curl_handle);
+	curl_global_cleanup();
+
+	return 0;
+}
+
+//#else
+
+/* Don't raise warnings */
+//void __useless(void) {}
+
+#endif /* HAVE_LIBCURL */
+
 
 int ptr_third_x(void)
 {
@@ -901,6 +1049,11 @@ int main(int argc, char **argv)
 	files = emalloc(filecnt * sizeof(*files));
 	memset(files, 0, filecnt * sizeof(*files));
 	fileidx = 0;
+#if HAVE_LIBCURL
+	rmcnt = 16;
+	rmfiles = emalloc(rmcnt * sizeof(char*));
+	rmidx = 0;
+#endif /* HAVE_LIBCURL */
 
 	if (options->from_stdin) {
 		n = 0;
@@ -917,6 +1070,19 @@ int main(int argc, char **argv)
 		filename = options->filenames[i];
 
 		if (stat(filename, &fstats) < 0) {
+#if HAVE_LIBCURL
+			if (is_url(filename)) {
+				char *tmp;
+
+				if (get_url(filename, &tmp) == 0) {
+					check_add_url(tmp, filename, true);
+					free(tmp);
+					continue;
+				} else {
+					error(0, errno, "%s", filename);
+				}
+			}
+#endif /* HAVE_LIBCURL */
 			error(0, errno, "%s", filename);
 			continue;
 		}
