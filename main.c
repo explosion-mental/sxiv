@@ -498,23 +498,18 @@ void update_info(void)
 }
 
 
-/* url.c */
 #if HAVE_LIBCURL
-//#include "sxiv.h"
-//
-//#include <stdlib.h>
-//#include <errno.h>
-//#include <stdio.h>
-//#include <unistd.h>
 #include <curl/curl.h>
 
 bool is_url(const char *url) {
-	CURLU       *h = curl_url();
-	int         rc;
-
-	rc = curl_url_set(h, CURLUPART_URL, url, 0);
-	curl_url_cleanup(h);
-	return rc == 0;
+	if ((!strncmp(url, "http://", 7))
+			|| (!strncmp(url, "https://", 8))
+			|| (!strncmp(url, "gopher://", 9))
+			|| (!strncmp(url, "gophers://", 10))
+			|| (!strncmp(url, "ftp://", 6))
+			|| (!strncmp(url, "file://", 7)))
+		return 1;
+	return 0;
 }
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -523,11 +518,11 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 }
 
 int get_url(const char *url, char **out) {
-	CURL        *curl_handle;
-	CURLcode    ret;
-	char        tmp[] = "/tmp/sxiv-XXXXXX";
-	FILE        *file = NULL;
-	int         fd;
+	CURL *curl_handle;
+	CURLcode ret;
+	char tmp[] = "/tmp/sxiv-XXXXXX";
+	FILE *file = NULL;
+	int fd;
 
 	fd = mkstemp(tmp);
 	if (fd == -1)
@@ -547,6 +542,10 @@ int get_url(const char *url, char **out) {
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
+	if (!curl_handle) {
+		printf("open url: libcurl initialization failure");
+		return 1;
+	}
 
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
@@ -556,7 +555,11 @@ int get_url(const char *url, char **out) {
 
 	if (ret != CURLE_OK) {
 		printf("Error: %s\n", curl_easy_strerror(ret));
-		return -1;
+		/* TODO: remove the tmp file when and ONLY when sxiv fails
+		   to open the image */
+		//close(fd);
+		//free(file);
+		exit(EXIT_FAILURE);
 	}
 
 	fclose(file);
@@ -565,12 +568,6 @@ int get_url(const char *url, char **out) {
 
 	return 0;
 }
-
-//#else
-
-/* Don't raise warnings */
-//void __useless(void) {}
-
 #endif /* HAVE_LIBCURL */
 
 
