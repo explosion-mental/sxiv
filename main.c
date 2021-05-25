@@ -520,17 +520,17 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 }
 
 int get_url(const char *url, char **out) {
-	CURL *curl_handle;
+	CURL *curl;
 	CURLcode ret;
-	char tmp[] = "/tmp/sxiv-XXXXXX";
+	char tmp[1024] = { 0 };
 	FILE *file = NULL;
-	int fd;
+	size_t j;
 
-	fd = mkstemp(tmp);
-	if (fd == -1)
-		return -1;
-	close(fd);
+	for (j = strlen(url); j != 0 && url[j] != '/'; j--);
+	if (j != 0)
+		j++;
 
+	snprintf(tmp, sizeof(tmp), "/tmp/sxiv-%s", url + j);
 	file = fopen(tmp, "wb");
 
 	if (file == NULL)
@@ -541,29 +541,25 @@ int get_url(const char *url, char **out) {
 		return -1;
 
 	curl_global_init(CURL_GLOBAL_ALL);
-	curl_handle = curl_easy_init();
-	if (!curl_handle) {
+	curl = curl_easy_init();
+	/*if (!curl_handle) {
 		printf("open url: libcurl initialization failure");
 		return 1;
-	}
+	}*/
 
-	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, file);
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
 
-	ret = curl_easy_perform(curl_handle);
+	ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK) {
-		printf("Error: %s\n", curl_easy_strerror(ret));
-		/* TODO: remove the tmp file when and ONLY when sxiv fails
-		   to open the image */
-		//close(fd);
-		//free(file);
+		printf("Curl Error: %s\n", curl_easy_strerror(ret));
 		return -1;
 	}
 
 	fclose(file);
-	curl_easy_cleanup(curl_handle);
+	curl_easy_cleanup(curl);
 	curl_global_cleanup();
 
 	return 0;
