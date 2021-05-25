@@ -526,11 +526,13 @@ int get_url(const char *url, char **out) {
 	FILE *file = NULL;
 	size_t j;
 
+	/*name*/
 	for (j = strlen(url); j != 0 && url[j] != '/'; j--);
 	if (j != 0)
 		j++;
-
 	snprintf(tmp, sizeof(tmp), "/tmp/sxiv-%s", url + j);
+
+	//open
 	file = fopen(tmp, "wb");
 
 	if (file == NULL)

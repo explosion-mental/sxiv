@@ -21,6 +21,7 @@ xbps-install imlib2-devel libexif-devel giflib-devel
 * With Q you quit sxiv and output the name of the image that was selected
 * Navigate on random image
 * Scale to fill the window
+* Stream images ( `sxiv 'https://raw.githubusercontent.com/explosion-mental/sxiv/main/sxiv.png'` )
 
 ## Key Handler
 With the patch I made (someone who knows diff and all that please make it correct), there's no need for "prefix-key" to execute a command on keyhandler, pretty stuff!
@@ -83,3 +84,4 @@ This is really the best image viewer and prob the fastest! After my changes it's
 - Not an improment but for my standards on understadings: I make a config.mk _just like st, dwm and dmenu_ so you can configure it I guess, also the autoreload_inotify/nop was annoying so I combine them into **one** file, if you want the autoreload before it add it on the Makefile. Because of this 'suckless' style, the compile messages are alike (I'm debating this, the initial messages where really clean and I like them, suggest something maybe?)
 - Saner config.h (Mar 24)
 - On/off Prefix-keys on *some* commands(Mar 25)
+- Streaming url images (May 25)
