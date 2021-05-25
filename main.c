@@ -349,6 +349,7 @@ end:
 	win_draw(&win);
 	close_info();
 }
+
 #ifdef ENABLE_COUNT
 int evaluate_prefix()
 {
@@ -360,6 +361,7 @@ int evaluate_prefix()
 		return prefix;
 }
 #endif /* ENABLE_COUNT */
+
 void load_image(int new)
 {
 	bool prev = new < fileidx;
@@ -531,14 +533,12 @@ int get_url(const char *url, char **out) {
 
 	file = fopen(tmp, "wb");
 
-	if (file == NULL) {
+	if (file == NULL)
 		return -1;
-	}
 
 	*out = strdup(tmp);
-	if (*out == NULL) {
+	if (*out == NULL)
 		return -1;
-	}
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl_handle = curl_easy_init();
@@ -559,7 +559,7 @@ int get_url(const char *url, char **out) {
 		   to open the image */
 		//close(fd);
 		//free(file);
-		exit(EXIT_FAILURE);
+		return -1;
 	}
 
 	fclose(file);

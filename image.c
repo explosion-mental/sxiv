@@ -294,11 +294,13 @@ Imlib_Image img_open(const fileinfo_t *file)
 {
 	struct stat st;
 	Imlib_Image im = NULL;
+	/* Shows actual error code */
+	Imlib_Load_Error err = 0;
 
 	if (access(file->path, R_OK) == 0 &&
 	    stat(file->path, &st) == 0 && S_ISREG(st.st_mode))
 	{
-		im = imlib_load_image(file->path);
+		im = imlib_load_image_with_error_return(file->path, &err);
 		if (im != NULL) {
 			imlib_context_set_image(im);
 			if (imlib_image_get_data_for_reading_only() == NULL) {
@@ -308,7 +310,7 @@ Imlib_Image img_open(const fileinfo_t *file)
 		}
 	}
 	if (im == NULL && (file->flags & FF_WARN))
-		error(0, 0, "%s: Error opening image", file->name);
+		error(0, 0, "%s: Error opening image (Imlib_Load_Error = %d)", file->name, err);
 	return im;
 }
 
