@@ -519,6 +519,7 @@ bool ci_slideshow(arg_t _)
 		img.ss.on = false;
 		reset_timeout(slideshow);
 	} else {
+//else if { img.ss.on.rand = true; ..
 		img.ss.on = true;
 	}
 	return true;
@@ -544,14 +545,13 @@ bool ct_reload_all(arg_t _)
 	/* Customs */
 bool ci_random_navigate(arg_t _)
 {
-  int n = rand() % filecnt;
+	int n = rand() % filecnt;
 
-  if (n != fileidx) {
-    load_image(n);
-    return true;
-  } else {
-    return false;
-  }
+	if (n != fileidx) {
+		load_image(n);
+		return true;
+	} else
+		return false;
 }
 
 bool cg_dmenu_output(arg_t _)

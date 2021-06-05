@@ -1,5 +1,7 @@
 # sxiv
 My build of sxiv
+
+_The "My build" is only for keybindings, this is meant to be as standard as possible_
 ![Image](sxiv.png "sxiv")
 
 # Instalation
