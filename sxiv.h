@@ -40,7 +40,7 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
-#define ARRLEN(a)		(sizeof(a) / sizeof((a)[0]))
+#define ARRLEN(a)		(sizeof(a) / sizeof a[0])
 #define STREQ(s1,s2)		(strcmp((s1), (s2)) == 0)
 #define TV_DIFF(t1,t2)		(((t1)->tv_sec  - (t2)->tv_sec ) * 1000 + \
 				 ((t1)->tv_usec - (t2)->tv_usec) / 1000)
