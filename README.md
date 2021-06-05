@@ -36,18 +36,20 @@ I'm trying the first option because, even I don't use the bar, the text saying _
 ## [Count]
 Basically the way you say(by pressing) '1' + '0' and, for example, 'G' (which is for the "n" or last image) that makes it so you will go to the 10th image. say you type '5' and now you press '}', this would add '+5' to the Gamma and so on. Of couse not all commands have that but some of them do. I don't really use this 'feature', I actually notice it's a bit slow (It's probably just me don't worry) but you can toggle it on/off by uncommentting/commenting on config.mk. I don't know any other way to do this, hopefully it's not a terrible thing. Also you need to change the number keys on the key-handler so letters or whatever you want, to make no conflics.
 
+_Note:_ I don't know how to call this sets of keys, on the code they called it prefix so thats what I'm calling it.
+
 _Edit:_ How did I miss this? Of course this is vim inspired, denoted `count`
 
-_Note:_ I don't know how to call this sets of keys, on the code they called it prefix so thats what I'm calling it.
 
 ## Patches
 Just look them up, most of them aren't on this build.
 
 # Fork
-I use someone's fork which I don't remember why I did it, but his fork I believe is on sxiv.1
-Escape key can be mapped in config.h., it is now `Sxiv - [Directory's basename]`... go to [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) for more
+I use someone's fork which I don't remember why I did it.
 
-_Note:_ after looking for all the forks I could find, the [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) was really logic in the code that has been changed. Of course I would like more things that's why this exist, so thanks to that repo.
+This includes:
+
+_Escape key can be mapped in config.h., it is now `Sxiv - [Directory's basename]`..._ go to [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) for more.
 
 # Help...
 This is really the best image viewer and prob the fastest! After my changes it's even better for me. I have one issue
