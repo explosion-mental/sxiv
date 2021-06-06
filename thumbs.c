@@ -34,7 +34,8 @@ Imlib_Image img_open(const fileinfo_t*);
 
 static char *cache_dir;
 
-char* tns_cache_filepath(const char *filepath)
+char *
+tns_cache_filepath(const char *filepath)
 {
 	size_t len;
 	char *cfile = NULL;
@@ -51,7 +52,8 @@ char* tns_cache_filepath(const char *filepath)
 	return cfile;
 }
 
-Imlib_Image tns_cache_load(const char *filepath, bool *outdated)
+Imlib_Image
+tns_cache_load(const char *filepath, bool *outdated)
 {
 	char *cfile;
 	struct stat cstats, fstats;
@@ -72,7 +74,8 @@ Imlib_Image tns_cache_load(const char *filepath, bool *outdated)
 	return im;
 }
 
-void tns_cache_write(Imlib_Image im, const char *filepath, bool force)
+void
+tns_cache_write(Imlib_Image im, const char *filepath, bool force)
 {
 	char *cfile, *dirend;
 	struct stat cstats, fstats;
@@ -117,7 +120,8 @@ end:
 	}
 }
 
-void tns_clean_cache(tns_t *tns)
+void
+tns_clean_cache(tns_t *tns)
 {
 	int dirlen;
 	char *cfile, *filename;
@@ -142,8 +146,8 @@ void tns_clean_cache(tns_t *tns)
 }
 
 
-void tns_init(tns_t *tns, fileinfo_t *files, const int *cnt, int *sel,
-              win_t *win)
+void
+tns_init(tns_t *tns, fileinfo_t *files, const int *cnt, int *sel, win_t *win)
 {
 	int len;
 	const char *homedir, *dsuffix = "";
@@ -179,7 +183,8 @@ void tns_init(tns_t *tns, fileinfo_t *files, const int *cnt, int *sel,
 	}
 }
 
-CLEANUP void tns_free(tns_t *tns)
+CLEANUP void
+tns_free(tns_t *tns)
 {
 	int i;
 
@@ -199,7 +204,8 @@ CLEANUP void tns_free(tns_t *tns)
 }
 
 
-Imlib_Image tns_scale_down(Imlib_Image im, int dim)
+Imlib_Image
+tns_scale_down(Imlib_Image im, int dim)
 {
 	int w, h;
 	imlib_context_set_image(im);
@@ -213,9 +219,11 @@ Imlib_Image tns_scale_down(Imlib_Image im, int dim)
 
 		if (dim < w || dim < h) {
 			imlib_context_set_anti_alias(1);
-			im = imlib_create_cropped_scaled_image(x, y, s, s, dim, dim);
+			im = imlib_create_cropped_scaled_image(x, y, s, s,
+								dim, dim);
 			if (im == NULL)
 				error(EXIT_FAILURE, ENOMEM, NULL);
+
 			imlib_free_image_and_decache();
 		}
 	} else {
@@ -228,55 +236,18 @@ Imlib_Image tns_scale_down(Imlib_Image im, int dim)
 		if (z < 1.0) {
 			imlib_context_set_anti_alias(1);
 			im = imlib_create_cropped_scaled_image(0, 0, w, h,
-			                                       MAX(z * w, 1), MAX(z * h, 1));
+			                                	MAX(z * w, 1), MAX(z * h, 1));
 			if (im == NULL)
 				error(EXIT_FAILURE, ENOMEM, NULL);
+
 			imlib_free_image_and_decache();
 		}
 	}
 	return im;
 }
-//ORIGINAL
-/*
-Imlib_Image tns_scale_down(Imlib_Image im, int dim)
-{
-	int w, h;
-#ifndef SQUARETHUMBS
-		float z, zw, zh;
-#endif
-	imlib_context_set_image(im);
-	w = imlib_image_get_width();
-	h = imlib_image_get_height();
-#ifndef SQUARETHUMBS
-	zw = (float) dim / (float) w;
-	zh = (float) dim / (float) h;
-	z = MIN(zw, zh);
-	z = MIN(z, 1.0);
-	if (z < 1.0) {
-#endif
 
-#ifdef SQUARETHUMBS
-		int x = (w < h) ? 0 : (w - h) / 2;
-		int y = (w > h) ? 0 : (h - w) / 2;
-		int s = (w < h) ? w : h;
-		if (dim < w || dim < h) {
-#endif
-		imlib_context_set_anti_alias(1);
-#ifndef SQUARETHUMBS
-		im = imlib_create_cropped_scaled_image(0, 0, w, h,
-		                                       MAX(z * w, 1), MAX(z * h, 1));
-#endif
-#ifdef SQUARETHUMBS
-		im = imlib_create_cropped_scaled_image(x, y, s, s, dim, dim);
-#endif
-		if (im == NULL)
-			error(EXIT_FAILURE, ENOMEM, NULL);
-		imlib_free_image_and_decache();
-	}
-	return im;
-}
-*/
-bool tns_load(tns_t *tns, int n, bool force, bool cache_only)
+bool
+tns_load(tns_t *tns, int n, bool force, bool cache_only)
 {
 	int maxwh = thumb_sizes[ARRLEN(thumb_sizes) - 1];
 	bool cache_hit = false;
@@ -410,7 +381,8 @@ bool tns_load(tns_t *tns, int n, bool force, bool cache_only)
 	return true;
 }
 
-void tns_unload(tns_t *tns, int n)
+void
+tns_unload(tns_t *tns, int n)
 {
 	thumb_t *t;
 
@@ -426,7 +398,8 @@ void tns_unload(tns_t *tns, int n)
 	}
 }
 
-void tns_check_view(tns_t *tns, bool scrolled)
+void
+tns_check_view(tns_t *tns, bool scrolled)
 {
 	int r;
 
@@ -454,7 +427,8 @@ void tns_check_view(tns_t *tns, bool scrolled)
 	}
 }
 
-void tns_render(tns_t *tns)
+void
+tns_render(tns_t *tns)
 {
 	thumb_t *t;
 	win_t *win;
@@ -517,7 +491,8 @@ void tns_render(tns_t *tns)
 	tns_highlight(tns, *tns->sel, true);
 }
 
-void tns_mark(tns_t *tns, int n, bool mark)
+void
+tns_mark(tns_t *tns, int n, bool mark)
 {
 	if (n >= 0 && n < *tns->cnt && tns->thumbs[n].im != NULL) {
 		win_t *win = tns->win;
@@ -548,7 +523,8 @@ void tns_mark(tns_t *tns, int n, bool mark)
 	}
 }
 
-void tns_highlight(tns_t *tns, int n, bool hl)
+void
+tns_highlight(tns_t *tns, int n, bool hl)
 {
 	if (n >= 0 && n < *tns->cnt && tns->thumbs[n].im != NULL) {
 		win_t *win = tns->win;
@@ -575,7 +551,8 @@ void tns_highlight(tns_t *tns, int n, bool hl)
 	}
 }
 
-bool tns_move_selection(tns_t *tns, direction_t dir, int cnt)
+bool
+tns_move_selection(tns_t *tns, direction_t dir, int cnt)
 {
 	int old, max;
 
@@ -608,7 +585,8 @@ bool tns_move_selection(tns_t *tns, direction_t dir, int cnt)
 	return *tns->sel != old;
 }
 
-bool tns_scroll(tns_t *tns, direction_t dir, bool screen)
+bool
+tns_scroll(tns_t *tns, direction_t dir, bool screen)
 {
 	int d, max, old;
 
@@ -631,7 +609,8 @@ bool tns_scroll(tns_t *tns, direction_t dir, bool screen)
 	return tns->first != old;
 }
 
-bool tns_zoom(tns_t *tns, int d)
+bool
+tns_zoom(tns_t *tns, int d)
 {
 	int i, oldzl;
 
@@ -654,7 +633,8 @@ bool tns_zoom(tns_t *tns, int d)
 	return tns->zl != oldzl;
 }
 
-int tns_translate(tns_t *tns, int x, int y)
+int
+tns_translate(tns_t *tns, int x, int y)
 {
 	int n;
 

@@ -26,7 +26,8 @@
 opt_t _options;
 const opt_t *options = (const opt_t*) &_options;
 
-void print_usage(void)
+void
+print_usage(void)
 {
 	printf("usage: sxiv [-abcfhiopqrtvZ] [-A framerate] [-e wid] [-G gamma] "
 	       "[-g geometry] [-N name] [-n num] [-S delay] [-s mode] [-z zoom] "
@@ -37,12 +38,14 @@ void print_usage(void)
 #endif /* HAVE_LIBCURL */
 }
 
-void print_version(void)
+void
+print_version(void)
 {
 	puts("sxiv-"VERSION);
 }
 
-void parse_options(int argc, char **argv)
+void
+parse_options(int argc, char **argv)
 {
 	int n, opt;
 	char *end, *s;
