@@ -409,25 +409,16 @@ ci_scroll_to_edge(arg_t dir)
 bool
 ci_scroll_or_navigate(arg_t dir)
 {
-  //if (img_zoom_diff(&img, NULL) >= 0 || zoomdiff(&img, zh)) {
-  //if (img_zoom_diff(&img, NULL) >= 0 || img_zoom_diff == SCALE_WIDTH) {
-  //if (img_fit(img) == false)
-  //if (img_fit_win == SCALE_WIDTH) return ci_scroll(dir);
-  //else			{
-  if (img_zoom_diff(&img, NULL) >= 0) {
-  //if (img_zoom_diff(&img, NULL) >= 0 || img_zoom_diff(img, &z) != 0 ) {
-  //if (img_zoom_diff(&img, NULL) >= 0 && img_fit(img->scalemode != SCALE_WID)) {
-    arg_t n;
-    switch (dir) {
-		case DIR_UP:	n = -1; break;
-		case DIR_DOWN:	n =  1; break;
-		default:	n =  0; break;
-    }
-    return ci_navigate(n);
-  } else {
-    return ci_scroll(dir);
-  }
- // 			}
+	if (img_zoom_diff(&img, NULL) >= 0) {
+		arg_t n;
+		switch (dir) {
+			case DIR_UP:	n = -1; break;
+			case DIR_DOWN:	n =  1; break;
+			default:	n =  0; break;
+		}
+		return ci_navigate(n);
+	} else
+	return ci_scroll(dir);
 }
 
 bool
@@ -579,14 +570,13 @@ cg_quit(arg_t _)
 bool
 ci_random_navigate(arg_t _)
 {
-  int n = rand() % filecnt;
+	int n = rand() % filecnt;
 
-  if (n != fileidx) {
-    load_image(n);
-    return true;
-  } else {
-    return false;
-  }
+	if (n != fileidx) {
+		load_image(n);
+		return true;
+	} else
+		return false;
 }
 
 bool
