@@ -520,7 +520,6 @@ update_info(void)
 
 /* url.c */
 #if HAVE_LIBCURL
-#include <curl/curl.h>
 
 bool
 is_url(const char *url) {
@@ -538,6 +537,8 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
 	return written;
 }
+
+#include <curl/curl.h>
 
 int
 get_url(const char *url, char **out) {
