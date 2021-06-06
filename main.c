@@ -102,14 +102,16 @@ cursor_t imgcursor[3] = {
 };
 
 #if HAVE_LIBCURL
-CLEANUP void tmp_unlink(char **rmfiles, int n) {
+CLEANUP void
+tmp_unlink(char **rmfiles, int n) {
 	while (n--)
 		unlink(rmfiles[n]);
 }
 #endif /* HAVE_LIBCURL */
 
 
-void cleanup(void)
+void
+cleanup(void)
 {
 #if HAVE_LIBCURL
 	tmp_unlink(rmfiles, rmidx);
@@ -131,9 +133,11 @@ check_and_get_path(char *filename)
 }
 
 #if HAVE_LIBCURL
-static void internal_check_add_file(char *filename, char *url, bool given)
+static void
+internal_check_add_file(char *filename, char *url, bool given)
 #else
-void check_add_file(char *filename, bool given)
+void
+check_add_file(char *filename, bool given)
 #endif /* HAVE_LIBCURL */
 {
 	char *path;
@@ -165,8 +169,7 @@ void check_add_file(char *filename, bool given)
 	files[fileidx].name = estrdup(filename);
 	files[fileidx].path = path;
 #if HAVE_LIBCURL
-	if (url != NULL)
-	{
+	if (url != NULL) {
 		files[fileidx].url = estrdup(url);
 		if (rmidx == rmcnt) {
 			rmcnt *= 2;
@@ -518,14 +521,17 @@ update_info(void)
 /* url.c */
 #if HAVE_LIBCURL
 #include <curl/curl.h>
+
 bool
 is_url(const char *url) {
-	CURLU       *h = curl_url();
-	int         rc;
-
-	rc = curl_url_set(h, CURLUPART_URL, url, 0);
-	curl_url_cleanup(h);
-	return rc == 0;
+	if ((!strncmp(url, "http://", 7))
+			|| (!strncmp(url, "https://", 8))
+			|| (!strncmp(url, "gopher://", 9))
+			|| (!strncmp(url, "gophers://", 10))
+			|| (!strncmp(url, "ftp://", 6))
+			|| (!strncmp(url, "file://", 7)))
+		return 1;
+	return 0;
 }
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -535,44 +541,42 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 
 int
 get_url(const char *url, char **out) {
-	CURL        *curl_handle;
-	CURLcode    ret;
-	char        tmp[] = "/tmp/sxiv-XXXXXX";
-	FILE        *file = NULL;
-	int         fd;
+	CURL *curl;
+	CURLcode ret;
+	char tmp[1024] = { 0 };
+	FILE *file = NULL;
+	size_t j;
 
-	fd = mkstemp(tmp);
-	if (fd == -1)
-		return -1;
-	close(fd);
+	for (j = strlen(url); j != 0 && url[j] != '/'; j--);
+	if (j != 0)
+		j++;
 
+	snprintf(tmp, sizeof(tmp), "/tmp/sxiv-%s", url + j);
 	file = fopen(tmp, "wb");
 
-	if (file == NULL) {
+	if (file == NULL)
 		return -1;
-	}
 
 	*out = strdup(tmp);
-	if (*out == NULL) {
+	if (*out == NULL)
 		return -1;
-	}
 
 	curl_global_init(CURL_GLOBAL_ALL);
-	curl_handle = curl_easy_init();
+	curl = curl_easy_init();
 
-	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, file);
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
 
-	ret = curl_easy_perform(curl_handle);
+	ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK) {
-		printf("Error: %s\n", curl_easy_strerror(ret));
+		printf("Curl Error: %s\n", curl_easy_strerror(ret));
 		return -1;
 	}
 
 	fclose(file);
-	curl_easy_cleanup(curl_handle);
+	curl_easy_cleanup(curl);
 	curl_global_cleanup();
 
 	return 0;
@@ -1098,9 +1102,8 @@ main(int argc, char **argv)
 					check_add_url(tmp, filename, true);
 					free(tmp);
 					continue;
-				} else {
+				} else
 					error(0, errno, "%s", filename);
-				}
 			}
 #endif /* HAVE_LIBCURL */
 			error(0, errno, "%s", filename);
@@ -1109,12 +1112,11 @@ main(int argc, char **argv)
 		if (!S_ISDIR(fstats.st_mode)) {
 			char *path = check_and_get_path(filename);
 			/* Set the first command line argument as the displayed file */
-			if (fileidx == 0) memcpy(savedname, path, sizeof(savedname));
+			if (fileidx == 0)
+				memcpy(savedname, path, sizeof(savedname));
 			/* If single file as argument, the whole directory will be scanned */
-
-			// Is this a problem when streaming images?
-
-			if (options->filecnt == 1) filename = dirname(filename);
+			if (options->filecnt == 1)
+				filename = dirname(filename);
 			else {
 				check_add_file(filename, true);
 				continue;
@@ -1142,8 +1144,8 @@ main(int argc, char **argv)
 	if (options->startnum > 0)
 		fileidx = options->startnum < filecnt ? options->startnum : 0;
 	else {
-		for (i = 0; i < filecnt; i++){
-			if (!strcmp(files[i].path, savedname)){
+		for (i = 0; i < filecnt; i++) {
+			if (!strcmp(files[i].path, savedname)) {
 				fileidx = i;
 				break;
 			}
