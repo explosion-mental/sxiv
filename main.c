@@ -120,7 +120,8 @@ void cleanup(void)
 	win_close(&win);
 }
 
-char *check_and_get_path(char *filename)
+char *
+check_and_get_path(char *filename)
 {
 	char *path;
 	if (access(filename, R_OK) < 0 ||
@@ -182,18 +183,21 @@ void check_add_file(char *filename, bool given)
 
 
 #if HAVE_LIBCURL
-void check_add_file(char *filename, bool given)
+void
+check_add_file(char *filename, bool given)
 {
 	internal_check_add_file(filename, NULL, given);
 }
 
-void check_add_url(char *filename, char *url, bool given)
+void
+check_add_url(char *filename, char *url, bool given)
 {
 	internal_check_add_file(filename, url, given);
 }
 #endif /* HAVE_LIBCURL */
 
-void remove_file(int n, bool manual)
+void
+remove_file(int n, bool manual)
 {
 	if (n < 0 || n >= filecnt)
 		return;
@@ -227,7 +231,8 @@ void remove_file(int n, bool manual)
 		markidx--;
 }
 
-void set_timeout(timeout_f handler, int time, bool overwrite)
+void
+set_timeout(timeout_f handler, int time, bool overwrite)
 {
 	int i;
 
@@ -243,7 +248,8 @@ void set_timeout(timeout_f handler, int time, bool overwrite)
 	}
 }
 
-void reset_timeout(timeout_f handler)
+void
+reset_timeout(timeout_f handler)
 {
 	int i;
 
@@ -255,7 +261,8 @@ void reset_timeout(timeout_f handler)
 	}
 }
 
-bool check_timeouts(struct timeval *t)
+bool
+check_timeouts(struct timeval *t)
 {
 	int i = 0, tdiff, tmin = -1;
 	struct timeval now;
@@ -280,7 +287,8 @@ bool check_timeouts(struct timeval *t)
 	return tmin > 0;
 }
 
-void close_info(void)
+void
+close_info(void)
 {
 	if (info.fd != -1) {
 		kill(info.pid, SIGTERM);
@@ -289,7 +297,8 @@ void close_info(void)
 	}
 }
 
-void open_info(void)
+void
+open_info(void)
 {
 	int pfd[2];
 	char w[12], h[12];
@@ -318,7 +327,8 @@ void open_info(void)
 	}
 }
 
-void read_info(void)
+void
+read_info(void)
 {
 	ssize_t i, n;
 	char buf[BAR_L_LEN];
@@ -351,7 +361,8 @@ end:
 }
 
 #ifdef ENABLE_COUNT
-int evaluate_prefix()
+int
+evaluate_prefix(void)
 {
 	extern int prefix;
 
@@ -362,7 +373,8 @@ int evaluate_prefix()
 }
 #endif /* ENABLE_COUNT */
 
-void load_image(int new)
+void
+load_image(int new)
 {
 	bool prev = new < fileidx;
 	static int current;
@@ -398,7 +410,8 @@ void load_image(int new)
 		reset_timeout(animate);
 }
 
-bool mark_image(int n, bool on)
+bool
+mark_image(int n, bool on)
 {
 	markidx = n;
 	if (!!(files[n].flags & FF_MARK) != on) {
@@ -411,7 +424,8 @@ bool mark_image(int n, bool on)
 	return false;
 }
 
-void bar_put(win_bar_t *bar, const char *fmt, ...)
+void
+bar_put(win_bar_t *bar, const char *fmt, ...)
 {
 	size_t len = bar->size - (bar->p - bar->buf), n;
 	va_list ap;
@@ -424,7 +438,8 @@ void bar_put(win_bar_t *bar, const char *fmt, ...)
 
 #define BAR_SEP "  "
 
-void update_info(void)
+void
+update_info(void)
 {
 	unsigned int i, fn, fw;
 	const char * mark;
@@ -500,18 +515,17 @@ void update_info(void)
 }
 
 
+/* url.c */
 #if HAVE_LIBCURL
 #include <curl/curl.h>
+bool
+is_url(const char *url) {
+	CURLU       *h = curl_url();
+	int         rc;
 
-bool is_url(const char *url) {
-	if ((!strncmp(url, "http://", 7))
-			|| (!strncmp(url, "https://", 8))
-			|| (!strncmp(url, "gopher://", 9))
-			|| (!strncmp(url, "gophers://", 10))
-			|| (!strncmp(url, "ftp://", 6))
-			|| (!strncmp(url, "file://", 7)))
-		return 1;
-	return 0;
+	rc = curl_url_set(h, CURLUPART_URL, url, 0);
+	curl_url_cleanup(h);
+	return rc == 0;
 }
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -519,49 +533,46 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 	return written;
 }
 
-int get_url(const char *url, char **out) {
-	CURL *curl;
-	CURLcode ret;
-	char tmp[1024] = { 0 };
-	FILE *file = NULL;
-	size_t j;
+int
+get_url(const char *url, char **out) {
+	CURL        *curl_handle;
+	CURLcode    ret;
+	char        tmp[] = "/tmp/sxiv-XXXXXX";
+	FILE        *file = NULL;
+	int         fd;
 
-	/*name*/
-	for (j = strlen(url); j != 0 && url[j] != '/'; j--);
-	if (j != 0)
-		j++;
-	snprintf(tmp, sizeof(tmp), "/tmp/sxiv-%s", url + j);
+	fd = mkstemp(tmp);
+	if (fd == -1)
+		return -1;
+	close(fd);
 
-	//open
 	file = fopen(tmp, "wb");
 
-	if (file == NULL)
+	if (file == NULL) {
 		return -1;
+	}
 
 	*out = strdup(tmp);
-	if (*out == NULL)
+	if (*out == NULL) {
 		return -1;
+	}
 
 	curl_global_init(CURL_GLOBAL_ALL);
-	curl = curl_easy_init();
-	/*if (!curl_handle) {
-		printf("open url: libcurl initialization failure");
-		return 1;
-	}*/
+	curl_handle = curl_easy_init();
 
-	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, file);
 
-	ret = curl_easy_perform(curl);
+	ret = curl_easy_perform(curl_handle);
 
 	if (ret != CURLE_OK) {
-		printf("Curl Error: %s\n", curl_easy_strerror(ret));
+		printf("Error: %s\n", curl_easy_strerror(ret));
 		return -1;
 	}
 
 	fclose(file);
-	curl_easy_cleanup(curl);
+	curl_easy_cleanup(curl_handle);
 	curl_global_cleanup();
 
 	return 0;
@@ -569,7 +580,8 @@ int get_url(const char *url, char **out) {
 #endif /* HAVE_LIBCURL */
 
 
-int ptr_third_x(void)
+int
+ptr_third_x(void)
 {
 	int x, y;
 
@@ -577,7 +589,8 @@ int ptr_third_x(void)
 	return MAX(0, MIN(2, (x / (win.w * 0.33))));
 }
 
-void redraw(void)
+void
+redraw(void)
 {
 	int t;
 
@@ -598,7 +611,8 @@ void redraw(void)
 	reset_cursor();
 }
 
-void reset_cursor(void)
+void
+reset_cursor(void)
 {
 	int c, i;
 	cursor_t cursor = CURSOR_NONE;
@@ -624,7 +638,8 @@ void reset_cursor(void)
 	win_set_cursor(&win, cursor);
 }
 
-void animate(void)
+void
+animate(void)
 {
 	if (img_frame_animate(&img)) {
 		redraw();
@@ -632,13 +647,15 @@ void animate(void)
 	}
 }
 
-void slideshow(void)
+void
+slideshow(void)
 {
 	load_image(fileidx + 1 < filecnt ? fileidx + 1 : 0);
 	redraw();
 }
 
-void clear_resize(void)
+void
+clear_resize(void)
 {
 	resized = false;
 }
@@ -648,7 +665,8 @@ Bool is_input_ev(Display *dpy, XEvent *ev, XPointer arg)
 	return ev->type == ButtonPress || ev->type == KeyPress;
 }
 
-void run_key_handler(const char *key, unsigned int mask)
+void
+run_key_handler(const char *key, unsigned int mask)
 {
 	pid_t pid;
 	FILE *pfs;
@@ -748,7 +766,8 @@ end:
 }
 
 #define MODMASK(mask) ((mask) & (ShiftMask|ControlMask|Mod1Mask))
-void on_keypress(XKeyEvent *kev)
+void
+on_keypress(XKeyEvent *kev)
 {
 	int i;
 	unsigned int sh = 0;
@@ -799,7 +818,8 @@ void on_keypress(XKeyEvent *kev)
 #endif /* ENABLE_COUNT */
 }
 
-void on_buttonpress(XButtonEvent *bev)
+void
+on_buttonpress(XButtonEvent *bev)
 {
 	int i, sel;
 	bool dirty = false;
@@ -874,7 +894,8 @@ void on_buttonpress(XButtonEvent *bev)
 
 const struct timespec ten_ms = {0, 10000000};
 
-void run(void)
+void
+run(void)
 {
 	int xfd;
 	fd_set fds;
@@ -987,17 +1008,20 @@ void run(void)
 	}
 }
 
-int fncmp(const void *a, const void *b)
+int
+fncmp(const void *a, const void *b)
 {
 	return strcoll(((fileinfo_t*) a)->name, ((fileinfo_t*) b)->name);
 }
 
-void sigchld(int sig)
+void
+sigchld(int sig)
 {
 	while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 
-void setup_signal(int sig, void (*handler)(int sig))
+void
+setup_signal(int sig, void (*handler)(int sig))
 {
 	struct sigaction sa;
 
@@ -1008,7 +1032,8 @@ void setup_signal(int sig, void (*handler)(int sig))
 		error(EXIT_FAILURE, errno, "signal %d", sig);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
 	int i, start;
 	size_t n;
@@ -1086,6 +1111,9 @@ int main(int argc, char **argv)
 			/* Set the first command line argument as the displayed file */
 			if (fileidx == 0) memcpy(savedname, path, sizeof(savedname));
 			/* If single file as argument, the whole directory will be scanned */
+
+			// Is this a problem when streaming images?
+
 			if (options->filecnt == 1) filename = dirname(filename);
 			else {
 				check_add_file(filename, true);
@@ -1135,11 +1163,11 @@ int main(int argc, char **argv)
 	img_init(&img, &win);
 	arl_init(&arl);
 
-    /* Set window title to 'Sxiv - [First file's directory's basename]' */
-    strncpy(dirn, files[0].path, sizeof(dirn)-1);
-    strncat(title, basename(dirname(dirn)), PATH_MAX);
-    //strncat(title, dirname(dirn), PATH_MAX);
-    win.title = title;
+	/* Set window title to 'Sxiv - [First file's directory's basename]' */
+	strncpy(dirn, files[0].path, sizeof(dirn)-1);
+	strncat(title, basename(dirname(dirn)), PATH_MAX);
+	//strncat(title, dirname(dirn), PATH_MAX);
+	win.title = title;
 
     	/* The executable files shouldn't be always on '.config/' but on the current dir */
 	if ((homedir = getenv("XDG_CONFIG_HOME")) == NULL || homedir[0] == '\0') {

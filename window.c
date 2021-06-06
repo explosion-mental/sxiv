@@ -43,7 +43,6 @@ static struct {
 };
 
 static GC gc;
-
 static XftFont *font;
 static int fontheight;
 static double fontsize;
@@ -51,7 +50,8 @@ static int barheight;
 
 Atom atoms[ATOM_COUNT];
 
-void win_init_font(const win_env_t *e, const char *fontstr)
+void
+win_init_font(const win_env_t *e, const char *fontstr)
 {
 	if ((font = XftFontOpenName(e->dpy, e->scr, fontstr)) == NULL)
 		error(EXIT_FAILURE, 0, "Error loading font '%s'", fontstr);
@@ -60,14 +60,16 @@ void win_init_font(const win_env_t *e, const char *fontstr)
 	barheight = fontheight + 2 * V_TEXT_PAD;
 }
 
-void win_alloc_color(const win_env_t *e, const char *name, XftColor *col)
+void
+win_alloc_color(const win_env_t *e, const char *name, XftColor *col)
 {
 	if (!XftColorAllocName(e->dpy, DefaultVisual(e->dpy, e->scr),
 	                       DefaultColormap(e->dpy, e->scr), name, col))
 		error(EXIT_FAILURE, 0, "Error allocating color '%s'", name);
 }
-		/* database          */
-const char* win_res(XrmDatabase db, const char *name, const char *def)
+		/* database          name                      def*/
+const char *
+win_res(XrmDatabase db, const char *name, const char *def)
 {
 	char *type;
 	XrmValue ret;
@@ -86,7 +88,8 @@ const char* win_res(XrmDatabase db, const char *name, const char *def)
 
 #define INIT_ATOM_(atom) atoms[ATOM_##atom] = XInternAtom(e->dpy, #atom, False);
 #define RES_CLASS "Sxiv"
-void win_init(win_t *win)
+void
+win_init(win_t *win)
 {
 	win_env_t *e;
 	const char *bg, *fg, *mark, *sel, *f;
@@ -145,7 +148,8 @@ void win_init(win_t *win)
 	INIT_ATOM_(_NET_WM_PID);
 }
 
-void win_open(win_t *win)
+void
+win_open(win_t *win)
 {
 	int c, i, j, n;
 	long parent;
@@ -301,7 +305,8 @@ void win_open(win_t *win)
 		win_toggle_fullscreen(win);
 }
 
-CLEANUP void win_close(win_t *win)
+CLEANUP void
+win_close(win_t *win)
 {
 	int i;
 
@@ -313,7 +318,8 @@ CLEANUP void win_close(win_t *win)
 	XCloseDisplay(win->env.dpy);
 }
 
-bool win_configure(win_t *win, XConfigureEvent *c)
+bool
+win_configure(win_t *win, XConfigureEvent *c)
 {
 	bool changed;
 
@@ -328,7 +334,8 @@ bool win_configure(win_t *win, XConfigureEvent *c)
 	return changed;
 }
 
-void win_toggle_fullscreen(win_t *win)
+void
+win_toggle_fullscreen(win_t *win)
 {
 	XEvent ev;
 	XClientMessageEvent *cm;
@@ -347,7 +354,8 @@ void win_toggle_fullscreen(win_t *win)
 	           SubstructureNotifyMask | SubstructureRedirectMask, &ev);
 }
 
-void win_toggle_bar(win_t *win)
+void
+win_toggle_bar(win_t *win)
 {
 	if (topbar) {
 		if (win->bar.h != 0) {
@@ -368,7 +376,8 @@ void win_toggle_bar(win_t *win)
 	}
 }
 
-void win_clear(win_t *win)
+void
+win_clear(win_t *win)
 {
 	win_env_t *e;
 
@@ -388,8 +397,8 @@ void win_clear(win_t *win)
 #define TEXTWIDTH(win, text, len) \
 	win_draw_text(win, NULL, NULL, 0, 0, text, len, 0)
 
-int win_draw_text(win_t *win, XftDraw *d, const XftColor *color, int x, int y,
-                  char *text, int len, int w)
+int
+win_draw_text(win_t *win, XftDraw *d, const XftColor *color, int x, int y, char *text, int len, int w)
 {
 	int err, tw = 0;
 	char *t, *next;
@@ -422,7 +431,8 @@ int win_draw_text(win_t *win, XftDraw *d, const XftColor *color, int x, int y,
 	return tw;
 }
 
-void win_draw_bar(win_t *win)
+void
+win_draw_bar(win_t *win)
 {
 	int len, x, y, w, tw;
 	win_env_t *e;
@@ -471,7 +481,8 @@ void win_draw_bar(win_t *win)
 	XftDrawDestroy(d);
 }
 
-void win_draw(win_t *win)
+void
+win_draw(win_t *win)
 {
 	if (win->bar.h > 0)
 		win_draw_bar(win);
@@ -482,7 +493,8 @@ void win_draw(win_t *win)
 }
 
 //Highlight thumb
-void win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw, unsigned long col)
+void
+win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw, unsigned long col)
 {
 	XGCValues gcval;
 
@@ -496,7 +508,8 @@ void win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw, un
 		XDrawRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
 }
 
-void win_set_title(win_t *win)
+void
+win_set_title(win_t *win)
 {
 	XStoreName(win->env.dpy, win->xwin, win->title);
 	XSetIconName(win->env.dpy, win->xwin, win->title);
@@ -509,7 +522,8 @@ void win_set_title(win_t *win)
 	                PropModeReplace, (unsigned char *) win->title, strlen(win->title));
 }
 
-void win_set_cursor(win_t *win, cursor_t cursor)
+void
+win_set_cursor(win_t *win, cursor_t cursor)
 {
 	if (cursor >= 0 && cursor < ARRLEN(cursors)) {
 		XDefineCursor(win->env.dpy, win->xwin, cursors[cursor].icon);
@@ -517,7 +531,8 @@ void win_set_cursor(win_t *win, cursor_t cursor)
 	}
 }
 
-void win_cursor_pos(win_t *win, int *x, int *y)
+void
+win_cursor_pos(win_t *win, int *x, int *y)
 {
 	int i;
 	unsigned int ui;

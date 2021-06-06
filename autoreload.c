@@ -23,7 +23,8 @@
 #include <unistd.h>
 #include <sys/inotify.h>
 
-void arl_init(arl_t *arl)
+void
+arl_init(arl_t *arl)
 {
 	arl->fd = inotify_init1(IN_CLOEXEC | IN_NONBLOCK);
 	arl->wd_dir = arl->wd_file = -1;
@@ -31,14 +32,16 @@ void arl_init(arl_t *arl)
 		error(0, 0, "Could not initialize inotify, no automatic image reloading");
 }
 
-CLEANUP void arl_cleanup(arl_t *arl)
+CLEANUP void
+arl_cleanup(arl_t *arl)
 {
 	if (arl->fd != -1)
 		close(arl->fd);
 	free(arl->filename);
 }
 
-static void rm_watch(int fd, int *wd)
+static void
+rm_watch(int fd, int *wd)
 {
 	if (*wd != -1) {
 		inotify_rm_watch(fd, *wd);
@@ -46,14 +49,16 @@ static void rm_watch(int fd, int *wd)
 	}
 }
 
-static void add_watch(int fd, int *wd, const char *path, uint32_t mask)
+static void
+add_watch(int fd, int *wd, const char *path, uint32_t mask)
 {
 	*wd = inotify_add_watch(fd, path, mask);
 	if (*wd == -1)
 		error(0, errno, "inotify: %s", path);
 }
 
-void arl_setup(arl_t *arl, const char *filepath)
+void
+arl_setup(arl_t *arl, const char *filepath)
 {
 	char *base = strrchr(filepath, '/');
 
@@ -80,7 +85,8 @@ union {
 	struct inotify_event e;
 } buf;
 
-bool arl_handle(arl_t *arl)
+bool
+arl_handle(arl_t *arl)
 {
 	bool reload = false;
 	char *ptr;
@@ -111,23 +117,27 @@ bool arl_handle(arl_t *arl)
 #endif /* AUTO_INOTIFY */
 
 #ifdef AUTO_NOP
-void arl_init(arl_t *arl)
+void
+arl_init(arl_t *arl)
 {
 	arl->fd = -1;
 }
 
-void arl_cleanup(arl_t *arl)
+void
+arl_cleanup(arl_t *arl)
 {
 	(void) arl;
 }
 
-void arl_setup(arl_t *arl, const char *filepath)
+void
+arl_setup(arl_t *arl, const char *filepath)
 {
 	(void) arl;
 	(void) filepath;
 }
 
-bool arl_handle(arl_t *arl)
+bool
+arl_handle(arl_t *arl)
 {
 	(void) arl;
 	return false;

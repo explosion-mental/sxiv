@@ -51,24 +51,11 @@ extern int markidx;
 extern int prefix;
 #endif /* ENABLE_COUNT */
 //extern bool extprefix;	/* Not needed! */
+bool
+img_frame_goto(img_t *, int);
 
-/* Customs */
-bool img_frame_goto(img_t *, int);
-
-bool cg_quit(arg_t _)
-{
-	unsigned int i;
-
-	if (options->to_stdout && markcnt > 0) {
-		for (i = 0; i < filecnt; i++) {
-			if (files[i].flags & FF_MARK)
-				printf("%s\n", files[i].name);
-		}
-	}
-	exit(EXIT_SUCCESS);
-}
-
-bool cg_switch_mode(arg_t _)
+bool
+cg_switch_mode(arg_t _)
 {
 	if (mode == MODE_IMAGE) {
 		if (tns.thumbs == NULL)
@@ -88,7 +75,8 @@ bool cg_switch_mode(arg_t _)
 	return true;
 }
 
-bool cg_toggle_fullscreen(arg_t _)
+bool
+cg_toggle_fullscreen(arg_t _)
 {
 	win_toggle_fullscreen(&win);
 	set_timeout(redraw, TO_REDRAW_RESIZE, false);	/* redraw after next ConfigureNotify event */
@@ -99,7 +87,8 @@ bool cg_toggle_fullscreen(arg_t _)
 	return false;
 }
 
-bool cg_toggle_bar(arg_t _)
+bool
+cg_toggle_bar(arg_t _)
 {
 	win_toggle_bar(&win);
 	if (mode == MODE_IMAGE) {
@@ -120,7 +109,8 @@ bool cg_prefix_external(arg_t _) // Not needed
 	return false;
 }
 */
-bool cg_reload_image(arg_t _)
+bool
+cg_reload_image(arg_t _)
 {
 	if (mode == MODE_IMAGE) {
 		load_image(fileidx);
@@ -134,7 +124,8 @@ bool cg_reload_image(arg_t _)
 	return true;
 }
 
-bool cg_remove_image(arg_t _)
+bool
+cg_remove_image(arg_t _)
 {
 	remove_file(fileidx, true);
 	if (mode == MODE_IMAGE)
@@ -144,7 +135,8 @@ bool cg_remove_image(arg_t _)
 	return true;
 }
 
-bool cg_first(arg_t _)
+bool
+cg_first(arg_t _)
 {
 	if (mode == MODE_IMAGE && fileidx != 0) {
 		load_image(0);
@@ -158,7 +150,8 @@ bool cg_first(arg_t _)
 	}
 }
 
-bool cg_n_or_last(arg_t _)
+bool
+cg_n_or_last(arg_t _)
 {
 #ifdef ENABLE_COUNT
 	int n = prefix != 0 && prefix - 1 < filecnt ? prefix - 1 : filecnt - 1;
@@ -181,7 +174,8 @@ bool cg_n_or_last(arg_t _)
 	}
 }
 
-bool cg_scroll_screen(arg_t dir)
+bool
+cg_scroll_screen(arg_t dir)
 {
 	if (mode == MODE_IMAGE)
 #ifdef ENABLE_COUNT
@@ -193,7 +187,8 @@ bool cg_scroll_screen(arg_t dir)
 		return tns_scroll(&tns, dir, true);
 }
 
-bool cg_zoom(arg_t d)
+bool
+cg_zoom(arg_t d)
 {
 	if (mode == MODE_THUMB)
 		return tns_zoom(&tns, d);
@@ -205,12 +200,14 @@ bool cg_zoom(arg_t d)
 		return false;
 }
 
-bool cg_toggle_image_mark(arg_t _)
+bool
+cg_toggle_image_mark(arg_t _)
 {
 	return mark_image(fileidx, !(files[fileidx].flags & FF_MARK));
 }
 
-bool cg_reverse_marks(arg_t _)
+bool
+cg_reverse_marks(arg_t _)
 {
 	int i;
 
@@ -223,7 +220,8 @@ bool cg_reverse_marks(arg_t _)
 	return true;
 }
 
-bool cg_mark_range(arg_t _)
+bool
+cg_mark_range(arg_t _)
 {
 	int d = markidx < fileidx ? 1 : -1, end, i;
 	bool dirty = false, on = !!(files[markidx].flags & FF_MARK);
@@ -233,7 +231,8 @@ bool cg_mark_range(arg_t _)
 	return dirty;
 }
 
-bool cg_unmark_all(arg_t _)
+bool
+cg_unmark_all(arg_t _)
 {
 	int i;
 
@@ -245,7 +244,8 @@ bool cg_unmark_all(arg_t _)
 	return true;
 }
 
-bool cg_navigate_marked(arg_t n)
+bool
+cg_navigate_marked(arg_t n)
 {
 	int d, i;
 	int new = fileidx;
@@ -282,7 +282,8 @@ bool cg_navigate_marked(arg_t n)
 	}
 }
 
-bool cg_change_gamma(arg_t d)
+bool
+cg_change_gamma(arg_t d)
 {
 #ifdef ENABLE_COUNT
 	if (img_change_gamma(&img, d * (prefix > 0 ? prefix : 1))) {
@@ -297,7 +298,8 @@ bool cg_change_gamma(arg_t d)
 	}
 }
 
-bool ci_navigate(arg_t n)
+bool
+ci_navigate(arg_t n)
 {
 #ifdef ENABLE_COUNT
 	if (prefix > 0)
@@ -317,18 +319,21 @@ bool ci_navigate(arg_t n)
 	}
 }
 
-bool ci_cursor_navigate(arg_t _)
+bool
+ci_cursor_navigate(arg_t _)
 {
 	return ci_navigate(ptr_third_x() - 1);
 }
 
-bool ci_alternate(arg_t _)
+bool
+ci_alternate(arg_t _)
 {
 	load_image(alternate);
 	return true;
 }
 
-bool ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is activated?
+bool
+ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is activated?
 {
 	int frame;
 #ifdef ENABLE_COUNT
@@ -348,7 +353,8 @@ bool ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is ac
 	}
 }
 
-bool ci_toggle_animation(arg_t _)
+bool
+ci_toggle_animation(arg_t _)
 {
 	bool dirty = false;
 
@@ -364,7 +370,8 @@ bool ci_toggle_animation(arg_t _)
 	return dirty;
 }
 
-bool ci_scroll(arg_t dir)
+bool
+ci_scroll(arg_t dir)
 {
 #ifdef ENABLE_COUNT
 	return img_pan(&img, dir, prefix);
@@ -373,7 +380,8 @@ bool ci_scroll(arg_t dir)
 #endif /* ENABLE_COUNT */
 }
 
-bool ci_scroll_to_edge(arg_t dir)
+bool
+ci_scroll_to_edge(arg_t dir)
 //If zoomed, then navigate else scroll to edge
 /* If not zoomed, zoom one float on the array of zoom on config.h */
 {
@@ -398,7 +406,8 @@ bool ci_scroll_to_edge(arg_t dir)
   //}
 }
 
-bool ci_scroll_or_navigate(arg_t dir)
+bool
+ci_scroll_or_navigate(arg_t dir)
 {
   //if (img_zoom_diff(&img, NULL) >= 0 || zoomdiff(&img, zh)) {
   //if (img_zoom_diff(&img, NULL) >= 0 || img_zoom_diff == SCALE_WIDTH) {
@@ -421,7 +430,8 @@ bool ci_scroll_or_navigate(arg_t dir)
  // 			}
 }
 
-bool ci_drag(arg_t mode)
+bool
+ci_drag(arg_t mode)
 {
 	int x, y, ox, oy;
 	float px, py;
@@ -467,7 +477,8 @@ bool ci_drag(arg_t mode)
 	return true;
 }
 
-bool ci_set_zoom(arg_t zl)
+bool
+ci_set_zoom(arg_t zl)
 {
 #ifdef ENABLE_COUNT
 	return img_zoom(&img, (prefix ? prefix : zl) / 100.0);
@@ -476,37 +487,43 @@ bool ci_set_zoom(arg_t zl)
 #endif /* ENABLE_COUNT */
 }
 
-bool ci_fit_to_win(arg_t sm)
+bool
+ci_fit_to_win(arg_t sm)
 {
 	return img_fit_win(&img, sm);
 }
 
-bool ci_rotate(arg_t degree)
+bool
+ci_rotate(arg_t degree)
 {
 	img_rotate(&img, degree);
 	return true;
 }
 
-bool ci_flip(arg_t dir)
+bool
+ci_flip(arg_t dir)
 {
 	img_flip(&img, dir);
 	return true;
 }
 
-bool ci_toggle_antialias(arg_t _)
+bool
+ci_toggle_antialias(arg_t _)
 {
 	img_toggle_antialias(&img);
 	return true;
 }
 
-bool ci_toggle_alpha(arg_t _)
+bool
+ci_toggle_alpha(arg_t _)
 {
 	img.alpha = !img.alpha;
 	img.dirty = true;
 	return true;
 }
 
-bool ci_slideshow(arg_t _)
+bool
+ci_slideshow(arg_t _)
 {
 #ifdef ENABLE_COUNT
 	if (prefix > 0) {
@@ -519,13 +536,13 @@ bool ci_slideshow(arg_t _)
 		img.ss.on = false;
 		reset_timeout(slideshow);
 	} else {
-//else if { img.ss.on.rand = true; ..
 		img.ss.on = true;
 	}
 	return true;
 }
 
-bool ct_move_sel(arg_t dir)
+bool
+ct_move_sel(arg_t dir)
 {
 #ifdef ENABLE_COUNT
 	return tns_move_selection(&tns, dir, prefix);
@@ -534,7 +551,8 @@ bool ct_move_sel(arg_t dir)
 #endif /* ENABLE_COUNT */
 }
 
-bool ct_reload_all(arg_t _)
+bool
+ct_reload_all(arg_t _)
 {
 	tns_free(&tns);
 	tns_init(&tns, files, &filecnt, &fileidx, &win);
@@ -543,30 +561,50 @@ bool ct_reload_all(arg_t _)
 }
 
 	/* Customs */
-bool ci_random_navigate(arg_t _)
+bool
+cg_quit(arg_t _)
 {
-	int n = rand() % filecnt;
+	unsigned int i;
 
-	if (n != fileidx) {
-		load_image(n);
-		return true;
-	} else
-		return false;
+	if (options->to_stdout && markcnt > 0) {
+		for (i = 0; i < filecnt; i++) {
+			if (files[i].flags & FF_MARK)
+				printf("%s\n", files[i].name);
+		}
+	}
+	exit(EXIT_SUCCESS);
 }
 
-bool cg_dmenu_output(arg_t _)
+
+bool
+ci_random_navigate(arg_t _)
+{
+  int n = rand() % filecnt;
+
+  if (n != fileidx) {
+    load_image(n);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool
+cg_dmenu_output(arg_t _)
 {
 	printf("%s\n", files[fileidx].name);
 	//printf("%s\n", files[fileidx].path);
         exit(EXIT_SUCCESS);
 }
 /*
-bool cg_toggle_squarethumb(arg_t _)
+bool
+cg_toggle_squarethumb(arg_t _)
 {
 	squarethumb = !squarethumb;
 	//return false;
 }
 */
+
 
 #undef  G_CMD
 #define G_CMD(c) { -1, cg_##c },

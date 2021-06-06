@@ -27,7 +27,8 @@
 
 const char *progname;
 
-void* emalloc(size_t size)
+void *
+emalloc(size_t size)
 {
 	void *ptr;
 
@@ -37,7 +38,8 @@ void* emalloc(size_t size)
 	return ptr;
 }
 
-void* erealloc(void *ptr, size_t size)
+void *
+erealloc(void *ptr, size_t size)
 {
 	ptr = realloc(ptr, size);
 	if (ptr == NULL)
@@ -45,7 +47,8 @@ void* erealloc(void *ptr, size_t size)
 	return ptr;
 }
 
-char* estrdup(const char *s)
+char *
+estrdup(const char *s)
 {
 	char *d;
 	size_t n = strlen(s) + 1;
@@ -57,7 +60,8 @@ char* estrdup(const char *s)
 	return d;
 }
 
-void error(int eval, int err, const char* fmt, ...)
+void
+error(int eval, int err, const char* fmt, ...)
 {
 	va_list ap;
 
@@ -78,7 +82,8 @@ void error(int eval, int err, const char* fmt, ...)
 		exit(eval);
 }
 
-void size_readable(float *size, const char **unit)
+void
+size_readable(float *size, const char **unit)
 {
 	const char *units[] = { "", "K", "M", "G" };
 	int i;
@@ -88,7 +93,8 @@ void size_readable(float *size, const char **unit)
 	*unit = units[MIN(i, ARRLEN(units) - 1)];
 }
 
-int r_opendir(r_dir_t *rdir, const char *dirname, bool recursive)
+int
+r_opendir(r_dir_t *rdir, const char *dirname, bool recursive)
 {
 	if (*dirname == '\0')
 		return -1;
@@ -110,7 +116,8 @@ int r_opendir(r_dir_t *rdir, const char *dirname, bool recursive)
 	return 0;
 }
 
-int r_closedir(r_dir_t *rdir)
+int
+r_closedir(r_dir_t *rdir)
 {
 	int ret = 0;
 
@@ -134,7 +141,8 @@ int r_closedir(r_dir_t *rdir)
 	return ret;
 }
 
-char* r_readdir(r_dir_t *rdir, bool skip_dotfiles)
+char *
+r_readdir(r_dir_t *rdir, bool skip_dotfiles)
 {
 	size_t len;
 	char *filename;
@@ -190,7 +198,8 @@ char* r_readdir(r_dir_t *rdir, bool skip_dotfiles)
 	return NULL;
 }
 
-int r_mkdir(char *path)
+int
+r_mkdir(char *path)
 {
 	char c, *s = path;
 	struct stat st;
