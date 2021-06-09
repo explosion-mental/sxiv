@@ -75,6 +75,7 @@ This is really the best image viewer and probably the fastest! After my changes 
 - How to make '#ifdef' on tns_move_selection. That is, how to remove the 'cnt' var?
 - Remove all position modificacion (zoom, rotation) RESTORE to default?, so reload image
 - <s>Is there a way to maximaze space in "thumbnail mode"?</s> Done☑️ Use **Square thumbnails**
+- Which color would be a nice one for the marks?
 
 # Major improvements:
 - More responsive after WM_HINTS patch
