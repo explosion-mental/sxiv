@@ -27,7 +27,7 @@ static const int THUMB_BORDERS[] = { 7 }; /* How does this work? */
 static const int THUMB_MARGIN    = -4;	/* margins between images, buggy with marks */
 static const int THUMB_PADDING   = 0;	/* padding of the highlight or mark */
 static const int THUMB_SIZE      = 3;	/* thumbnail size at startup, index into thumb_sizes[]: */
-static const int squarethumb     = 0;	/* 0 means normal thumbs (default) */
+static const int squarethumb     = 1;	/* 0 means normal thumbs (default) */
 static const int thumb_sizes[] = {
  /* thumbnail sizes in pixels (width == height) */
 	32, 64, 116, 145, 181, 286, 361, 412

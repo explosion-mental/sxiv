@@ -37,26 +37,19 @@ Although there are **two** options:
 ## [Count]
 - A vim inspired way of multiplying the keystrokes of movement & modification.
 - Example: Pressing `10` and 'G' (which is for the "nth" image or defaults to the last image in absence of `n`) takes you to the 10th image.
-- Say you type `5` & `}`, this would add '+5' to the Gamma and so on. 
+- Say you type `5` & `}`, this would add '+5' to the Gamma and so on.
   - Of couse not all commands have that but some of them do. I don't really use this 'feature'. I noticed it's a bit slow (or maybe it's probably just me)
   - You can toggle it on/off by uncommentting/commenting it in config.mk. I don't know any other way to do this, hopefully it's not a terrible thing. You also need to change the number keys in the key-handler (by default in `~/config/sxiv/exec/key-handler) to letters (or whatever you want), to make remove conflicts.
-
-_Note:_ I don't know what to call this sets of keys, on the code they called it prefix so thats what I'm calling it.
 
 ## Patches
 Just look them up, most of them aren't on this build.
 
 # Fork
-I used someone's fork which I don't remember why I did it.
-
-This includes:
-
 _Escape key can be mapped in config.h., it is now `Sxiv - [Directory's basename]`..._ go to [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) for more.
 
 # Help...
 This is really the best image viewer and probably the fastest! After my changes it's even better for me. I have one issue:
 - What's the best position/intuitive (preferably not with Shift) for some actions on sxiv?
-- Is there a way to maximaze space in "thumbnail mode"? (Maybe with square thumbnails?)
 
 # TODO
 - Load all frames from TIFF files. We have to write our own loader for this to
@@ -81,11 +74,12 @@ This is really the best image viewer and probably the fastest! After my changes 
 - <s>Make "if" statement (either '#if' or 'if') on a value or definition on the config.mk in order to make `count` (that is: when pressing a number (like '10'), sxiv's default behaviour would be to wait for the next command. Let's say, again, after those two keys you press G (which is bounded to the command 'n_or_last') that means you would go '10' images "down". I don't really use this but I supposed that there are people who find this usefull, so I'm thinking a way to make that optional (user decides).</s> Done✅. You decide if you want that or not (which i believe is just there for some reason) See the `[Count]`
 - How to make '#ifdef' on tns_move_selection. That is, how to remove the 'cnt' var?
 - Remove all position modificacion (zoom, rotation) RESTORE to default?, so reload image
+- <s>Is there a way to maximaze space in "thumbnail mode"?</s> Done☑️ Use **Square thumbnails**
 
 # Major improvements:
 - More responsive after WM_HINTS patch
 - Compile even if sxiv is active _(cp -f)_
-- version.h not needed (one less file ) 
+- version.h not needed (one less file )
   - _**Note**_: I have no idea what that file was doing, looking at the **Makefile** says something about .git/index or whatever, I have no idea if that broke something external (not the program), maybe it was a little sync with the github main repo?
 - Not an improvement but for my standards of understading: I make a config.mk _just like st, dwm and dmenu_ so you can configure it I guess, also the autoreload_inotify/nop was annoying so I combine them into **one** file, if you want the autoreload before it, add it on the Makefile. Because of this 'suckless' style, the compile messages are alike (I'm debating this, the initial messages where really clean and I like them, suggest something maybe?)
 - Saner config.h (Mar 24)
