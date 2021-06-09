@@ -79,8 +79,7 @@ This is really the best image viewer and probably the fastest! After my changes 
 # Major improvements:
 - More responsive after WM_HINTS patch
 - Compile even if sxiv is active _(cp -f)_
-- version.h not needed (one less file )
-  - _**Note**_: I have no idea what that file was doing, looking at the **Makefile** says something about .git/index or whatever, I have no idea if that broke something external (not the program), maybe it was a little sync with the github main repo?
+- version.h not needed (one less file)
 - Not an improvement but for my standards of understading: I make a config.mk _just like st, dwm and dmenu_ so you can configure it I guess, also the autoreload_inotify/nop was annoying so I combine them into **one** file, if you want the autoreload before it, add it on the Makefile. Because of this 'suckless' style, the compile messages are alike (I'm debating this, the initial messages where really clean and I like them, suggest something maybe?)
 - Saner config.h (Mar 24)
 - On/off Prefix-keys on *some* commands(Mar 25)
