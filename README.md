@@ -42,7 +42,7 @@ Although there are **two** options:
   - You can toggle it on/off by uncommentting/commenting it in config.mk. I don't know any other way to do this, hopefully it's not a terrible thing. You also need to change the number keys in the key-handler (by default in `~/config/sxiv/exec/key-handler) to letters (or whatever you want), to make remove conflicts.
 
 ## Patches
-Just look them up, most of them aren't on this build.
+Just look them up [here](https://github.com/explosion-mental/sxiv/tree/main/patches), most of them aren't on this build.
 
 # Fork
 _Escape key can be mapped in config.h., it is now `Sxiv - [Directory's basename]`..._ go to [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) for more.
