@@ -2,6 +2,8 @@
 My build of sxiv
 
 _The "My build" is only for keybindings. This is meant to be as standard as possible_
+
+
 ![Image](sxiv.png "sxiv")
 
 # Instalation
@@ -25,12 +27,25 @@ xbps-install imlib2-devel libexif-devel giflib-devel
 * Scale to fill the window
 * Stream images directly from the web (example: `sxiv 'https://raw.githubusercontent.com/explosion-mental/sxiv/main/sxiv.png'` )
 
-## Key Handler
-With the patch I made (someone who knows diff and all that please make it correct), there's no need for "prefix-key" to execute a command on keyhandler, pretty stuff!
-Although there are **two** options:
-1. With the default one, on `main.c`, you will **only** be able to execute something on the keyhandler if that key isn't bound on config.h (i.e., config.h dominates).
-2. The other option is to have them _simultaneously_, if the key that you pressed is on config.h try to execute the command that is on command.c (i.e., the normal sxiv commands) or else search it on the keyhandler (that's why on every other key it will always be searching for it, as you can see on the bar when pressing keys that aren't on the keyhandler, sometimes it executes faster so it seems like it doesn't show up).
-  - With this kind of handling the handler you can do pretty stuff like bind SCALE_FIT to "w" and, on the key-handler, bound also "w" to [setbg](https://github.com/explosion-mental/scripts/blob/main/setbg). The result would be, if SCALE_FIT can be executed then run it else search on key-handler, basically if the image is zoomed in/out or in other SCALE mode (if it can be SCALEd to FIT) do it, but if it's already "fit" then set the img as a wallpaper (setbg script).
+## Key Handler With the patch I made (someone who knows diff and all that
+please make it correct), there's no need for "prefix-key" to execute a command
+on keyhandler, pretty stuff!  Although there are **two** options:
+1. With the default one, on `main.c`, you will **only** be able to execute
+   something on the keyhandler if that key isn't bound on config.h (i.e.,
+   config.h dominates).
+2. The other option is to have them _simultaneously_, if the key that you
+pressed is on config.h try to execute the command that is on command.c (i.e.,
+the normal sxiv commands) or else search it on the keyhandler (that's why on
+every other key it will always be searching for it, as you can see on the bar
+when pressing keys that aren't on the keyhandler, sometimes it executes faster
+so it seems like it doesn't show up).
+  - With this kind of handling the handler you can do pretty stuff like bind
+    SCALE_FIT to "w" and, on the key-handler, bound also "w" to
+    [setbg](https://github.com/explosion-mental/scripts/blob/main/setbg). The
+    result would be, if SCALE_FIT can be executed then run it else search on
+    key-handler, basically if the image is zoomed in/out or in other SCALE mode
+    (if it can be SCALEd to FIT) do it, but if it's already "fit" then set the
+    img as a wallpaper (setbg script).
 
 (I personally prefer the first way, because even I don't use the bar, the text saying _Keyhandler..._ annoys me and makes me think its searching on the keyhandler when it's not needed.)
 
@@ -45,7 +60,10 @@ Although there are **two** options:
 Just look them up [here](https://github.com/explosion-mental/sxiv/tree/main/patches), most of them aren't on this build.
 
 # Fork
-_Escape key can be mapped in config.h., it is now `Sxiv - [Directory's basename]`..._ go to [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) for more.
+go to [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) for...
+
+
+_Escape key can be mapped in config.h., it is now `Sxiv - [Directory's basename]`, and more!..._
 
 # Help...
 This is really the best image viewer and probably the fastest! After my changes it's even better for me. I have one issue:
