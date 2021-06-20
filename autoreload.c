@@ -102,11 +102,11 @@ arl_handle(arl_t *arl)
 		}
 		for (ptr = buf.d; ptr < buf.d + len; ptr += sizeof(*e) + e->len) {
 			e = (const struct inotify_event*) ptr;
-			if (e->wd == arl->wd_file && (e->mask & IN_CLOSE_WRITE)) {
+			if (e->wd == arl->wd_file && (e->mask & IN_CLOSE_WRITE))
 				reload = true;
-			} else if (e->wd == arl->wd_file && (e->mask & IN_DELETE_SELF)) {
+			else if (e->wd == arl->wd_file && (e->mask & IN_DELETE_SELF))
 				rm_watch(arl->fd, &arl->wd_file);
-			} else if (e->wd == arl->wd_dir && (e->mask & (IN_CREATE | IN_MOVED_TO))) {
+			else if (e->wd == arl->wd_dir && (e->mask & (IN_CREATE | IN_MOVED_TO))) {
 				if (STREQ(e->name, arl->filename))
 					reload = true;
 			}

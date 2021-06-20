@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
@@ -66,6 +67,7 @@ int rmcnt, rmidx;
 #ifdef ENABLE_COUNT
 int prefix;
 #endif /* ENABLE_COUNT */
+
 /*What is this?
 bool extprefix;
 bool inputting_prefix;
@@ -111,8 +113,7 @@ tmp_unlink(char **rmfiles, int n) {
 
 
 void
-cleanup(void)
-{
+cleanup(void) {
 #if HAVE_LIBCURL
 	tmp_unlink(rmfiles, rmidx);
 #endif /* HAVE_LIBCURL */
@@ -146,16 +147,14 @@ check_add_file(char *filename, bool given)
 	if (*filename == '\0')
 		return;
 
-	if (access(filename, R_OK) < 0 ||
-	    (path = realpath(filename, NULL)) == NULL)
-	{
+	if (access(filename, R_OK) < 0 || (path = realpath(filename, NULL)) == NULL) {
 		if (given)
 			error(0, errno, "%s", filename);
 		return;
 	}
 
 	/* If file is already present in files array, don't duplicate it */
-	for (i = 0; i < fileidx; i++){
+	for (i = 0; i < fileidx; i++) {
 		if (!strcmp(files[i].path, path))
 			return;
 	}
@@ -168,6 +167,7 @@ check_add_file(char *filename, bool given)
 
 	files[fileidx].name = estrdup(filename);
 	files[fileidx].path = path;
+
 #if HAVE_LIBCURL
 	if (url != NULL) {
 		files[fileidx].url = estrdup(url);
@@ -210,6 +210,7 @@ remove_file(int n, bool manual)
 			fprintf(stderr, "sxiv: no more files to display, aborting\n");
 		exit(manual ? EXIT_SUCCESS : EXIT_FAILURE);
 	}
+
 	if (files[n].flags & FF_MARK)
 		markcnt--;
 
@@ -220,7 +221,7 @@ remove_file(int n, bool manual)
 	if (n + 1 < filecnt) {
 		if (tns.thumbs != NULL) {
 			memmove(tns.thumbs + n, tns.thumbs + n + 1, (filecnt - n - 1) *
-			        sizeof(*tns.thumbs));
+			   sizeof(*tns.thumbs));
 			memset(tns.thumbs + filecnt - 1, 0, sizeof(*tns.thumbs));
 		}
 		memmove(files + n, files + n + 1, (filecnt - n - 1) * sizeof(*files));
@@ -279,14 +280,15 @@ check_timeouts(struct timeval *t)
 				if (timeouts[i].handler != NULL)
 					timeouts[i].handler();
 				i = tmin = -1;
-			} else if (tmin < 0 || tdiff < tmin) {
+			} else if (tmin < 0 || tdiff < tmin)
 				tmin = tdiff;
-			}
 		}
 		i++;
 	}
+
 	if (tmin > 0 && t != NULL)
 		TV_SET_MSEC(t, tmin);
+
 	return tmin > 0;
 }
 
@@ -321,9 +323,9 @@ open_info(void)
 		error(EXIT_FAILURE, errno, "exec: %s", info.f.cmd);
 	}
 	close(pfd[1]);
-	if (info.pid < 0) {
+	if (info.pid < 0)
 		close(pfd[0]);
-	} else {
+	else {
 		fcntl(pfd[0], F_SETFL, O_NONBLOCK);
 		info.fd = pfd[0];
 		info.i = info.lastsep = 0;
@@ -445,7 +447,7 @@ void
 update_info(void)
 {
 	unsigned int i, fn, fw;
-	const char * mark;
+	const char *mark;
 	win_bar_t *l = &win.bar.l, *r = &win.bar.r;
 
 	/* update bar contents */
@@ -457,20 +459,20 @@ update_info(void)
 	r->p = r->buf;
 	if (mode == MODE_THUMB) {
 			//show name even when caching
-		if (tns.loadnext < tns.end){
+		if (tns.loadnext < tns.end) {
 			bar_put(r, "Loading...  %0*d" BAR_SEP, fw, tns.loadnext + 1);
 			strncpy(l->buf, basename((char *)files[fileidx].name), l->size); }
 	//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt, "Loading... %0*d", fw, tns.loadnext + 1);
-		else if (tns.initnext < filecnt){
+		else if (tns.initnext < filecnt) {
 			bar_put(r, "Caching...  %0*d" BAR_SEP, fw, tns.initnext + 1);
 		strncpy(l->buf, basename((char *)files[fileidx].name), l->size);}
 			//bar_put(r, "[%s%d] %0*d/%d", mark, markcnt, fw, fileidx + 1, filecnt, "Caching... %0*d", fw, tns.initnext + 1);
 		else {	//Show only the image basename() in titlebar, not the entire path(./)
 
 #if HAVE_LIBCURL
-			if (files[fileidx].url != NULL) {
+			if (files[fileidx].url != NULL)
 				strncpy(l->buf, files[fileidx].url, l->size);
-			} else {
+			else {
 #endif /* HAVE_LIBCURL */
 				//strncpy(l->buf, files[fileidx].name, l->size);
 			strncpy(l->buf, basename((char *)files[fileidx].name), l->size);
@@ -486,7 +488,7 @@ update_info(void)
 	} else {//show marked imgs on bar(only if there's at least one image marked)
 		//But this doens't update...?
 		if (markcnt != 0)
-		bar_put(r, "[%s%d]" BAR_SEP, mark, markcnt);
+			bar_put(r, "[%s%d]" BAR_SEP, mark, markcnt);
 		if (img.ss.on) {
 			if (img.ss.delay % 10 != 0)
 				bar_put(r, "%2.1fs" BAR_SEP, (float)img.ss.delay / 10);
@@ -505,9 +507,9 @@ update_info(void)
 		//	strncpy(l->buf, files[fileidx].name, l->size);
 		if (info.f.err) {
 #if HAVE_LIBCURL
-			if (files[fileidx].url != NULL) {
+			if (files[fileidx].url != NULL)
 				strncpy(l->buf, files[fileidx].url, l->size);
-			} else {
+			else {
 #endif /* HAVE_LIBCURL */
 				strncpy(l->buf, files[fileidx].name, l->size);
 #if HAVE_LIBCURL
@@ -520,9 +522,16 @@ update_info(void)
 
 /* url.c */
 #if HAVE_LIBCURL
+#include <curl/curl.h>
+
+static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
+	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+	return written;
+}
 
 bool
-is_url(const char *url) {
+is_url(const char *url)
+{
 	if ((!strncmp(url, "http://", 7))
 			|| (!strncmp(url, "https://", 8))
 			|| (!strncmp(url, "gopher://", 9))
@@ -533,15 +542,9 @@ is_url(const char *url) {
 	return 0;
 }
 
-static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
-	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
-	return written;
-}
-
-#include <curl/curl.h>
-
 int
-get_url(const char *url, char **out) {
+get_url(const char *url, char **out)
+{
 	CURL *curl;
 	CURLcode ret;
 	char tmp[1024] = { 0 };
@@ -551,31 +554,26 @@ get_url(const char *url, char **out) {
 	for (j = strlen(url); j != 0 && url[j] != '/'; j--);
 	if (j != 0)
 		j++;
-
 	snprintf(tmp, sizeof(tmp), "/tmp/sxiv-%s", url + j);
 	file = fopen(tmp, "wb");
 
 	if (file == NULL)
 		return -1;
-
 	*out = strdup(tmp);
 	if (*out == NULL)
 		return -1;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl = curl_easy_init();
-
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-
 	ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK) {
 		printf("Curl Error: %s\n", curl_easy_strerror(ret));
 		return -1;
 	}
-
 	fclose(file);
 	curl_easy_cleanup(curl);
 	curl_global_cleanup();
@@ -607,9 +605,8 @@ redraw(void)
 				t = MAX(t, img.multi.length);
 			set_timeout(slideshow, t, false);
 		}
-	} else {
+	} else
 		tns_render(&tns);
-	}
 	update_info();
 	win_draw(&win);
 	reset_timeout(redraw);
@@ -706,15 +703,16 @@ run_key_handler(const char *key, unsigned int mask)
 
 	close_info();
 	memcpy(oldbar, win.bar.l.buf, sizeof(oldbar));
+
 	/* How to put the text on the midlle? */
 	snprintf(win.bar.l.buf, win.bar.l.size, "%s >_ Keyhandler...", oldbar);
 	win_draw(&win);
 	win_set_cursor(&win, CURSOR_WATCH);
 
 	snprintf(kstr, sizeof(kstr), "%s%s%s%s",
-	         mask & ControlMask ? "C-" : "",
-	         mask & Mod1Mask    ? "M-" : "",
-	         mask & ShiftMask   ? "S-" : "", key);
+	    mask & ControlMask ? "C-" : "",
+	    mask & Mod1Mask    ? "M-" : "",
+	    mask & ShiftMask   ? "S-" : "", key);
 
 	if ((pid = fork()) == 0) {
 		close(pfd[1]);
@@ -737,13 +735,13 @@ run_key_handler(const char *key, unsigned int mask)
 		}
 	}
 	fclose(pfs);
+
 	while (waitpid(pid, NULL, 0) == -1 && errno == EINTR);
 
 	for (f = i = 0; f < fcnt; i++) {
 		if ((marked && (files[i].flags & FF_MARK)) || (!marked && i == fileidx)) {
-			if (stat(files[i].path, &st) != 0 ||
-				  memcmp(&oldst[f].st_mtime, &st.st_mtime, sizeof(st.st_mtime)) != 0)
-			{
+			if (stat(files[i].path, &st) != 0 || memcmp(&oldst[f].st_mtime,
+				    &st.st_mtime, sizeof(st.st_mtime)) != 0) {
 				if (tns.thumbs != NULL) {
 					tns_unload(&tns, i);
 					tns.loadnext = MIN(tns.loadnext, i);
@@ -761,9 +759,8 @@ end:
 		if (changed) {
 			img_close(&img, true);
 			load_image(fileidx);
-		} else {
+		} else
 			open_info();
-		}
 	}
 	free(oldst);
 	reset_cursor();
@@ -862,9 +859,8 @@ on_buttonpress(XButtonEvent *bev)
 						set_timeout(reset_cursor, TO_CURSOR_HIDE, true);
 						load_image(fileidx);
 						redraw();
-					} else {
+					} else
 						firstclick = bev->time;
-					}
 				}
 				break;
 			case Button3:
@@ -876,7 +872,7 @@ on_buttonpress(XButtonEvent *bev)
 						if (sel >= 0 && mark_image(sel, on))
 							redraw();
 						XMaskEvent(win.env.dpy,
-						           ButtonPressMask | ButtonReleaseMask | PointerMotionMask, &e);
+						    ButtonPressMask | ButtonReleaseMask | PointerMotionMask, &e);
 						if (e.type == ButtonPress || e.type == ButtonRelease)
 							break;
 						while (XCheckTypedEvent(win.env.dpy, MotionNotify, &e));
@@ -887,7 +883,7 @@ on_buttonpress(XButtonEvent *bev)
 			case Button4:
 			case Button5:
 				if (tns_scroll(&tns, bev->button == Button4 ? DIR_UP : DIR_DOWN,
-				               (bev->state & ControlMask) != 0))
+				        	(bev->state & ControlMask) != 0))
 					redraw();
 				break;
 		}
@@ -988,16 +984,14 @@ run(void)
 					if (mode == MODE_IMAGE) {
 						img.dirty = true;
 						img.checkpan = true;
-					} else {
+					} else
 						tns.dirty = true;
-					}
 					if (!resized) {
 						redraw();
 						set_timeout(clear_resize, TO_REDRAW_RESIZE, false);
 						resized = true;
-					} else {
+					} else
 						set_timeout(redraw, TO_REDRAW_RESIZE, false);
-					}
 				}
 				break;
 			case KeyPress:
@@ -1189,9 +1183,8 @@ main(int argc, char **argv)
 			if (access(cmd[i]->cmd, X_OK) != 0)
 				cmd[i]->err = errno;
 		}
-	} else {
+	} else
 		error(0, 0, "Exec directory not found");
-	}
 	info.fd = -1;
 
 	if (options->thumb_mode) {

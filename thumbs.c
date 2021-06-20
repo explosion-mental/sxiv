@@ -155,9 +155,8 @@ tns_init(tns_t *tns, fileinfo_t *files, const int *cnt, int *sel, win_t *win)
 	if (cnt != NULL && *cnt > 0) {
 		tns->thumbs = (thumb_t*) emalloc(*cnt * sizeof(thumb_t));
 		memset(tns->thumbs, 0, *cnt * sizeof(thumb_t));
-	} else {
+	} else
 		tns->thumbs = NULL;
-	}
 	tns->files = files;
 	tns->cnt = cnt;
 	tns->initnext = tns->loadnext = 0;
@@ -178,9 +177,8 @@ tns_init(tns_t *tns, fileinfo_t *files, const int *cnt, int *sel, win_t *win)
 		len = strlen(homedir) + strlen(dsuffix) + 6;
 		cache_dir = (char*) emalloc(len);
 		snprintf(cache_dir, len, "%s%s/sxiv", homedir, dsuffix);
-	} else {
+	} else
 		error(0, 0, "Cache directory not found");
-	}
 }
 
 CLEANUP void
@@ -198,7 +196,6 @@ tns_free(tns_t *tns)
 		free(tns->thumbs);
 		tns->thumbs = NULL;
 	}
-
 	free(cache_dir);
 	cache_dir = NULL;
 }
@@ -219,11 +216,9 @@ tns_scale_down(Imlib_Image im, int dim)
 
 		if (dim < w || dim < h) {
 			imlib_context_set_anti_alias(1);
-			im = imlib_create_cropped_scaled_image(x, y, s, s,
-								dim, dim);
+			im = imlib_create_cropped_scaled_image(x, y, s, s, dim, dim);
 			if (im == NULL)
 				error(EXIT_FAILURE, ENOMEM, NULL);
-
 			imlib_free_image_and_decache();
 		}
 	} else {
@@ -235,11 +230,9 @@ tns_scale_down(Imlib_Image im, int dim)
 
 		if (z < 1.0) {
 			imlib_context_set_anti_alias(1);
-			im = imlib_create_cropped_scaled_image(0, 0, w, h,
-			                                	MAX(z * w, 1), MAX(z * h, 1));
+			im = imlib_create_cropped_scaled_image(0, 0, w, h, MAX(z * w, 1), MAX(z * h, 1));
 			if (im == NULL)
 				error(EXIT_FAILURE, ENOMEM, NULL);
-
 			imlib_free_image_and_decache();
 		}
 	}
@@ -282,9 +275,8 @@ tns_load(tns_t *tns, int n, bool force, bool cache_only)
 				}
 				imlib_free_image_and_decache();
 				im = NULL;
-			} else {
+			} else
 				cache_hit = true;
-			}
 #if HAVE_LIBEXIF
 		} else if (!force && !options->private_mode) {
 			int pw = 0, ph = 0, w, h, x = 0, y = 0;
@@ -477,15 +469,13 @@ tns_render(tns_t *tns)
 			imlib_render_image_on_drawable_at_size(t->x, t->y, t->w, t->h);
 			if (tns->files[i].flags & FF_MARK)
 				tns_mark(tns, i, true);
-		} else {
+		} else
 			tns->loadnext = MIN(tns->loadnext, i);
-		}
 		if ((i + 1) % tns->cols == 0) {
 			x = tns->x;
 			y += tns->dim;
-		} else {
+		} else
 			x += tns->dim;
-		}
 	}
 	tns->dirty = false;
 	tns_highlight(tns, *tns->sel, true);
@@ -598,9 +588,8 @@ tns_scroll(tns_t *tns, direction_t dir, bool screen)
 		if (*tns->cnt % tns->cols != 0)
 			max += tns->cols - *tns->cnt % tns->cols;
 		tns->first = MIN(tns->first + d, max);
-	} else if (dir == DIR_UP) {
+	} else if (dir == DIR_UP)
 		tns->first = MAX(tns->first - d, 0);
-	}
 
 	if (tns->first != old) {
 		tns_check_view(tns, true);
@@ -640,7 +629,6 @@ tns_translate(tns_t *tns, int x, int y)
 
 	if (x < tns->x || y < tns->y)
 		return -1;
-
 	n = tns->first + (y - tns->y) / tns->dim * tns->cols +
 	    (x - tns->x) / tns->dim;
 	if (n >= *tns->cnt)

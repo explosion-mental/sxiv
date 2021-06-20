@@ -97,9 +97,8 @@ cg_toggle_bar(arg_t _)
 		else
 			close_info();
 		img.checkpan = img.dirty = true;
-	} else {
+	} else
 		tns.dirty = true;
-	}
 	return true;
 }
 /* Not needed lol
@@ -145,9 +144,8 @@ cg_first(arg_t _)
 		fileidx = 0;
 		tns.dirty = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool
@@ -169,9 +167,8 @@ cg_n_or_last(arg_t _)
 #endif /* ENABLE_COUNT */
 		tns.dirty = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool
@@ -270,16 +267,15 @@ cg_navigate_marked(arg_t n)
 		}
 	}
 	if (new != fileidx) {
-		if (mode == MODE_IMAGE) {
+		if (mode == MODE_IMAGE)
 			load_image(new);
-		} else {
+		else {
 			fileidx = new;
 			tns.dirty = true;
 		}
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool
@@ -293,9 +289,8 @@ cg_change_gamma(arg_t d)
 		if (mode == MODE_THUMB)
 			tns.dirty = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool
@@ -314,9 +309,8 @@ ci_navigate(arg_t n)
 	if (n != fileidx) {
 		load_image(n);
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool
@@ -345,12 +339,13 @@ ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is activat
 		frame = (img.multi.sel + d) % img.multi.cnt;
 		while (frame < 0)
 			frame += img.multi.cnt;
-		//return img_frame_goto(&img,frame);	/* This one doen't care if it's playing the animaton */
-		return !img.multi.animate && img_frame_goto(&img, frame);	/* This one cares if it's playing, so will only navigate if animation is paused */
-	} else {
-	//return img_frame_navigate(&img, d);
-	return !img.multi.animate && img_frame_navigate(&img, d);
-	}
+/* This one doen't care if it's playing the animaton */
+		//return img_frame_goto(&img,frame);
+/* This one cares if it's playing, so will only navigate if animation is paused */
+		return !img.multi.animate && img_frame_goto(&img, frame);
+	} else
+		//return img_frame_navigate(&img, d);
+		return !img.multi.animate && img_frame_navigate(&img, d);
 }
 
 bool
@@ -363,9 +358,8 @@ ci_toggle_animation(arg_t _)
 		if (img.multi.animate) {
 			dirty = img_frame_animate(&img);
 			set_timeout(animate, img.multi.frames[img.multi.sel].delay, true);
-		} else {
+		} else
 			reset_timeout(animate);
-		}
 	}
 	return dirty;
 }
@@ -418,7 +412,7 @@ ci_scroll_or_navigate(arg_t dir)
 		}
 		return ci_navigate(n);
 	} else
-	return ci_scroll(dir);
+		return ci_scroll(dir);
 }
 
 bool
@@ -526,9 +520,8 @@ ci_slideshow(arg_t _)
 	if (img.ss.on) {
 		img.ss.on = false;
 		reset_timeout(slideshow);
-	} else {
+	} else
 		img.ss.on = true;
-	}
 	return true;
 }
 

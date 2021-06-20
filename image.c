@@ -217,11 +217,9 @@ img_load_gif(img_t *img, const fileinfo_t *file)
 					{
 						if (prev_frame != NULL && (prev_disposal != 2 ||
 						    i < py || i >= py + ph || j < px || j >= px + pw))
-						{
 							*ptr = prev_frame[i * sw + j];
-						} else {
+						else
 							*ptr = bgpixel;
-						}
 					} else {
 						r = cmap->Colors[rows[i-y][j-x]].Red;
 						g = cmap->Colors[rows[i-y][j-x]].Green;
@@ -302,7 +300,7 @@ img_open(const fileinfo_t *file)
 	Imlib_Load_Error err = 0;
 
 	if (access(file->path, R_OK) == 0 &&
-	    stat(file->path, &st) == 0 && S_ISREG(st.st_mode))
+		stat(file->path, &st) == 0 && S_ISREG(st.st_mode))
 	{
 		im = imlib_load_image_with_error_return(file->path, &err);
 		if (im != NULL) {
@@ -452,9 +450,8 @@ img_fit(img_t *img)
 		img->zoom = z;
 		img->dirty = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 void
@@ -492,6 +489,7 @@ img_render(img_t *img)
 		dx = img->x;
 		dw = img->w * img->zoom;
 	}
+
 	if (img->y <= 0) {
 		sy = -img->y / img->zoom + 0.5;
 		sh = win->h / img->zoom;
@@ -526,9 +524,8 @@ img_render(img_t *img)
 				if (r == 0 || r == 8) {
 					for (c = 0; c < dw; c++)
 						data[i++] = col[!(c & 8) ^ !r];
-				} else {
+				} else
 					memcpy(&data[i], &data[(r & 8) * dw], dw * sizeof(data[0]));
-				}
 			}
 			imlib_image_put_back_data(data);
 		} else {
@@ -541,9 +538,8 @@ img_render(img_t *img)
 		imlib_render_image_on_drawable(dx, dy);
 		imlib_free_image();
 		imlib_context_set_color_modifier(img->cmod);
-	} else {
+	} else
 		imlib_render_image_part_on_drawable_at_size(sx, sy, sw, sh, dx, dy, dw, dh);
-	}
 	img->dirty = false;
 }
 
@@ -560,9 +556,8 @@ img_fit_win(img_t *img, scalemode_t sm)
 		img->y = img->win->h / 2 - (img->win->h / 2 - img->y) * img->zoom / oz;
 		img->checkpan = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool
@@ -587,9 +582,8 @@ img_zoom(img_t *img, float z)
 		img->checkpan = true;
 		img->dirty = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool
@@ -636,9 +630,8 @@ img_pos(img_t *img, float x, float y)
 	if (ox != img->x || oy != img->y) {
 		img->dirty = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool
@@ -708,9 +701,8 @@ img_pan_edge(img_t *img, direction_t dir)
 	if (ox != img->x || oy != img->y) {
 		img->dirty = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 void
@@ -804,9 +796,8 @@ img_change_gamma(img_t *img, int d)
 		img->gamma = gamma;
 		img->dirty = true;
 		return true;
-	} else {
+	} else
 		return false;
-	}
 }
 
 bool

@@ -236,9 +236,7 @@ win_open(win_t *win)
 	}
 	if (XAllocNamedColor(e->dpy, DefaultColormap(e->dpy, e->scr), "black",
 	                     &col, &col) == 0)
-	{
 		error(EXIT_FAILURE, 0, "Error allocating color 'black'");
-	}
 	none = XCreateBitmapFromData(e->dpy, win->xwin, none_data, 8, 8);
 	*cnone = XCreatePixmapCursor(e->dpy, none, none, &col, &col, 0, 0);
 
@@ -361,9 +359,13 @@ win_toggle_bar(win_t *win)
 		if (win->bar.h != 0) {
 			win->h -= win->bar.h;
 			win->bar.h = 0;
+			//win->h = win->bar.h - win->h;
+			//win->bar.h = 0;
 		} else {
 			win->bar.h = barheight;
 			win->h += win->bar.h;
+			//win->bar.h = barheight;
+			//win->h = win->bar.h + win->h;
 		}
 	} else {
 		if (win->bar.h != 0) {
@@ -409,9 +411,9 @@ win_draw_text(win_t *win, XftDraw *d, const XftColor *color, int x, int y, char 
 
 	for (t = text; t - text < len; t = next) {
 		next = utf8_decode(t, &rune, &err);
-		if (XftCharExists(win->env.dpy, font, rune)) {
+		if (XftCharExists(win->env.dpy, font, rune))
 			f = font;
-		} else { /* fallback font */
+		else { /* fallback font */
 			fccharset = FcCharSetCreate();
 			FcCharSetAddChar(fccharset, rune);
 			f = XftFontOpen(win->env.dpy, win->env.scr, FC_CHARSET, FcTypeCharSet,
@@ -455,11 +457,9 @@ win_draw_bar(win_t *win)
 	/* bar */
 	if (topbar)
 			    /*display	drawable    gc  x	y	wid     height	*/
-		XFillRectangle(e->dpy, win->buf.pm, gc,
-				0, 0, win->w, win->bar.h);
+		XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->w, win->bar.h);
 	else
-		XFillRectangle(e->dpy, win->buf.pm, gc,
-				0, win->h, win->w, win->bar.h);
+		XFillRectangle(e->dpy, win->buf.pm, gc, 0, win->h, win->w, win->bar.h);
 
 	XSetForeground(e->dpy, gc, win->bg.pixel);
 	XSetBackground(e->dpy, gc, win->fg.pixel);
