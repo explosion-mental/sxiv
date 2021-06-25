@@ -532,13 +532,20 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 bool
 is_url(const char *url)
 {
-	if ((!strncmp(url, "http://", 7))
-			|| (!strncmp(url, "https://", 8))
-			|| (!strncmp(url, "gopher://", 9))
-			|| (!strncmp(url, "gophers://", 10))
-			|| (!strncmp(url, "ftp://", 6))
-			|| (!strncmp(url, "file://", 7)))
-		return 1;
+/* It does work with e.g.: sxiv  'file:///home/user/Media/Pictures/pic.jpg' */
+//	CURLU       *h = curl_url();
+//	int         rc;
+//
+//	rc = curl_url_set(h, CURLUPART_URL, url, 0);
+//	curl_url_cleanup(h);
+//	return rc == 0;
+	if ((!strncmp(url, "http://",	7))
+	 || (!strncmp(url, "https://",	8))
+	 || (!strncmp(url, "gopher://",	9))
+	 || (!strncmp(url, "gophers://",10))
+	 || (!strncmp(url, "ftp://",	6))
+	 || (!strncmp(url, "file://",	7)))
+		return -1;
 	return 0;
 }
 
@@ -571,7 +578,7 @@ get_url(const char *url, char **out)
 	ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK) {
-		printf("Curl Error: %s\n", curl_easy_strerror(ret));
+		printf("curl error: %s\n", curl_easy_strerror(ret));
 		return -1;
 	}
 	fclose(file);
