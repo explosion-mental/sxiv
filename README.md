@@ -71,8 +71,11 @@ Just look them up
 [here](https://github.com/explosion-mental/sxiv/tree/main/patches), most of
 them aren't on this build.
 
-## Fork
-Base fork is [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master)
+## Thanks
+Base fork is [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) , which I liked but needed to make changes.
+
+
+Really usefull repo [0ion9 fork](https://github.com/0ion9/sxiv) , which is to complicated for me to understand.
 
 # Contribute!
 - What's the best position/intuitive (preferably not with Shift) for some
