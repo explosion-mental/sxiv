@@ -95,6 +95,7 @@ Base fork is [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master)
 - When searching recursively (i.e., search all images in the directory and subdirs), images names on the bar are displayed. I would like to know in which directory am I (dirname), so how to show the subdirectory of the directory in which sxiv was called to be recursive.
 - Remove all position modificacion (zoom, rotation) RESTORE to default?, so reload image
 - Make '#ifdef' on tns_move_selection. That is, how to remove the 'cnt' var?
+- If only one image given match background color to the image (comflicts with the current build, but making a patch would be interesting)
 - <s>'-d' for dmenu like output?</s> Why have a flag, a command added called dmenu_output added ☑️
 - <s>After adding the padding patch, I found a screenshot of my dwm bar which is really wide but not with much height. When I marked it in "thumbnail mode" on some of the smalls zooms the image dissapears (the image was almost as thick as the marks)</s>
 - <s>How to loop on the command 'cg_navigate_marked'? (on marked images)</s> Done✅

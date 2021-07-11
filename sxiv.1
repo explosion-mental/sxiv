@@ -91,8 +91,13 @@ Enable private mode, in which sxiv does not write any cache or temporary files.
 .B \-q
 Be quiet, disable warnings to standard error stream.
 .TP
-.B \-r
+.BI "\-R " image
 Search the given directories recursively for images to view.
+.TP
+.B "\-r " image
+Single Recursive (only be recursive once). 'image' could be whatever file,
+thanks to sxiv filters, and it will search all images on the current directory
+of that image.
 .TP
 .BI "\-S " delay
 Start in slideshow mode. Set the delay between images to

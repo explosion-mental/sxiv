@@ -29,7 +29,7 @@ const opt_t *options = (const opt_t*) &_options;
 void
 print_usage(void)
 {
-	printf("usage: sxiv [-abcfhiopqrtvZ] [-A framerate] [-e wid] [-G gamma] "
+	printf("usage: sxiv [-abcfhiopqRrtvZ] [-A framerate] [-e wid] [-G gamma] "
 	       "[-g geometry] [-N name] [-n num] [-S delay] [-s mode] [-z zoom] "
 #if HAVE_LIBCURL
 	       "FILES / URLS...\n");
@@ -57,6 +57,7 @@ parse_options(int argc, char **argv)
 	_options.from_stdin = false;
 	_options.to_stdout = false;
 	_options.recursive = false;
+	_options.single_r = false;
 	_options.startnum = 0;
 
 	_options.scalemode = SCALE_DOWN;
@@ -77,7 +78,7 @@ parse_options(int argc, char **argv)
 	_options.clean_cache = false;
 	_options.private_mode = false;
 
-	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opqrS:s:tvZz:")) != -1) {
+	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opqRrS:s:tvZz:")) != -1) {
 		switch (opt) {
 			case '?':
 				print_usage();
@@ -139,8 +140,11 @@ parse_options(int argc, char **argv)
 			case 'q':
 				_options.quiet = true;
 				break;
-			case 'r':
+			case 'R':
 				_options.recursive = true;
+				break;
+			case 'r':
+				_options.single_r = true;
 				break;
 			case 'S':
 				n = strtof(optarg, &end) * 10;

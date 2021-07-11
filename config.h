@@ -86,6 +86,8 @@ static const keymap_t keys[] = {
 
 				/* Marks */
 	{ 0,		XK_m,		g_toggle_image_mark,	None },
+	{ 0,            XK_m,		i_navigate,		+1 },
+	{ 0,            XK_m,		t_move_sel,		DIR_RIGHT },
 //	{ 0,		XK_z,		g_toggle_squarethumb,	None },
 //	{ 0,		XK_M,		g_mark_range,		None },
 //	{ ControlMask,	XK_m,		g_reverse_marks,	None },

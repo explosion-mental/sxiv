@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
@@ -67,7 +66,6 @@ int rmcnt, rmidx;
 #ifdef ENABLE_COUNT
 int prefix;
 #endif /* ENABLE_COUNT */
-
 /*What is this?
 bool extprefix;
 bool inputting_prefix;
@@ -113,7 +111,8 @@ tmp_unlink(char **rmfiles, int n) {
 
 
 void
-cleanup(void) {
+cleanup(void)
+{
 #if HAVE_LIBCURL
 	tmp_unlink(rmfiles, rmidx);
 #endif /* HAVE_LIBCURL */
@@ -167,7 +166,6 @@ check_add_file(char *filename, bool given)
 
 	files[fileidx].name = estrdup(filename);
 	files[fileidx].path = path;
-
 #if HAVE_LIBCURL
 	if (url != NULL) {
 		files[fileidx].url = estrdup(url);
@@ -210,7 +208,6 @@ remove_file(int n, bool manual)
 			fprintf(stderr, "sxiv: no more files to display, aborting\n");
 		exit(manual ? EXIT_SUCCESS : EXIT_FAILURE);
 	}
-
 	if (files[n].flags & FF_MARK)
 		markcnt--;
 
@@ -221,7 +218,7 @@ remove_file(int n, bool manual)
 	if (n + 1 < filecnt) {
 		if (tns.thumbs != NULL) {
 			memmove(tns.thumbs + n, tns.thumbs + n + 1, (filecnt - n - 1) *
-			   sizeof(*tns.thumbs));
+			        sizeof(*tns.thumbs));
 			memset(tns.thumbs + filecnt - 1, 0, sizeof(*tns.thumbs));
 		}
 		memmove(files + n, files + n + 1, (filecnt - n - 1) * sizeof(*files));
@@ -285,10 +282,8 @@ check_timeouts(struct timeval *t)
 		}
 		i++;
 	}
-
 	if (tmin > 0 && t != NULL)
 		TV_SET_MSEC(t, tmin);
-
 	return tmin > 0;
 }
 
@@ -524,34 +519,25 @@ update_info(void)
 #if HAVE_LIBCURL
 #include <curl/curl.h>
 
+bool
+is_url(const char *url) {
+	if ((!strncmp(url, "http://", 7))
+			|| (!strncmp(url, "https://", 8))
+			|| (!strncmp(url, "gopher://", 9))
+			|| (!strncmp(url, "gophers://", 10))
+			|| (!strncmp(url, "ftp://", 6))
+			|| (!strncmp(url, "file://", 7)))
+		return 1;
+	return 0;
+}
+
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 	size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
 	return written;
 }
 
-bool
-is_url(const char *url)
-{
-/* It does work with e.g.: sxiv  'file:///home/user/Media/Pictures/pic.jpg' */
-//	CURLU       *h = curl_url();
-//	int         rc;
-//
-//	rc = curl_url_set(h, CURLUPART_URL, url, 0);
-//	curl_url_cleanup(h);
-//	return rc == 0;
-	if ((!strncmp(url, "http://",	7))
-	 || (!strncmp(url, "https://",	8))
-	 || (!strncmp(url, "gopher://",	9))
-	 || (!strncmp(url, "gophers://",10))
-	 || (!strncmp(url, "ftp://",	6))
-	 || (!strncmp(url, "file://",	7)))
-		return -1;
-	return 0;
-}
-
 int
-get_url(const char *url, char **out)
-{
+get_url(const char *url, char **out) {
 	CURL *curl;
 	CURLcode ret;
 	char tmp[1024] = { 0 };
@@ -561,24 +547,28 @@ get_url(const char *url, char **out)
 	for (j = strlen(url); j != 0 && url[j] != '/'; j--);
 	if (j != 0)
 		j++;
+
 	snprintf(tmp, sizeof(tmp), "/tmp/sxiv-%s", url + j);
 	file = fopen(tmp, "wb");
 
 	if (file == NULL)
 		return -1;
+
 	*out = strdup(tmp);
 	if (*out == NULL)
 		return -1;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl = curl_easy_init();
+
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+
 	ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK) {
-		printf("curl error: %s\n", curl_easy_strerror(ret));
+		printf("Curl error: %s\n", curl_easy_strerror(ret));
 		return -1;
 	}
 	fclose(file);
@@ -747,8 +737,9 @@ run_key_handler(const char *key, unsigned int mask)
 
 	for (f = i = 0; f < fcnt; i++) {
 		if ((marked && (files[i].flags & FF_MARK)) || (!marked && i == fileidx)) {
-			if (stat(files[i].path, &st) != 0 || memcmp(&oldst[f].st_mtime,
-				    &st.st_mtime, sizeof(st.st_mtime)) != 0) {
+			if (stat(files[i].path, &st) != 0 ||
+				  memcmp(&oldst[f].st_mtime, &st.st_mtime, sizeof(st.st_mtime)) != 0)
+			{
 				if (tns.thumbs != NULL) {
 					tns_unload(&tns, i);
 					tns.loadnext = MIN(tns.loadnext, i);
@@ -879,7 +870,7 @@ on_buttonpress(XButtonEvent *bev)
 						if (sel >= 0 && mark_image(sel, on))
 							redraw();
 						XMaskEvent(win.env.dpy,
-						    ButtonPressMask | ButtonReleaseMask | PointerMotionMask, &e);
+						           ButtonPressMask | ButtonReleaseMask | PointerMotionMask, &e);
 						if (e.type == ButtonPress || e.type == ButtonRelease)
 							break;
 						while (XCheckTypedEvent(win.env.dpy, MotionNotify, &e));
@@ -890,7 +881,7 @@ on_buttonpress(XButtonEvent *bev)
 			case Button4:
 			case Button5:
 				if (tns_scroll(&tns, bev->button == Button4 ? DIR_UP : DIR_DOWN,
-				        	(bev->state & ControlMask) != 0))
+				               (bev->state & ControlMask) != 0))
 					redraw();
 				break;
 		}
@@ -1112,17 +1103,17 @@ main(int argc, char **argv)
 			continue;
 		}
 		if (!S_ISDIR(fstats.st_mode)) {
-			char *path = check_and_get_path(filename);
-			/* Set the first command line argument as the displayed file */
-			if (fileidx == 0)
-				memcpy(savedname, path, sizeof(savedname));
-			/* If single file as argument, the whole directory will be scanned */
-			if (options->filecnt == 1)
-				filename = dirname(filename);
-			else {
+			/* -r */
+			if (options->single_r) {
+				char *path = check_and_get_path(filename);
+			//no	/* Set the first command line argument as the displayed file */
+				if (fileidx == 0)
+					memcpy(savedname, path, sizeof(savedname));
+			//no	/* If single file as argument, the whole directory will be scanned */
+				//if (options->filecnt == 1)
+					filename = dirname(filename);
+			} else
 				check_add_file(filename, true);
-				continue;
-			}
 		}
 		if (r_opendir(&dir, filename, options->recursive) < 0) {
 			error(0, errno, "%s", filename);
@@ -1151,7 +1142,7 @@ main(int argc, char **argv)
 				fileidx = i;
 				break;
 			}
-			fileidx=0;
+			fileidx = 0;
 		}
 	}
 

@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 /* Why have this file? */
 #ifndef SXIV_H
 #define SXIV_H
@@ -158,7 +159,7 @@ typedef bool (*cmd_f)(arg_t);
 #define T_CMD(c) t_##c,
 
 typedef enum {
-#include "commands.lst"
+	#include "commands.lst"
 	CMD_COUNT
 } cmd_id_t;
 
@@ -362,14 +363,14 @@ typedef struct {
 
 extern const char *progname;
 
-void* emalloc(size_t);
-void* erealloc(void*, size_t);
-char* estrdup(const char*);
+void *emalloc(size_t);
+void *erealloc(void*, size_t);
+char *estrdup(const char*);
 void error(int, int, const char*, ...);
 void size_readable(float*, const char**);
 int r_opendir(r_dir_t*, const char*, bool);
 int r_closedir(r_dir_t*);
-char* r_readdir(r_dir_t*, bool);
+char *r_readdir(r_dir_t*, bool);
 int r_mkdir(char*);
 
 
