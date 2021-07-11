@@ -26,6 +26,7 @@ xbps-install imlib2-devel libexif-devel giflib-devel
 * Navigate to random image
 * Scale to fill the window
 * Stream images directly from the web (example: `sxiv 'https://raw.githubusercontent.com/explosion-mental/sxiv/main/sxiv.png'` )
+* _Single recursive_ with -r. ( example: `sxiv -r image.png` will scan the whole directory for images in which `image.png` is located, if you want true recursivess, all subdirs also, use -R )
 
 ## Key Handler
 With the patch I made (I'll formatting correctly), there's no need for
