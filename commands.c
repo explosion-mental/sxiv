@@ -101,8 +101,8 @@ cg_toggle_bar(arg_t _)
 		tns.dirty = true;
 	return true;
 }
-/* Not needed lol
-bool cg_prefix_external(arg_t _) // Not needed
+/* Not needed
+bool cg_prefix_external(arg_t _)
 {
 	extprefix = true;
 	return false;
@@ -111,9 +111,9 @@ bool cg_prefix_external(arg_t _) // Not needed
 bool
 cg_reload_image(arg_t _)
 {
-	if (mode == MODE_IMAGE) {
+	if (mode == MODE_IMAGE)
 		load_image(fileidx);
-	} else {
+	else {
 		win_set_cursor(&win, CURSOR_WATCH);
 		if (!tns_load(&tns, fileidx, true, false)) {
 			remove_file(fileidx, false);
