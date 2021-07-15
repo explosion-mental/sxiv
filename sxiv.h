@@ -263,6 +263,7 @@ struct opt {
 	bool from_stdin;
 	bool to_stdout;
 	bool recursive;
+	bool single_r;
 	int filecnt;
 	int startnum;
 
