@@ -1058,7 +1058,7 @@ main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	if (options->recursive || options->from_stdin)
+	if (options->recursive || options->single_r || options->from_stdin)
 		filecnt = 1024;
 	else
 		filecnt = options->filecnt;
@@ -1105,15 +1105,13 @@ main(int argc, char **argv)
 		if (!S_ISDIR(fstats.st_mode)) {
 			/* -r */
 			if (options->single_r) {
-				char *path = check_and_get_path(filename);
-			//no	/* Set the first command line argument as the displayed file */
-				if (fileidx == 0)
-					memcpy(savedname, path, sizeof(savedname));
-			//no	/* If single file as argument, the whole directory will be scanned */
-				//if (options->filecnt == 1)
-					filename = dirname(filename);
-			} else
+				/* Display the image given first */
+				memcpy(savedname, check_and_get_path(filename), sizeof(savedname));
+				filename = dirname(filename);
+			} else {
 				check_add_file(filename, true);
+				continue;
+			}
 		}
 		if (r_opendir(&dir, filename, options->recursive) < 0) {
 			error(0, errno, "%s", filename);

@@ -10,24 +10,25 @@ static const int  topbar       = 0;		/* 0 means bottom bar (default) */
 
 /* global */
 enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
-enum { SLIDESHOW_DELAY = 4 };		/* slideshow delay in seconds (overwritten via -S option) */
-static const double GAMMA_MAX 	= 10.0; /* [-GAMMA_RANGE, 0] and (0, GAMMA_RANGE] are mapped.. */
-static const int GAMMA_RANGE 	= 32;	/* to the ranges [0, 1], and (1, GAMMA_MAX] */
-static const int PAN_FRACTION 	= 8;	/* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
-static const bool ANTI_ALIAS  	= true;	/* false means pixelate images at zoom level != 100% */
-static const bool ALPHA_LAYER 	= false;/* true means use a checkerboard background for alpha layer */
+static const float SLIDESHOW_DELAY = 4.5;   /* slideshow delay in seconds (overwritten via -S option) */
+static const double GAMMA_MAX 	= 10.0;     /* [-GAMMA_RANGE, 0] and (0, GAMMA_RANGE] are mapped.. */
+static const int GAMMA_RANGE 	= 32;       /* to the ranges [0, 1], and (1, GAMMA_MAX] */
+static const int PAN_FRACTION 	= 8;        /* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
+static const bool ANTI_ALIAS  	= true;     /* false means pixelate images at zoom level != 100% */
+static const bool ALPHA_LAYER 	= false;    /* if true use checkerboard background for alpha layer (i_toggle_alpha) */
 static const float zoom_levels[] = {
  /* first/last value is used as min/max zoom percent level */
-	 12.5,  25.0,  35.0,  45.0,  50.0,  75.0,
-	100.0, 125.0,  150.0, 200.0, 400.0, 800.0
+	12.5, 14,  25,  35,  45,  50,  75,
+	100, 125,  150, 200, 400, 800
 };
 
+
 /* thumbnail */
-static const int THUMB_BORDERS[] = { 7 }; /* How does this work? */
-static const int THUMB_MARGIN    = -4;	/* margins between images, buggy with marks */
-static const int THUMB_PADDING   = 0;	/* padding of the highlight or mark */
-static const int THUMB_SIZE      = 3;	/* thumbnail size at startup, index into thumb_sizes[]: */
-static const int squarethumb     = 1;	/* 0 means normal thumbs (default) */
+static const int THUMB_BORDERS[] = { 7 }; /* borders */
+static const int THUMB_MARGIN    = -4;    /* margins between images, buggy with marks */
+static const int THUMB_PADDING   = 0;     /* padding of the highlight or mark */
+static const int THUMB_SIZE      = 3;     /* thumbnail size at startup, index into thumb_sizes[]: */
+static const int squarethumb     = 1;     /* 0 means normal thumbs (default) */
 static const int thumb_sizes[] = {
  /* thumbnail sizes in pixels (width == height) */
 	32, 64, 116, 145, 181, 286, 361, 412

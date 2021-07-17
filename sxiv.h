@@ -292,7 +292,7 @@ struct opt {
 extern const opt_t *options;
 
 void print_usage(void);
-void print_version(void);
+//void print_version(void);
 void parse_options(int, char**);
 
 

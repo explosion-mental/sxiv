@@ -39,12 +39,6 @@ print_usage(void)
 }
 
 void
-print_version(void)
-{
-	puts("sxiv-"VERSION);
-}
-
-void
 parse_options(int argc, char **argv)
 {
 	int n, opt;
@@ -162,7 +156,7 @@ parse_options(int argc, char **argv)
 				_options.thumb_mode = true;
 				break;
 			case 'v':
-				print_version();
+				puts("sxiv-"VERSION);
 				exit(EXIT_SUCCESS);
 			case 'Z':
 				_options.scalemode = SCALE_ZOOM;
