@@ -86,6 +86,7 @@ win_res(XrmDatabase db, const char *name, const char *def)
 	}
 }
 
+//typedef XftColor Clr;
 #define INIT_ATOM_(atom) atoms[ATOM_##atom] = XInternAtom(e->dpy, #atom, False);
 #define RES_CLASS "Sxiv"
 void
@@ -125,6 +126,8 @@ win_init(win_t *win)
 	fg   = win_res(db, RES_CLASS ".color2",     fgcolor);	/* bar */
 	mark = win_res(db, RES_CLASS ".color2",   markcolor);	/* mark */
 	sel  = win_res(db, RES_CLASS ".color8",    selcolor);	/* highlight */
+	//colors[SchemeNorm][ColBg];
+
 	win_alloc_color(e, bg, &win->bg);
 	win_alloc_color(e, fg, &win->fg);
  	win_alloc_color(e, mark, &win->markcol);
