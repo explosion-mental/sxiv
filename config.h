@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+/* Default settings; can be overriden by command line. */
 
 /* appearance */
 static const char bgcolor[]   = "#222222";	/* background */
@@ -9,17 +10,17 @@ static const char leterfont[] = "unifont-9";	//multiple fonts?
 static const int  topbar      = 0;		/* 0 means bottom bar (default) */
 
 /* global */
-enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 }; /* window dimensions (overwritten by -g option) */
-static const float SLIDESHOW_DELAY = 4.5;   /* slideshow delay in seconds (overwritten via -S option) */
+enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 };    /* -g option; window dimensions */
+static const float SLIDESHOW_DELAY = 4.5;      /* -S option; slideshow delay in seconds */
 static const double GAMMA_MAX      = 10.0;     /* [-GAMMA_RANGE, 0] and (0, GAMMA_RANGE] are mapped.. */
 static const int GAMMA_RANGE       = 32;       /* to the ranges [0, 1], and (1, GAMMA_MAX] */
-static const int PAN_FRACTION      = 8;        /* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
+static const int PAN_FRACTION      = 4;        /* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
 static const bool ANTI_ALIAS       = true;     /* false means pixelate images at zoom level != 100% */
 static const bool ALPHA_LAYER      = false;    /* if true use checkerboard background for alpha layer (i_toggle_alpha) */
 static const float zoom_levels[]   = {
  /* first/last value is used as min/max zoom percent level */
 	12.5, 14,  25,  35,  45,  50,  75,
-	100, 125,  150, 200, 400, 800
+	100, 125,  150, 200, 400, 800, 900
 };
 
 
