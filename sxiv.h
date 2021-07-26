@@ -98,6 +98,7 @@ typedef enum {
 	CURSOR_LEFT,
 	CURSOR_RIGHT,
 	CURSOR_NONE,
+
 	CURSOR_COUNT
 } cursor_t;
 
@@ -426,7 +427,7 @@ struct win {
 	XftColor selcol;
 	XftColor markcol;
 
-	char *title;
+    const char *title;
 
 	int x;
 	int y;

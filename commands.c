@@ -336,21 +336,16 @@ ci_navigate_frame(arg_t d)//How to toggle animation if navigate frame is activat
 #endif /* ENABLE_COUNT */
 //	return !img.multi.animate && img_frame_navigate(&img, d);
 	if (img.multi.cnt > 0) {
-//			img.multi.animate = !img.multi.animate;
-//		if (img.multi.animate) {
-//			set_timeout(animate, img.multi.frames[img.multi.sel].delay, true);
-//		} else
-//			reset_timeout(animate);
 		frame = (img.multi.sel + d) % img.multi.cnt;
 		while (frame < 0)
 			frame += img.multi.cnt;
 /* This one doen't care if it's playing the animaton */
-		return img_frame_goto(&img,frame);
+		//return img_frame_goto(&img,frame);
 /* This one cares if it's playing, so will only navigate if animation is paused */
-		//return !img.multi.animate && img_frame_goto(&img, frame);
+		return !img.multi.animate && img_frame_goto(&img, frame);
 	} else
-		return img_frame_navigate(&img, d);
-		//return !img.multi.animate && img_frame_navigate(&img, d);
+		//return img_frame_navigate(&img, d);
+		return !img.multi.animate && img_frame_navigate(&img, d);
 }
 
 bool
