@@ -2,12 +2,13 @@
 /* Default settings; can be overriden by command line. */
 
 /* appearance */
-static const char bgcolor[]   = "#222222";	/* background */
-static const char fgcolor[]   = "#444444";	/* bar */
-static const char markcolor[] = "#bbbbbb";	/* mark */
-static const char selcolor[]  = "#eeeeee";	/* highlight */
-static const char leterfont[] = "unifont-9";	//multiple fonts?
-static const int  topbar      = 0;		/* 0 means bottom bar (default) */
+static const int  topbar      = 0;             /* 0 means bottom bar (default) */
+static const char bgcolor[]   = "#222222";     /* background */
+static const char fgcolor[]   = "#444444";     /* bar */
+static const char markcolor[] = "#bbbbbb";     /* mark */
+static const char selcolor[]  = "#eeeeee";     /* highlight */
+static const char leterfont[] = "unifont-9";   //multiple fonts?
+//static const char title[]     = "";            /* default "Sxiv -" */
 
 /* global */
 enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 };    /* -g option; window dimensions */
