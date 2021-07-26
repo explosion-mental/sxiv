@@ -1,7 +1,5 @@
 # sxiv
-My build of sxiv
-
-_The "My build" is only for keybindings. This is meant to be as standard as possible_
+Improving sxiv!
 
 
 ![Image](sxiv.png "sxiv")
@@ -75,11 +73,12 @@ them aren't on this build.
 Base fork is [qsmodo fork](https://github.com/qsmodo/sxiv/commits/master) , which I liked but needed to make changes.
 
 
-Really usefull repo [0ion9 fork](https://github.com/0ion9/sxiv) , which is to complicated for me to understand.
+Really usefull repo [0ion9 fork](https://github.com/0ion9/sxiv) , which is too complicated for me to understand.
 
 # Contribute!
 - What's the best position/intuitive (preferably not with Shift) for some
   actions on sxiv?
+- Write about interesting features!
 
 # TODO
 - Load all frames from TIFF files. We have to write our own loader for this to
