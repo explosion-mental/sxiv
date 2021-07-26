@@ -1035,7 +1035,8 @@ main(int argc, char **argv)
 	int i, start;
 	size_t n;
 	ssize_t len;
-	char *filename, dirn[PATH_MAX], savedname[PATH_MAX] = {0}, title[] = "Sxiv - ";
+	//char *filename, dirn[PATH_MAX], savedname[PATH_MAX] = {0}, title[] = "";
+	char *filename, dirn[PATH_MAX], savedname[PATH_MAX] = {0}, title[] = "";
 	const char *homedir, *dsuffix = "";
 	struct stat fstats;
 	r_dir_t dir;
