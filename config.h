@@ -7,7 +7,7 @@ static const char bgcolor[]   = "#222222";     /* background */
 static const char fgcolor[]   = "#444444";     /* bar */
 static const char markcolor[] = "#bbbbbb";     /* mark */
 static const char selcolor[]  = "#eeeeee";     /* highlight */
-static const char leterfont[] = "unifont-9";   //multiple fonts?
+static const char leterfont[] = "JetBrains Mono Medium:pixelsize=15:antialias=true:autohint=true";   //multiple fonts?
 //static const char title[]     = "";            /* default "Sxiv -" */
 
 /* global */
