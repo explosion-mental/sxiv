@@ -29,10 +29,9 @@
 #include "config.h"
 #include "icon/data.h"
 #include "utf8.h"
-enum {
-	H_TEXT_PAD = 5,
-	V_TEXT_PAD = 1
-};
+//#include "drw.h"
+enum {	H_TEXT_PAD = 5,
+	V_TEXT_PAD = 1 };
 
 static struct {
 	int name;
@@ -43,12 +42,32 @@ static struct {
 };
 
 static GC gc;
+//static GC = drw->gc;
 static XftFont *font;
 static int fontheight;
 static double fontsize;
 static int barheight;
 
 Atom atoms[ATOM_COUNT];
+
+void
+drw_rect(const win_env_t *e, int x, int y, unsigned int w, unsigned int h, int filled, int invert)
+{
+	//const win_env_t *e;
+	win_t *win;
+
+	//if (!drw || !drw->scheme)
+	//	return;
+	XSetForeground(e->dpy, gc, invert ? win->bg.pixel : win->fg.pixel);
+	//XSetForeground(drw->dpy, drw->gc, invert ? drw->scheme[ColBg].pixel : drw->scheme[ColFg].pixel);
+	if (filled)
+		//XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
+		XFillRectangle(e->dpy, win->buf.pm, gc, x, y, w, h);
+	else
+		//XDrawRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w - 1, h - 1);
+		XDrawRectangle(win->env.dpy, win->buf.pm, gc, x, y, w - 1, h - 1);
+}
+
 
 void
 win_init_font(const win_env_t *e, const char *fontstr)
@@ -297,6 +316,7 @@ win_open(win_t *win)
 	                            win->buf.w, win->buf.h, e->depth);
 	XSetForeground(e->dpy, gc, win->bg.pixel);
 	XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
+	//drw_rect(e->dpy, 0, 0, win->buf.w, win->buf.h, 1, 0);
 	XSetWindowBackgroundPixmap(e->dpy, win->xwin, win->buf.pm);
 
 	XMapWindow(e->dpy, win->xwin);

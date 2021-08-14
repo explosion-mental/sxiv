@@ -85,10 +85,10 @@ union {
 	struct inotify_event e;
 } buf;
 
-bool
+int
 arl_handle(arl_t *arl)
 {
-	bool reload = false;
+	int reload = 0;
 	char *ptr;
 	const struct inotify_event *e;
 
@@ -103,12 +103,12 @@ arl_handle(arl_t *arl)
 		for (ptr = buf.d; ptr < buf.d + len; ptr += sizeof(*e) + e->len) {
 			e = (const struct inotify_event*) ptr;
 			if (e->wd == arl->wd_file && (e->mask & IN_CLOSE_WRITE))
-				reload = true;
+				reload = 1;
 			else if (e->wd == arl->wd_file && (e->mask & IN_DELETE_SELF))
 				rm_watch(arl->fd, &arl->wd_file);
 			else if (e->wd == arl->wd_dir && (e->mask & (IN_CREATE | IN_MOVED_TO))) {
 				if (STREQ(e->name, arl->filename))
-					reload = true;
+					reload = 1;
 			}
 		}
 	}
@@ -122,24 +122,21 @@ arl_init(arl_t *arl)
 {
 	arl->fd = -1;
 }
-
 void
 arl_cleanup(arl_t *arl)
 {
 	(void) arl;
 }
-
 void
 arl_setup(arl_t *arl, const char *filepath)
 {
 	(void) arl;
 	(void) filepath;
 }
-
-bool
+int
 arl_handle(arl_t *arl)
 {
 	(void) arl;
-	return false;
+	return -1;
 }
 #endif /* AUTO_NOP */

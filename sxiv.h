@@ -146,7 +146,7 @@ struct arl {
 void arl_init(arl_t*);
 void arl_cleanup(arl_t*);
 void arl_setup(arl_t*, const char* /* result of realpath(3) */);
-bool arl_handle(arl_t*);
+int arl_handle(arl_t*);
 
 
 /* commands.c */
