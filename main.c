@@ -110,6 +110,12 @@ tmp_unlink(char **rmfiles, int n) {
 #endif /* HAVE_LIBCURL */
 
 
+#ifdef HAVE_LIBCURL
+int is_url(const char *url);
+int get_url(const char *url, char **out);
+#endif /* HAVE_LIBCURL */
+
+
 void
 cleanup(void)
 {
