@@ -23,7 +23,32 @@
 #include <unistd.h>
 #include <utime.h>
 
-#include "sxiv.h"
+#include <Imlib2.h>
+//#include "sxiv.h"
+/* sxiv.c */
+#include "main.h"
+
+/* autoreload.c */
+//#include "autoreload.h"
+
+/* commands.c */
+#include "commands.h"
+
+/* options.c */
+#include "options.h"
+
+/* thumbs.c */
+#include "thumbs.h"
+
+/* util.c */
+#include "util.h"
+
+/* url.c */
+
+/* window.c */
+#include "window.h"
+
+
 #include "config.h"
 #if HAVE_LIBEXIF
 #include <libexif/exif-data.h>

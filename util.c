@@ -16,7 +16,33 @@
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sxiv.h"
+//#include "sxiv.h"
+
+#include <Imlib2.h>
+/* sxiv.c */
+#include "main.h"
+
+/* autoreload.c */
+//#include "autoreload.h"
+
+/* commands.c */
+//#include "commands.h"
+
+/* options.c */
+#include "options.h"
+
+/* thumbs.c */
+//#include "thumbs.h"
+
+/* util.c */
+#include "util.h"
+
+/* url.c */
+
+/* window.c */
+#include "window.h"
+
+
 
 #include <stdlib.h>
 #include <string.h>

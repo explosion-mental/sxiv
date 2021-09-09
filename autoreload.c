@@ -15,7 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "sxiv.h"
+#include <Imlib2.h>
+//#include "sxiv.h"
+
+/* sxiv.c */
+#include "main.h"
+
+/* autoreload.c */
+#include "autoreload.h"
+
+/* commands.c */
+//#include "commands.h"
+
+/* options.c */
+//#include "options.h"
+
+/* thumbs.c */
+//#include "thumbs.h"
+
+/* util.c */
+#include "util.h"
+
+/* url.c */
+
+/* window.c */
+//#include "window.h"
+
+
 #ifdef AUTO_INOTIFY
 #include <errno.h>
 #include <stdlib.h>

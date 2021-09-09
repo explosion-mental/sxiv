@@ -19,8 +19,34 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <Imlib2.h>
 
-#include "sxiv.h"
+//#include "sxiv.h"
+
+/* sxiv.c */
+#include "main.h"
+
+/* autoreload.c */
+//#include "autoreload.h"
+
+/* commands.c */
+#include "commands.h"
+
+/* options.c */
+#include "options.h"
+
+/* thumbs.c */
+#include "thumbs.h"
+
+/* util.c */
+//#include "util.h"
+
+/* url.c */
+
+/* window.c */
+#include "window.h"
+
+
 #include "config.h"
 
 void remove_file(int, int);

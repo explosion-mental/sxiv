@@ -25,12 +25,39 @@
 #include <signal.h>
 #include <sys/select.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
+#include <Imlib2.h>
 
-#include "sxiv.h"
+//#include "sxiv.h"
+
+/* sxiv.c */
+#include "main.h"
+
+/* autoreload.c */
+#include "autoreload.h"
+
+/* commands.c */
+#include "commands.h"
+
+/* options.c */
+#include "options.h"
+
+/* thumbs.c */
+#include "thumbs.h"
+
+/* util.c */
+#include "util.h"
+
+/* url.c */
+
+/* window.c */
+#include "window.h"
+
+
 #include "config.h"
 
 typedef struct {

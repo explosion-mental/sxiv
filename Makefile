@@ -21,7 +21,7 @@ config.h:
 
 window.o: icon/data.h
 
-$(OBJ): commands.lst sxiv.h config.h config.mk
+$(OBJ): commands.lst  config.h config.mk
 
 sxiv: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(SXIVLDFLAGS)
@@ -32,7 +32,7 @@ clean:
 dist: clean
 	mkdir -p sxiv-${VERSION}
 	cp -R LICENSE Makefile README config.def.h config.mk\
-		sxiv.1 sxiv.h utf8.h util.h ${SRC} sxiv.png sxiv-${VERSION}
+		sxiv.1  utf8.h util.h ${SRC} sxiv.png sxiv-${VERSION}
 	tar -cf sxiv-${VERSION}.tar sxiv-${VERSION}
 	gzip sxiv-${VERSION}.tar
 	rm -rf sxiv-${VERSION}

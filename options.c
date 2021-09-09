@@ -19,9 +19,35 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <Imlib2.h>
 
-#include "sxiv.h"
+//#include "sxiv.h"
 //#include "config.h"
+/* sxiv.c */
+#include "main.h"
+
+/* autoreload.c */
+//#include "autoreload.h"
+
+/* commands.c */
+//#include "commands.h"
+
+/* options.c */
+#include "options.h"
+
+/* thumbs.c */
+//#include "thumbs.h"
+
+/* util.c */
+#include "util.h"
+
+/* url.c */
+
+/* window.c */
+#include "window.h"
+
+
+
 
 opt_t _options;
 const opt_t *options = (const opt_t*) &_options;

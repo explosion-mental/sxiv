@@ -23,8 +23,34 @@
 #include <X11/cursorfont.h>
 #include <X11/Xatom.h>
 #include <X11/Xresource.h>
+#include <Imlib2.h>
 
-#include "sxiv.h"
+//#include "sxiv.h"
+
+/* sxiv.c */
+#include "main.h"
+
+/* autoreload.c */
+//#include "autoreload.h"
+
+/* commands.c */
+#include "commands.h"
+
+/* options.c */
+#include "options.h"
+
+/* thumbs.c */
+//#include "thumbs.h"
+
+/* util.c */
+#include "util.h"
+
+/* url.c */
+
+/* window.c */
+#include "window.h"
+
+
 //#define _WINDOW_CONFIG
 #include "config.h"
 #include "icon/data.h"
