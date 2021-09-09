@@ -53,7 +53,7 @@ tns_cache_filepath(const char *filepath)
 }
 
 Imlib_Image
-tns_cache_load(const char *filepath, bool *outdated)
+tns_cache_load(const char *filepath, int *outdated)
 {
 	char *cfile;
 	struct stat cstats, fstats;
@@ -67,7 +67,7 @@ tns_cache_load(const char *filepath, bool *outdated)
 			if (cstats.st_mtime == fstats.st_mtime)
 				im = imlib_load_image(cfile);
 			else
-				*outdated = true;
+				*outdated = 1;
 		}
 		free(cfile);
 	}
@@ -75,7 +75,7 @@ tns_cache_load(const char *filepath, bool *outdated)
 }
 
 void
-tns_cache_write(Imlib_Image im, const char *filepath, bool force)
+tns_cache_write(Imlib_Image im, const char *filepath, int force)
 {
 	char *cfile, *dirend;
 	struct stat cstats, fstats;
@@ -127,14 +127,14 @@ tns_clean_cache(tns_t *tns)
 	char *cfile, *filename;
 	r_dir_t dir;
 
-	if (r_opendir(&dir, cache_dir, true) < 0) {
+	if (r_opendir(&dir, cache_dir, 1) < 0) {
 		error(0, errno, "%s", cache_dir);
 		return;
 	}
 
 	dirlen = strlen(cache_dir);
 
-	while ((cfile = r_readdir(&dir, false)) != NULL) {
+	while ((cfile = r_readdir(&dir, 0)) != NULL) {
 		filename = cfile + dirlen;
 		if (access(filename, F_OK) < 0) {
 			if (unlink(cfile) < 0)
@@ -163,7 +163,7 @@ tns_init(tns_t *tns, fileinfo_t *files, const int *cnt, int *sel, win_t *win)
 	tns->first = tns->end = tns->r_first = tns->r_end = 0;
 	tns->sel = sel;
 	tns->win = win;
-	tns->dirty = false;
+	tns->dirty = 0;
 
 	tns->zl = THUMB_SIZE;
 	tns_zoom(tns, 0);
@@ -239,21 +239,21 @@ tns_scale_down(Imlib_Image im, int dim)
 	return im;
 }
 
-bool
-tns_load(tns_t *tns, int n, bool force, bool cache_only)
+int
+tns_load(tns_t *tns, int n, int force, int cache_only)
 {
 	int maxwh = thumb_sizes[ARRLEN(thumb_sizes) - 1];
-	bool cache_hit = false;
+	int cache_hit = 0;
 	char *cfile;
 	thumb_t *t;
 	fileinfo_t *file;
 	Imlib_Image im = NULL;
 
 	if (n < 0 || n >= *tns->cnt)
-		return false;
+		return 0;
 	file = &tns->files[n];
 	if (file->name == NULL || file->path == NULL)
-		return false;
+		return 0;
 
 	t = &tns->thumbs[n];
 
@@ -276,11 +276,11 @@ tns_load(tns_t *tns, int n, bool force, bool cache_only)
 				imlib_free_image_and_decache();
 				im = NULL;
 			} else
-				cache_hit = true;
+				cache_hit = 1;
 #if HAVE_LIBEXIF
 		} else if (!force && !options->private_mode) {
 			int pw = 0, ph = 0, w, h, x = 0, y = 0;
-			bool err;
+			int err;
 			float zw, zh;
 			ExifData *ed;
 			ExifEntry *entry;
@@ -340,7 +340,7 @@ tns_load(tns_t *tns, int n, bool force, bool cache_only)
 
 	if (im == NULL) {
 		if ((im = img_open(file)) == NULL)
-			return false;
+			return 0;
 	}
 	imlib_context_set_image(im);
 
@@ -351,7 +351,7 @@ tns_load(tns_t *tns, int n, bool force, bool cache_only)
 		im = tns_scale_down(im, maxwh);
 		imlib_context_set_image(im);
 		if (imlib_image_get_width() == maxwh || imlib_image_get_height() == maxwh)
-			tns_cache_write(im, file->path, true);
+			tns_cache_write(im, file->path, 1);
 	}
 
 	if (cache_only) {
@@ -361,7 +361,7 @@ tns_load(tns_t *tns, int n, bool force, bool cache_only)
 		imlib_context_set_image(t->im);
 		t->w = imlib_image_get_width();
 		t->h = imlib_image_get_height();
-		tns->dirty = true;
+		tns->dirty = 1;
 	}
 	file->flags |= FF_TN_INIT;
 
@@ -370,7 +370,7 @@ tns_load(tns_t *tns, int n, bool force, bool cache_only)
 	if (n == tns->loadnext && !cache_only)
 		while (++tns->loadnext < tns->end && (++t)->im != NULL);
 
-	return true;
+	return 1;
 }
 
 void
@@ -391,7 +391,7 @@ tns_unload(tns_t *tns, int n)
 }
 
 void
-tns_check_view(tns_t *tns, bool scrolled)
+tns_check_view(tns_t *tns, int scrolled)
 {
 	int r;
 
@@ -411,10 +411,10 @@ tns_check_view(tns_t *tns, bool scrolled)
 		/* scroll to selection */
 		if (tns->first + tns->cols * tns->rows <= *tns->sel) {
 			tns->first = *tns->sel - r - tns->cols * (tns->rows - 1);
-			tns->dirty = true;
+			tns->dirty = 1;
 		} else if (tns->first > *tns->sel) {
 			tns->first = *tns->sel - r;
-			tns->dirty = true;
+			tns->dirty = 1;
 		}
 	}
 }
@@ -440,7 +440,7 @@ tns_render(tns_t *tns)
 		tns->first = 0;
 		cnt = *tns->cnt;
 	} else {
-		tns_check_view(tns, false);
+		tns_check_view(tns, 0);
 		cnt = tns->cols * tns->rows;
 		if ((r = tns->first + cnt - *tns->cnt) >= tns->cols)
 			tns->first -= r - r % tns->cols;
@@ -468,7 +468,7 @@ tns_render(tns_t *tns)
 			imlib_context_set_image(t->im);
 			imlib_render_image_on_drawable_at_size(t->x, t->y, t->w, t->h);
 			if (tns->files[i].flags & FF_MARK)
-				tns_mark(tns, i, true);
+				tns_mark(tns, i, 1);
 		} else
 			tns->loadnext = MIN(tns->loadnext, i);
 		if ((i + 1) % tns->cols == 0) {
@@ -477,17 +477,16 @@ tns_render(tns_t *tns)
 		} else
 			x += tns->dim;
 	}
-	tns->dirty = false;
-	tns_highlight(tns, *tns->sel, true);
+	tns->dirty = 0;
+	tns_highlight(tns, *tns->sel, 1);
 }
 
 void
-tns_mark(tns_t *tns, int n, bool mark)
+tns_mark(tns_t *tns, int n, int mark)
 {
 	if (n >= 0 && n < *tns->cnt && tns->thumbs[n].im != NULL) {
 		win_t *win = tns->win;
 		thumb_t *t = &tns->thumbs[n];
-		//unsigned long col = win->bg.pixel;
 		unsigned long col = mark ? win->markcol.pixel : win->bg.pixel;
      //   int oxy = (tns->bw + 1) / 2, owh = tns->bw;
 		int x = t->x - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
@@ -496,25 +495,25 @@ tns_mark(tns_t *tns, int n, bool mark)
 		    h = t->h + 2 * THUMB_PADDING + tns->bw;
 
 
-			//win_draw_rect(win, x, y, w, h, false, tns->bw, col);
+			//win_draw_rect(win, x, y, w, h, 0, tns->bw, col);
 
         //if (mark) col = win->markcol.pixel;
 //	win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
-//	              false, tns->bw, col);
-	//funny thing switching it to true colors the image
-	//win_draw_rect(win, x - 1, y - 1, w - 1, h - 1, false, tns->bw, col);
-	win_draw_rect(win, x, y, w, h, false, tns->bw, col);
-	//tns->dirty = true;
+//	              0, tns->bw, col);
+	//funny thing switching it to 1 colors the image
+	//win_draw_rect(win, x - 1, y - 1, w - 1, h - 1, 0, tns->bw, col);
+	win_draw_rect(win, x, y, w, h, 0, tns->bw, col);
+	//tns->dirty = 1;
 	//we can stack them wow (yeah i don't know what im doing) so it appears the little square also
-//	win_draw_rect(win, x, y, 2 * tns->bw, 2 * tns->bw, true, tns->bw, col);
+//	win_draw_rect(win, x, y, 2 * tns->bw, 2 * tns->bw, 1, tns->bw, col);
 
 		if (!mark && n == *tns->sel)
-			tns_highlight(tns, n, true);
+			tns_highlight(tns, n, 1);
 	}
 }
 
 void
-tns_highlight(tns_t *tns, int n, bool hl)
+tns_highlight(tns_t *tns, int n, int hl)
 {
 	if (n >= 0 && n < *tns->cnt && tns->thumbs[n].im != NULL) {
 		win_t *win = tns->win;
@@ -526,22 +525,22 @@ tns_highlight(tns_t *tns, int n, bool hl)
 
 
 //		win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
-//		              false, tns->bw, col);
+//		              0, tns->bw, col);
 		int x = t->x - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
 		    y = t->y - THUMB_PADDING - tns->bw / 2 - tns->bw % 2,
 		    w = t->w + 2 * THUMB_PADDING + tns->bw,
 		    h = t->h + 2 * THUMB_PADDING + tns->bw;
 
 		/* This one is perfect so highlight > marks */
-	//	win_draw_rect(win, x - 1 , y - 1, w +2 , h + 2, false, tns->bw, col);
-		win_draw_rect(win, x, y, w, h, false, tns->bw, col);
+	//	win_draw_rect(win, x - 1 , y - 1, w +2 , h + 2, 0, tns->bw, col);
+		win_draw_rect(win, x, y, w, h, 0, tns->bw, col);
 
 		if (tns->files[n].flags & FF_MARK)
-			tns_mark(tns, n, true);
+			tns_mark(tns, n, 1);
 	}
 }
 
-bool
+int
 tns_move_selection(tns_t *tns, direction_t dir, int cnt)
 {
 	int old, max;
@@ -567,16 +566,16 @@ tns_move_selection(tns_t *tns, direction_t dir, int cnt)
 	}
 
 	if (*tns->sel != old) {
-		tns_highlight(tns, old, false);
-		tns_check_view(tns, false);
+		tns_highlight(tns, old, 0);
+		tns_check_view(tns, 0);
 		if (!tns->dirty)
-			tns_highlight(tns, *tns->sel, true);
+			tns_highlight(tns, *tns->sel, 1);
 	}
 	return *tns->sel != old;
 }
 
-bool
-tns_scroll(tns_t *tns, direction_t dir, bool screen)
+int
+tns_scroll(tns_t *tns, direction_t dir, int screen)
 {
 	int d, max, old;
 
@@ -592,13 +591,13 @@ tns_scroll(tns_t *tns, direction_t dir, bool screen)
 		tns->first = MAX(tns->first - d, 0);
 
 	if (tns->first != old) {
-		tns_check_view(tns, true);
-		tns->dirty = true;
+		tns_check_view(tns, 1);
+		tns->dirty = 1;
 	}
 	return tns->first != old;
 }
 
-bool
+int
 tns_zoom(tns_t *tns, int d)
 {
 	int i, oldzl;
@@ -617,7 +616,7 @@ tns_zoom(tns_t *tns, int d)
 	if (tns->zl != oldzl) {
 		for (i = 0; i < *tns->cnt; i++)
 			tns_unload(tns, i);
-		tns->dirty = true;
+		tns->dirty = 1;
 	}
 	return tns->zl != oldzl;
 }

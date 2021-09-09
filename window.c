@@ -50,23 +50,23 @@ static int barheight;
 
 Atom atoms[ATOM_COUNT];
 
-void
-drw_rect(const win_env_t *e, int x, int y, unsigned int w, unsigned int h, int filled, int invert)
-{
-	//const win_env_t *e;
-	win_t *win;
-
-	//if (!drw || !drw->scheme)
-	//	return;
-	XSetForeground(e->dpy, gc, invert ? win->bg.pixel : win->fg.pixel);
-	//XSetForeground(drw->dpy, drw->gc, invert ? drw->scheme[ColBg].pixel : drw->scheme[ColFg].pixel);
-	if (filled)
-		//XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
-		XFillRectangle(e->dpy, win->buf.pm, gc, x, y, w, h);
-	else
-		//XDrawRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w - 1, h - 1);
-		XDrawRectangle(win->env.dpy, win->buf.pm, gc, x, y, w - 1, h - 1);
-}
+//void
+//drw_rect(const win_env_t *e, int x, int y, unsigned int w, unsigned int h, int filled, int invert)
+//{
+//	//const win_env_t *e;
+//	win_t *win;
+//
+//	//if (!drw || !drw->scheme)
+//	//	return;
+//	XSetForeground(e->dpy, gc, invert ? win->bg.pixel : win->fg.pixel);
+//	//XSetForeground(drw->dpy, drw->gc, invert ? drw->scheme[ColBg].pixel : drw->scheme[ColFg].pixel);
+//	if (filled)
+//		//XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
+//		XFillRectangle(e->dpy, win->buf.pm, gc, x, y, w, h);
+//	else
+//		//XDrawRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w - 1, h - 1);
+//		XDrawRectangle(win->env.dpy, win->buf.pm, gc, x, y, w - 1, h - 1);
+//}
 
 
 void
@@ -339,10 +339,10 @@ win_close(win_t *win)
 	XCloseDisplay(win->env.dpy);
 }
 
-bool
+int
 win_configure(win_t *win, XConfigureEvent *c)
 {
-	bool changed;
+	int changed;
 
 	changed = win->w != c->width || win->h + win->bar.h != c->height;
 
@@ -517,7 +517,7 @@ win_draw(win_t *win)
 
 //Highlight thumb
 void
-win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw, unsigned long col)
+win_draw_rect(win_t *win, int x, int y, int w, int h, int fill, int lw, unsigned long col)
 {
 	XGCValues gcval;
 
@@ -525,9 +525,9 @@ win_draw_rect(win_t *win, int x, int y, int w, int h, bool fill, int lw, unsigne
 	gcval.foreground = col;
 	XChangeGC(win->env.dpy, gc, GCForeground | GCLineWidth, &gcval);
 
-//	if (fill)
-//		XFillRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
-//	else
+	if (fill)
+		XFillRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
+	else
 		XDrawRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
 }
 

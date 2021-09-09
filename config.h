@@ -15,8 +15,8 @@ static const float SLIDESHOW_DELAY = 4.5;      /* -S option; slideshow delay in 
 static const double GAMMA_MAX      = 10.0;     /* [-GAMMA_RANGE, 0] and (0, GAMMA_RANGE] are mapped.. */
 static const int GAMMA_RANGE       = 32;       /* to the ranges [0, 1], and (1, GAMMA_MAX] */
 static const int PAN_FRACTION      = 4;        /* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
-static const bool ANTI_ALIAS       = true;     /* false means pixelate images at zoom level != 100% */
-static const bool ALPHA_LAYER      = false;    /* if true use checkerboard background for alpha layer (i_toggle_alpha) */
+static const int ANTI_ALIAS       = 1;     /* false means pixelate images at zoom level != 100% */
+static const int ALPHA_LAYER      = 0;    /* if true use checkerboard background for alpha layer (i_toggle_alpha) */
 static const float zoom_levels[]   = {
  /* first/last value is used as min/max zoom percent level */
 	12.5, 14,  25,  35,  45,  50,  75,

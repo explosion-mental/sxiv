@@ -94,7 +94,7 @@ size_readable(float *size, const char **unit)
 }
 
 int
-r_opendir(r_dir_t *rdir, const char *dirname, bool recursive)
+r_opendir(r_dir_t *rdir, const char *dirname, int recursive)
 {
 	if (*dirname == '\0')
 		return -1;
@@ -142,14 +142,14 @@ r_closedir(r_dir_t *rdir)
 }
 
 char *
-r_readdir(r_dir_t *rdir, bool skip_dotfiles)
+r_readdir(r_dir_t *rdir, int skip_dotfiles)
 {
 	size_t len;
 	char *filename;
 	struct dirent *dentry;
 	struct stat fstats;
 
-	while (true) {
+	while (1) {
 		if (rdir->dir != NULL && (dentry = readdir(rdir->dir)) != NULL) {
 			if (dentry->d_name[0] == '.') {
 				if (skip_dotfiles)

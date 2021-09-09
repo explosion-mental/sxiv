@@ -35,7 +35,7 @@
 
 typedef struct {
 	struct timeval when;
-	bool active;
+	int active;
 	timeout_f handler;
 } timeout_t;
 
@@ -67,10 +67,10 @@ int rmcnt, rmidx;
 int prefix;
 #endif /* ENABLE_COUNT */
 /*What is this?
-bool extprefix;
-bool inputting_prefix;
+int extprefix;
+int inputting_prefix;
 */
-bool resized = false;
+int resized = 0;
 
 typedef struct {
 	int err;
@@ -86,15 +86,15 @@ struct {
 
 struct {
 	extcmd_t f;
-	bool warned;
+	int warned;
 } keyhandler;
 
 timeout_t timeouts[] = {
-	{ { 0, 0 }, false, redraw       },
-	{ { 0, 0 }, false, reset_cursor },
-	{ { 0, 0 }, false, animate      },
-	{ { 0, 0 }, false, slideshow    },
-	{ { 0, 0 }, false, clear_resize },
+	{ { 0, 0 }, 0, redraw       },
+	{ { 0, 0 }, 0, reset_cursor },
+	{ { 0, 0 }, 0, animate      },
+	{ { 0, 0 }, 0, slideshow    },
+	{ { 0, 0 }, 0, clear_resize },
 };
 
 cursor_t imgcursor[3] = {
@@ -116,7 +116,7 @@ cleanup(void)
 #if HAVE_LIBCURL
 	tmp_unlink(rmfiles, rmidx);
 #endif /* HAVE_LIBCURL */
-	img_close(&img, false);
+	img_close(&img, 0);
 	arl_cleanup(&arl);
 	tns_free(&tns);
 	win_close(&win);
@@ -134,10 +134,10 @@ check_and_get_path(char *filename)
 
 #if HAVE_LIBCURL
 static void
-internal_check_add_file(char *filename, char *url, bool given)
+internal_check_add_file(char *filename, char *url, int given)
 #else
 void
-check_add_file(char *filename, bool given)
+check_add_file(char *filename, int given)
 #endif /* HAVE_LIBCURL */
 {
 	char *path;
@@ -185,20 +185,20 @@ check_add_file(char *filename, bool given)
 
 #if HAVE_LIBCURL
 void
-check_add_file(char *filename, bool given)
+check_add_file(char *filename, int given)
 {
 	internal_check_add_file(filename, NULL, given);
 }
 
 void
-check_add_url(char *filename, char *url, bool given)
+check_add_url(char *filename, char *url, int given)
 {
 	internal_check_add_file(filename, url, given);
 }
 #endif /* HAVE_LIBCURL */
 
 void
-remove_file(int n, bool manual)
+remove_file(int n, int manual)
 {
 	if (n < 0 || n >= filecnt)
 		return;
@@ -233,7 +233,7 @@ remove_file(int n, bool manual)
 }
 
 void
-set_timeout(timeout_f handler, int time, bool overwrite)
+set_timeout(timeout_f handler, int time, int overwrite)
 {
 	int i;
 
@@ -242,7 +242,7 @@ set_timeout(timeout_f handler, int time, bool overwrite)
 			if (!timeouts[i].active || overwrite) {
 				gettimeofday(&timeouts[i].when, 0);
 				TV_ADD_MSEC(&timeouts[i].when, time);
-				timeouts[i].active = true;
+				timeouts[i].active = 1;
 			}
 			return;
 		}
@@ -256,13 +256,13 @@ reset_timeout(timeout_f handler)
 
 	for (i = 0; i < ARRLEN(timeouts); i++) {
 		if (timeouts[i].handler == handler) {
-			timeouts[i].active = false;
+			timeouts[i].active = 0;
 			return;
 		}
 	}
 }
 
-bool
+int
 check_timeouts(struct timeval *t)
 {
 	int i = 0, tdiff, tmin = -1;
@@ -273,7 +273,7 @@ check_timeouts(struct timeval *t)
 			gettimeofday(&now, 0);
 			tdiff = TV_DIFF(&timeouts[i].when, &now);
 			if (tdiff <= 0) {
-				timeouts[i].active = false;
+				timeouts[i].active = 0;
 				if (timeouts[i].handler != NULL)
 					timeouts[i].handler();
 				i = tmin = -1;
@@ -333,7 +333,7 @@ read_info(void)
 	ssize_t i, n;
 	char buf[BAR_L_LEN];
 
-	while (true) {
+	while (1) {
 		n = read(info.fd, buf, sizeof(buf));
 		if (n < 0 && errno == EAGAIN)
 			return;
@@ -376,7 +376,7 @@ evaluate_prefix(void)
 void
 load_image(int new)
 {
-	bool prev = new < fileidx;
+	int prev = new < fileidx;
 	static int current;
 
 	if (new < 0 || new >= filecnt)
@@ -389,9 +389,9 @@ load_image(int new)
 	if (new != current)
 		alternate = current;
 
-	img_close(&img, false);
+	img_close(&img, 0);
 	while (!img_load(&img, &files[new])) {
-		remove_file(new, false);
+		remove_file(new, 0);
 		if (new >= filecnt)
 			new = filecnt - 1;
 		else if (new > 0 && prev)
@@ -405,13 +405,13 @@ load_image(int new)
 	arl_setup(&arl, files[fileidx].path);
 
 	if (img.multi.cnt > 0 && img.multi.animate)
-		set_timeout(animate, img.multi.frames[img.multi.sel].delay, true);
+		set_timeout(animate, img.multi.frames[img.multi.sel].delay, 1);
 	else
 		reset_timeout(animate);
 }
 
-bool
-mark_image(int n, bool on)
+int
+mark_image(int n, int on)
 {
 	markidx = n;
 	if (!!(files[n].flags & FF_MARK) != on) {
@@ -419,9 +419,9 @@ mark_image(int n, bool on)
 		markcnt += on ? 1 : -1;
 		if (mode == MODE_THUMB)
 			tns_mark(&tns, n, on);
-		return true;
+		return 1;
 	}
-	return false;
+	return 0;
 }
 
 void
@@ -519,7 +519,7 @@ update_info(void)
 #if HAVE_LIBCURL
 #include <curl/curl.h>
 
-bool
+int
 is_url(const char *url) {
 	if ((!strncmp(url, "http://", 7))
 			|| (!strncmp(url, "https://", 8))
@@ -600,7 +600,7 @@ redraw(void)
 			t = img.ss.delay * 100;
 			if (img.multi.cnt > 0 && img.multi.animate)
 				t = MAX(t, img.multi.length);
-			set_timeout(slideshow, t, false);
+			set_timeout(slideshow, t, 0);
 		}
 	} else
 		tns_render(&tns);
@@ -642,7 +642,7 @@ animate(void)
 {
 	if (img_frame_animate(&img)) {
 		redraw();
-		set_timeout(animate, img.multi.frames[img.multi.sel].delay, true);
+		set_timeout(animate, img.multi.frames[img.multi.sel].delay, 1);
 	}
 }
 
@@ -656,7 +656,7 @@ slideshow(void)
 void
 clear_resize(void)
 {
-	resized = false;
+	resized = 0;
 }
 
 Bool is_input_ev(Display *dpy, XEvent *ev, XPointer arg)
@@ -669,8 +669,8 @@ run_key_handler(const char *key, unsigned int mask)
 {
 	pid_t pid;
 	FILE *pfs;
-	bool marked = markcnt > 0;
-	bool changed = false;
+	int marked = markcnt > 0;
+	int changed = 0;
 	int f, i, pfd[2];
 	int fcnt = marked ? markcnt : 1;
 	char kstr[32], oldbar[BAR_L_LEN];
@@ -680,7 +680,7 @@ run_key_handler(const char *key, unsigned int mask)
 	if (keyhandler.f.err != 0) {
 		if (!keyhandler.warned) {
 			error(0, keyhandler.f.err, "%s", keyhandler.f.cmd);
-			keyhandler.warned = true;
+			keyhandler.warned = 1;
 		}
 		return;
 	}
@@ -744,7 +744,7 @@ run_key_handler(const char *key, unsigned int mask)
 					tns_unload(&tns, i);
 					tns.loadnext = MIN(tns.loadnext, i);
 				}
-				changed = true;
+				changed = 1;
 			}
 			f++;
 		}
@@ -755,7 +755,7 @@ run_key_handler(const char *key, unsigned int mask)
 end:
 	if (mode == MODE_IMAGE) {
 		if (changed) {
-			img_close(&img, true);
+			img_close(&img, 1);
 			load_image(fileidx);
 		} else
 			open_info();
@@ -773,8 +773,8 @@ on_keypress(XKeyEvent *kev)
 	unsigned int sh = 0;
 	KeySym ksym, shksym;
 	char dummy, key;
-	bool bound = false;
-	bool dirty = false;
+	int bound = 0;
+	int dirty = 0;
 
 	XLookupString(kev, &key, 1, &ksym, NULL);
 
@@ -805,8 +805,8 @@ on_keypress(XKeyEvent *kev)
 		    (cmds[keys[i].cmd].mode < 0 || cmds[keys[i].cmd].mode == mode))
 		{
 			if (cmds[keys[i].cmd].func(keys[i].arg))
-				dirty = true;
-			bound = true;
+				dirty = 1;
+			bound = 1;
 		}
 	}
 	if (!bound)
@@ -822,11 +822,11 @@ void
 on_buttonpress(XButtonEvent *bev)
 {
 	int i, sel;
-	bool dirty = false;
+	int dirty = 0;
 	static Time firstclick;
 
 	if (mode == MODE_IMAGE) {
-		set_timeout(reset_cursor, TO_CURSOR_HIDE, true);	/* Clock */
+		set_timeout(reset_cursor, TO_CURSOR_HIDE, 1);	/* Clock */
 		reset_cursor();
 
 		for (i = 0; i < ARRLEN(buttons); i++) {
@@ -836,7 +836,7 @@ on_buttonpress(XButtonEvent *bev)
 			    (cmds[buttons[i].cmd].mode < 0 || cmds[buttons[i].cmd].mode == mode))
 			{
 				if (cmds[buttons[i].cmd].func(buttons[i].arg))
-					dirty = true;
+					dirty = 1;
 			}
 		}
 		if (dirty)
@@ -847,14 +847,14 @@ on_buttonpress(XButtonEvent *bev)
 			case Button1:
 				if ((sel = tns_translate(&tns, bev->x, bev->y)) >= 0) {
 					if (sel != fileidx) {
-						tns_highlight(&tns, fileidx, false);
-						tns_highlight(&tns, sel, true);
+						tns_highlight(&tns, fileidx, 0);
+						tns_highlight(&tns, sel, 1);
 						fileidx = sel;
 						firstclick = bev->time;
 						redraw();
 					} else if (bev->time - firstclick <= TO_DOUBLE_CLICK) {
 						mode = MODE_IMAGE;
-						set_timeout(reset_cursor, TO_CURSOR_HIDE, true);
+						set_timeout(reset_cursor, TO_CURSOR_HIDE, 1);
 						load_image(fileidx);
 						redraw();
 					} else
@@ -863,7 +863,7 @@ on_buttonpress(XButtonEvent *bev)
 				break;
 			case Button3:
 				if ((sel = tns_translate(&tns, bev->x, bev->y)) >= 0) {
-					bool on = !(files[sel].flags & FF_MARK);
+					int on = !(files[sel].flags & FF_MARK);
 					XEvent e;
 
 					for (;;) {
@@ -899,10 +899,10 @@ run(void)
 	int xfd;
 	fd_set fds;
 	struct timeval timeout;
-	bool discard, init_thumb, load_thumb, to_set;
+	int discard, init_thumb, load_thumb, to_set;
 	XEvent ev, nextev;
 
-	while (true) {
+	while (1) {
 		to_set = check_timeouts(&timeout);
 		init_thumb = mode == MODE_THUMB && tns.initnext < filecnt;
 		load_thumb = mode == MODE_THUMB && tns.loadnext < tns.end;
@@ -911,17 +911,17 @@ run(void)
 			   arl.fd != -1) && XPending(win.env.dpy) == 0)
 		{
 			if (load_thumb) {
-				set_timeout(redraw, TO_REDRAW_THUMBS, false);
-				if (!tns_load(&tns, tns.loadnext, false, false)) {
-					remove_file(tns.loadnext, false);
-					tns.dirty = true;
+				set_timeout(redraw, TO_REDRAW_THUMBS, 0);
+				if (!tns_load(&tns, tns.loadnext, 0, 0)) {
+					remove_file(tns.loadnext, 0);
+					tns.dirty = 1;
 				}
 				if (tns.loadnext >= tns.end)
 					redraw();
 			} else if (init_thumb) {
-				set_timeout(redraw, TO_REDRAW_THUMBS, false);
-				if (!tns_load(&tns, tns.initnext, false, true))
-					remove_file(tns.initnext, false);
+				set_timeout(redraw, TO_REDRAW_THUMBS, 0);
+				if (!tns_load(&tns, tns.initnext, 0, 1))
+					remove_file(tns.initnext, 0);
 			} else {
 				xfd = ConnectionNumber(win.env.dpy);
 				FD_ZERO(&fds);
@@ -941,7 +941,7 @@ run(void)
 					if (arl_handle(&arl)) {
 						/* when too fast, imlib2 can't load the image */
 						nanosleep(&ten_ms, NULL);
-						img_close(&img, true);
+						img_close(&img, 1);
 						load_image(fileidx);
 						redraw();
 					}
@@ -952,7 +952,7 @@ run(void)
 
 		do {
 			XNextEvent(win.env.dpy, &ev);
-			discard = false;
+			discard = 0;
 			if (XEventsQueued(win.env.dpy, QueuedAlready) > 0) {
 				XPeekEvent(win.env.dpy, &nextev);
 				switch (ev.type) {
@@ -980,16 +980,16 @@ run(void)
 			case ConfigureNotify:
 				if (win_configure(&win, &ev.xconfigure)) {
 					if (mode == MODE_IMAGE) {
-						img.dirty = true;
-						img.checkpan = true;
+						img.dirty = 1;
+						img.checkpan = 1;
 					} else
-						tns.dirty = true;
+						tns.dirty = 1;
 					if (!resized) {
 						redraw();
-						set_timeout(clear_resize, TO_REDRAW_RESIZE, false);
-						resized = true;
+						set_timeout(clear_resize, TO_REDRAW_RESIZE, 0);
+						resized = 1;
 					} else
-						set_timeout(redraw, TO_REDRAW_RESIZE, false);
+						set_timeout(redraw, TO_REDRAW_RESIZE, 0);
 				}
 				break;
 			case KeyPress:
@@ -997,7 +997,7 @@ run(void)
 				break;
 			case MotionNotify:
 				if (mode == MODE_IMAGE) {
-					set_timeout(reset_cursor, TO_CURSOR_HIDE, true);
+					set_timeout(reset_cursor, TO_CURSOR_HIDE, 1);
 					reset_cursor();
 				}
 				break;
@@ -1078,7 +1078,7 @@ main(int argc, char **argv)
 		while ((len = getline(&filename, &n, stdin)) > 0) {
 			if (filename[len-1] == '\n')
 				filename[len-1] = '\0';
-			check_add_file(filename, true);
+			check_add_file(filename, 1);
 		}
 		free(filename);
 	}
@@ -1092,7 +1092,7 @@ main(int argc, char **argv)
 				char *tmp;
 
 				if (get_url(filename, &tmp) == 0) {
-					check_add_url(tmp, filename, true);
+					check_add_url(tmp, filename, 1);
 					free(tmp);
 					continue;
 				} else
@@ -1109,7 +1109,7 @@ main(int argc, char **argv)
 				memcpy(savedname, check_and_get_path(filename), sizeof(savedname));
 				filename = dirname(filename);
 			} else {
-				check_add_file(filename, true);
+				check_add_file(filename, 1);
 				continue;
 			}
 		}
@@ -1118,8 +1118,8 @@ main(int argc, char **argv)
 			continue;
 		}
 		start = fileidx;
-		while ((filename = r_readdir(&dir, true)) != NULL) {
-			check_add_file(filename, false);
+		while ((filename = r_readdir(&dir, 1)) != NULL) {
+			check_add_file(filename, 0);
 			free((void*) filename);
 		}
 		r_closedir(&dir);
@@ -1186,8 +1186,8 @@ main(int argc, char **argv)
 	if (options->thumb_mode) {
 		mode = MODE_THUMB;
 		tns_init(&tns, files, &filecnt, &fileidx, &win);
-		while (!tns_load(&tns, fileidx, false, false))
-			remove_file(fileidx, false);
+		while (!tns_load(&tns, fileidx, 0, 0))
+			remove_file(fileidx, 0);
 	} else {
 		mode = MODE_IMAGE;
 		tns.thumbs = NULL;
@@ -1198,7 +1198,7 @@ main(int argc, char **argv)
 
 	atexit(cleanup);
 
-	set_timeout(redraw, 25, false);
+	set_timeout(redraw, 25, 0);
 
 	run();
 

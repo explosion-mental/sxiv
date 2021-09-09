@@ -152,7 +152,7 @@ int arl_handle(arl_t*);
 /* commands.c */
 
 typedef int arg_t;
-typedef bool (*cmd_f)(arg_t);
+typedef int (*cmd_f)(arg_t);
 
 #define G_CMD(c) g_##c,
 #define I_CMD(c) i_##c,
@@ -197,7 +197,7 @@ typedef struct {
 	int cap;
 	int cnt;
 	int sel;
-	bool animate;
+	int animate;
 	int framedelay;
 	int length;
 } multi_img_t;
@@ -214,16 +214,16 @@ struct img {
 	scalemode_t scalemode;
 	float zoom;
 
-	bool checkpan;
-	bool dirty;
-	bool aa;
-	bool alpha;
+	int checkpan;
+	int dirty;
+	int aa;
+	int alpha;
 
 	Imlib_Color_Modifier cmod;
 	int gamma;
 
 	struct {
-		bool on;
+		int on;
 		int delay;
 	} ss;
 
@@ -231,27 +231,27 @@ struct img {
 };
 
 void img_init(img_t*, win_t*);
-bool img_load(img_t*, const fileinfo_t*);
-CLEANUP void img_close(img_t*, bool);
+int img_load(img_t*, const fileinfo_t*);
+CLEANUP void img_close(img_t*, int);
 void img_render(img_t*);
-bool img_fit_win(img_t*, scalemode_t);
-bool img_zoom(img_t*, float);
-bool img_zoom_in(img_t*);
-bool img_zoom_out(img_t*);
-bool img_pos(img_t*, float, float);
-bool img_move(img_t*, float, float);
+int img_fit_win(img_t*, scalemode_t);
+int img_zoom(img_t*, float);
+int img_zoom_in(img_t*);
+int img_zoom_out(img_t*);
+int img_pos(img_t*, float, float);
+int img_move(img_t*, float, float);
 #ifdef ENABLE_COUNT
-bool img_pan(img_t*, direction_t, int);
+int img_pan(img_t*, direction_t, int);
 #else
-bool img_pan(img_t*, direction_t);
+int img_pan(img_t*, direction_t);
 #endif /* ENABLE_COUNT */
-bool img_pan_edge(img_t*, direction_t);
+int img_pan_edge(img_t*, direction_t);
 void img_rotate(img_t*, degree_t);
 void img_flip(img_t*, flipdir_t);
 void img_toggle_antialias(img_t*);
-bool img_change_gamma(img_t*, int);
-bool img_frame_navigate(img_t*, int);
-bool img_frame_animate(img_t*);
+int img_change_gamma(img_t*, int);
+int img_frame_navigate(img_t*, int);
+int img_frame_animate(img_t*);
 int  img_zoom_diff(img_t*, float*);
 
 
@@ -260,33 +260,33 @@ int  img_zoom_diff(img_t*, float*);
 struct opt {
 	/* file list: */
 	char **filenames;
-	bool from_stdin;
-	bool to_stdout;
-	bool recursive;
-	bool single_r;
+	int from_stdin;
+	int to_stdout;
+	int recursive;
+	int single_r;
 	int filecnt;
 	int startnum;
 
 	/* image: */
 	scalemode_t scalemode;
 	float zoom;
-	bool animate;
+	int animate;
 	int gamma;
 	int slideshow;
 	int framerate;
 
 	/* window: */
-	bool fullscreen;
-	bool hide_bar;
+	int fullscreen;
+	int hide_bar;
 	long embed;
 	char *geometry;
 	char *res_name;
 
 	/* misc flags: */
-	bool quiet;
-	bool thumb_mode;
-	bool clean_cache;
-	bool private_mode;
+	int quiet;
+	int thumb_mode;
+	int clean_cache;
+	int private_mode;
 };
 
 extern const opt_t *options;
@@ -329,56 +329,30 @@ struct tns {
 	//int autozoom_threshold;
 
 
-	bool dirty;
+	int dirty;
 };
 
 void tns_clean_cache(tns_t*);
 void tns_init(tns_t*, fileinfo_t*, const int*, int*, win_t*);
 CLEANUP void tns_free(tns_t*);
-bool tns_load(tns_t*, int, bool, bool);
+int tns_load(tns_t*, int, int, int);
 void tns_unload(tns_t*, int);
 void tns_render(tns_t*);
-void tns_mark(tns_t*, int, bool);
-void tns_highlight(tns_t*, int, bool);
-bool tns_move_selection(tns_t*, direction_t, int);
-bool tns_scroll(tns_t*, direction_t, bool);
-bool tns_zoom(tns_t*, int);
+void tns_mark(tns_t*, int, int);
+//void tns_highlight(tns_t*, int, int);
+void tns_highlight(tns_t *tns, int n, int hl);
+int tns_move_selection(tns_t*, direction_t, int);
+int tns_scroll(tns_t*, direction_t, int);
+int tns_zoom(tns_t*, int);
 int tns_translate(tns_t*, int, int);
 /* Customs */
-//bool tns_zoom(tns_t*, int);
+//int tns_zoom(tns_t*, int);
 
-/* util.c */
-
-#include <dirent.h>
-
-typedef struct {
-	DIR *dir;
-	char *name;
-	int d;
-	bool recursive;
-
-	char **stack;
-	int stcap;
-	int stlen;
-} r_dir_t;
-
-extern const char *progname;
-
-void *emalloc(size_t);
-void *erealloc(void*, size_t);
-char *estrdup(const char*);
-void error(int, int, const char*, ...);
-void size_readable(float*, const char**);
-int r_opendir(r_dir_t*, const char*, bool);
-int r_closedir(r_dir_t*);
-char *r_readdir(r_dir_t*, bool);
-int r_mkdir(char*);
-
-
+#include "util.h"
 /* url.c */
 
 #ifdef HAVE_LIBCURL
-bool is_url(const char *url);
+int is_url(const char *url);
 int get_url(const char *url, char **out);
 #endif /* HAVE_LIBCURL */
 
@@ -453,12 +427,12 @@ extern Atom atoms[ATOM_COUNT];
 void win_init(win_t*);
 void win_open(win_t*);
 CLEANUP void win_close(win_t*);
-bool win_configure(win_t*, XConfigureEvent*);
+int win_configure(win_t*, XConfigureEvent*);
 void win_toggle_fullscreen(win_t*);
 void win_toggle_bar(win_t*);
 void win_clear(win_t*);
 void win_draw(win_t*);
-void win_draw_rect(win_t*, int, int, int, int, bool, int, unsigned long);
+void win_draw_rect(win_t*, int, int, int, int, int, int, unsigned long);
 void win_set_title(win_t*);
 void win_set_cursor(win_t*, cursor_t);
 void win_cursor_pos(win_t*, int*, int*);

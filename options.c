@@ -21,7 +21,7 @@
 #include <unistd.h>
 
 #include "sxiv.h"
-#include "config.h"
+//#include "config.h"
 
 opt_t _options;
 const opt_t *options = (const opt_t*) &_options;
@@ -48,29 +48,29 @@ parse_options(int argc, char **argv)
 	progname = strrchr(argv[0], '/');
 	progname = progname ? progname + 1 : argv[0];
 
-	_options.from_stdin = false;
-	_options.to_stdout = false;
-	_options.recursive = false;
-	_options.single_r = false;
+	_options.from_stdin = 0;
+	_options.to_stdout = 0;
+	_options.recursive = 0;
+	_options.single_r = 0;
 	_options.startnum = 0;
 
 	_options.scalemode = SCALE_DOWN;
 	_options.zoom = 1.0;
-	_options.animate = false;
+	_options.animate = 0;
 	_options.gamma = 0;
 	_options.slideshow = 0;
 	_options.framerate = 0;
 
-	_options.fullscreen = false;
+	_options.fullscreen = 0;
 	_options.embed = 0;
-	_options.hide_bar = false;
+	_options.hide_bar = 0;
 	_options.geometry = NULL;
 	_options.res_name = NULL;
 
-	_options.quiet = false;
-	_options.thumb_mode = false;
-	_options.clean_cache = false;
-	_options.private_mode = false;
+	_options.quiet = 0;
+	_options.thumb_mode = 0;
+	_options.clean_cache = 0;
+	_options.private_mode = 0;
 
 	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opqRrS:s:tvZz:")) != -1) {
 		switch (opt) {
@@ -84,13 +84,13 @@ parse_options(int argc, char **argv)
 				_options.framerate = n;
 				/* fall through */
 			case 'a':
-				_options.animate = true;
+				_options.animate = 1;
 				break;
 			case 'b':
-				_options.hide_bar = true;
+				_options.hide_bar = 1;
 				break;
 			case 'c':
-				_options.clean_cache = true;
+				_options.clean_cache = 1;
 				break;
 			case 'e':
 				n = strtol(optarg, &end, 0);
@@ -99,7 +99,7 @@ parse_options(int argc, char **argv)
 				_options.embed = n;
 				break;
 			case 'f':
-				_options.fullscreen = true;
+				_options.fullscreen = 1;
 				break;
 			case 'G':
 				n = strtol(optarg, &end, 0);
@@ -114,7 +114,7 @@ parse_options(int argc, char **argv)
 				print_usage();
 				exit(EXIT_SUCCESS);
 			case 'i':
-				_options.from_stdin = true;
+				_options.from_stdin = 1;
 				break;
 			case 'n':
 				n = strtol(optarg, &end, 0);
@@ -126,19 +126,19 @@ parse_options(int argc, char **argv)
 				_options.res_name = optarg;
 				break;
 			case 'o':
-				_options.to_stdout = true;
+				_options.to_stdout = 1;
 				break;
 			case 'p':
-				_options.private_mode = true;
+				_options.private_mode = 1;
 				break;
 			case 'q':
-				_options.quiet = true;
+				_options.quiet = 1;
 				break;
 			case 'R':
-				_options.recursive = true;
+				_options.recursive = 1;
 				break;
 			case 'r':
-				_options.single_r = true;
+				_options.single_r = 1;
 				break;
 			case 'S':
 				n = strtof(optarg, &end) * 10;
@@ -153,7 +153,7 @@ parse_options(int argc, char **argv)
 				_options.scalemode = s - scalemodes;
 				break;
 			case 't':
-				_options.thumb_mode = true;
+				_options.thumb_mode = 1;
 				break;
 			case 'v':
 				puts("sxiv-"VERSION);
@@ -178,6 +178,6 @@ parse_options(int argc, char **argv)
 	if (_options.filecnt == 1 && STREQ(_options.filenames[0], "-")) {
 		_options.filenames++;
 		_options.filecnt--;
-		_options.from_stdin = true;
+		_options.from_stdin = 1;
 	}
 }
