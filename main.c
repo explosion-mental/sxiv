@@ -659,7 +659,8 @@ clear_resize(void)
 	resized = 0;
 }
 
-Bool is_input_ev(Display *dpy, XEvent *ev, XPointer arg)
+int
+is_input_ev(Display *dpy, XEvent *ev, XPointer arg)
 {
 	return ev->type == ButtonPress || ev->type == KeyPress;
 }

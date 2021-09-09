@@ -6,32 +6,30 @@ static const char bgcolor[]   = "#222222";	/* background */
 static const char fgcolor[]   = "#444444";	/* bar */
 static const char markcolor[] = "#bbbbbb";	/* mark */
 static const char selcolor[]  = "#eeeeee";	/* highlight */
-static const char leterfont[] = "unifont-9";	//multiple fonts?
+static const char leterfont[] = "JetBrains Mono Medium:pixelsize=15:antialias=true:autohint=true";   //multiple fonts?
 static const int  topbar      = 0;		/* 0 means bottom bar (default) */
 
 /* global */
-enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 };    /* -g option; window dimensions */
-static const float SLIDESHOW_DELAY = 4.5;      /* -S option; slideshow delay in seconds */
-static const double GAMMA_MAX      = 10.0;     /* [-GAMMA_RANGE, 0] and (0, GAMMA_RANGE] are mapped.. */
-static const int GAMMA_RANGE       = 32;       /* to the ranges [0, 1], and (1, GAMMA_MAX] */
-static const int PAN_FRACTION      = 4;        /* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
-static const int ANTI_ALIAS       = 1;     /* false means pixelate images at zoom level != 100% */
-static const int ALPHA_LAYER      = 0;    /* if true use checkerboard background for alpha layer (i_toggle_alpha) */
-static const float zoom_levels[]   = {
- /* first/last value is used as min/max zoom percent level */
+enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 };  /* -g option; window dimensions */
+static const float SLIDESHOW_DELAY = 4.5;    /* -S option; slideshow delay in seconds */
+static const double GAMMA_MAX      = 10.0;   /* [-GAMMA_RANGE, 0] and (0, GAMMA_RANGE] are mapped.. */
+static const int GAMMA_RANGE       = 32;     /* to the ranges [0, 1], and (1, GAMMA_MAX] */
+static const int PAN_FRACTION      = 4;      /* 'i_scroll' pans image 1/PAN_FRACTION of screen width/height */
+static const int ANTI_ALIAS       = 1;       /* 1 means pixelate images at zoom level != 100% */
+static const int ALPHA_LAYER      = 0;       /* 1 means use checkerboard background for alpha layer (i_toggle_alpha) */
+static const float zoom_levels[]   = {       /* first/last value is used as min/max zoom percent level */
 	12.5, 14,  25,  35,  45,  50,  75,
 	100, 125,  150, 200, 400, 800, 900
 };
 
 
 /* thumbnail */
-static const int THUMB_BORDERS[] = { 7 }; /* borders */
-static const int THUMB_MARGIN    = -4;    /* margins between images, buggy with marks */
-static const int THUMB_PADDING   = 0;     /* padding of the highlight or mark */
-static const int THUMB_SIZE      = 3;     /* thumbnail size at startup, index into thumb_sizes[]: */
-static const int squarethumb     = 1;     /* 0 means normal thumbs (default) */
-static const int thumb_sizes[]   = {
- /* thumbnail sizes in pixels (width == height) */
+static const int THUMB_BORDERS[] = { 7 };    /* borders */
+static const int THUMB_MARGIN    = -4;       /* margins between images, buggy with marks */
+static const int THUMB_PADDING   = 0;        /* padding of the highlight or mark */
+static const int THUMB_SIZE      = 3;        /* thumbnail size at startup, index into thumb_sizes[]: */
+static const int squarethumb     = 1;        /* 0 means normal thumbs (default) */
+static const int thumb_sizes[]   = {         /* thumbnail sizes in pixels (width == height) */
 	32, 64, 116, 145, 181, 286, 361, 412
 };
 

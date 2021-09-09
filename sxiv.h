@@ -21,7 +21,6 @@
 #define SXIV_H
 
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <sys/time.h>
 #include <sys/types.h>
