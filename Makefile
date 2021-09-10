@@ -2,7 +2,7 @@
 
 include config.mk
 
-SRC = autoreload.c commands.c image.c main.c options.c thumbs.c util.c window.c
+SRC = autoreload.c commands.c image.c main.c options.c thumbs.c util.c window.c drw.c
 OBJ = $(SRC:.c=.o)
 
 all: options sxiv
@@ -32,7 +32,7 @@ clean:
 dist: clean
 	mkdir -p sxiv-${VERSION}
 	cp -R LICENSE Makefile README config.def.h config.mk\
-		sxiv.1  utf8.h util.h ${SRC} sxiv.png sxiv-${VERSION}
+		sxiv.1  utf8.h util.h drw.h ${SRC} sxiv.png sxiv-${VERSION}
 	tar -cf sxiv-${VERSION}.tar sxiv-${VERSION}
 	gzip sxiv-${VERSION}.tar
 	rm -rf sxiv-${VERSION}

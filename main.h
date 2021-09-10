@@ -5,12 +5,12 @@
  ********************************************************************/
 #define CLEANUP
 
-#ifndef MIN
+//#ifndef MIN
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-#ifndef MAX
+//#endif
+//#ifndef MAX
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
-#endif
+//#endif
 
 #define ARRLEN(a)		(sizeof(a) / sizeof a[0])
 #define STREQ(s1,s2)		(strcmp((s1), (s2)) == 0)

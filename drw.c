@@ -7,6 +7,7 @@
 
 #include "drw.h"
 #include "util.h"
+#include "main.h"
 
 #define UTF_INVALID 0xFFFD
 #define UTF_SIZ     4
