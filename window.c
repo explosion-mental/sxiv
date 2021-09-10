@@ -51,6 +51,8 @@
 #include "window.h"
 
 
+#include "drw.h"
+
 //#define _WINDOW_CONFIG
 #include "config.h"
 #include "icon/data.h"
@@ -66,6 +68,8 @@ static struct {
 	{ XC_left_ptr }, { XC_dotbox }, { XC_watch },
 	{ XC_sb_left_arrow }, { XC_sb_right_arrow }
 };
+
+static Drw *drw;
 
 static GC gc;
 //static GC = drw->gc;
@@ -341,8 +345,8 @@ win_open(win_t *win)
 	win->buf.pm = XCreatePixmap(e->dpy, win->xwin,
 	                            win->buf.w, win->buf.h, e->depth);
 	XSetForeground(e->dpy, gc, win->bg.pixel);
-	XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
-	//drw_rect(e->dpy, 0, 0, win->buf.w, win->buf.h, 1, 0);
+	//XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
+	drw_rect(drw, 0, 0, win->buf.w, win->buf.h, 1, 0);
 	XSetWindowBackgroundPixmap(e->dpy, win->xwin, win->buf.pm);
 
 	XMapWindow(e->dpy, win->xwin);
