@@ -1,6 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 /* Default settings; can be overriden by command line. */
 
+enum { SchemeNorm };
+
 /* appearance */
 static const char bgcolor[]   = "#222222";	/* background */
 static const char fgcolor[]   = "#444444";	/* bar */
@@ -8,7 +10,12 @@ static const char markcolor[] = "#bbbbbb";	/* mark */
 static const char selcolor[]  = "#eeeeee";	/* highlight */
 static const char leterfont[] = "JetBrains Mono Medium:pixelsize=15:antialias=true:autohint=true";   //multiple fonts?
 static const int  topbar      = 0;		/* 0 means bottom bar (default) */
-
+static const char *colors[][3] = {
+      			/*  fg       bg     */
+	[SchemeNorm] = { "#444444", "#222222" },
+	//[SchemeSel]  = { "#eeeeee", "#005577" },
+	//[SchemeOut]  = { "#000000", "#00ffff" },
+};
 /* global */
 enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 };  /* -g option; window dimensions */
 static const float SLIDESHOW_DELAY = 4.5;    /* -S option; slideshow delay in seconds */

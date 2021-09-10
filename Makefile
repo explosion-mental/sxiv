@@ -17,7 +17,7 @@ config.h:
 	cp config.def.h $@
 
 .c.o:
-	$(CC) $(SXIVCFLAGS) -c -o $@ $<
+	$(CC) $(SXIVCFLAGS) -c $<
 
 window.o: icon/data.h
 
@@ -37,7 +37,7 @@ dist: clean
 	gzip sxiv-${VERSION}.tar
 	rm -rf sxiv-${VERSION}
 
-install: all
+install: sxiv
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f sxiv $(DESTDIR)$(PREFIX)/bin/
 	chmod 755 $(DESTDIR)$(PREFIX)/bin/sxiv
@@ -52,4 +52,4 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/sxiv\
 		rm -f $(DESTDIR)$(MANPREFIX)/man1/sxiv.1\
 		rm -rf $(DESTDIR)$(PREFIX)/share/sxiv
-.PHONY: all clean install uninstall
+.PHONY: all options clean dist install uninstall

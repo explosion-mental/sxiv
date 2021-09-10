@@ -1,0 +1,356 @@
+options.c:#include "window.h"
+window.h:} win_env_t;
+window.h:} win_bar_t;
+window.h:struct win {
+window.h:	Window xwin;
+window.h:	win_env_t env;
+window.h:	unsigned int h; /* = win height - bar height */
+window.h:		win_bar_t l;
+window.h:		win_bar_t r;
+window.h:void win_init(win_t*);
+window.h:void win_open(win_t*);
+window.h:CLEANUP void win_close(win_t*);
+window.h:int win_configure(win_t*, XConfigureEvent*);
+window.h:void win_toggle_fullscreen(win_t*);
+window.h:void win_toggle_bar(win_t*);
+window.h:void win_clear(win_t*);
+window.h:void win_draw(win_t*);
+window.h:void win_draw_rect(win_t*, int, int, int, int, int, int, unsigned long);
+window.h:void win_set_title(win_t*);
+window.h:void win_set_cursor(win_t*, cursor_t);
+window.h:void win_cursor_pos(win_t*, int*, int*);
+README.md:* Scale to fill the window
+utf8.h: * following the end of the data stream.
+window.c:/* window.c */
+window.c:#include "window.h"
+window.c:static Window root, wmcheckwin;
+window.c:win_init_font(const win_env_t *e, const char *fontstr)
+window.c:win_alloc_color(const win_env_t *e, const char *name, XftColor *col)
+window.c:win_res(XrmDatabase db, const char *name, const char *def)
+window.c:win_init(win_t *win)
+window.c:	win_env_t *e;
+window.c:	memset(win, 0, sizeof(win_t));
+window.c:	e = &win->env;
+window.c:	//f = win_res(db, RES_CLASS "unifont-9", "monospace-8");
+window.c:	f = win_res(db, RES_CLASS ".font", leterfont);
+window.c:	win_init_font(e, f);
+window.c://	fg = win_res(db, RES_CLASS ".foreground", "color8");
+window.c:	bg   = win_res(db, RES_CLASS ".background", bgcolor);	/* background */
+window.c:	fg   = win_res(db, RES_CLASS ".color2",     fgcolor);	/* bar */
+window.c:	mark = win_res(db, RES_CLASS ".color2",   markcolor);	/* mark */
+window.c:	sel  = win_res(db, RES_CLASS ".color8",    selcolor);	/* highlight */
+window.c:	win_alloc_color(e, bg, &win->bg);
+window.c:	win_alloc_color(e, fg, &win->fg);
+window.c: 	win_alloc_color(e, mark, &win->markcol);
+window.c: 	win_alloc_color(e, sel, &win->selcol);
+window.c:	win->bar.l.size = BAR_L_LEN;
+window.c:	win->bar.r.size = BAR_R_LEN;
+window.c:	win->bar.l.buf = emalloc(win->bar.l.size + 3);
+window.c:	win->bar.l.buf[0] = '\0';
+window.c:	win->bar.r.buf = emalloc(win->bar.r.size + 3);
+window.c:	win->bar.r.buf[0] = '\0';
+window.c:	win->bar.h = options->hide_bar ? 0 : barheight;
+window.c:win_open(win_t *win)
+window.c:	win_env_t *e;
+window.c:	e = &win->env;
+window.c:	sizehints.win_gravity = NorthWestGravity;
+window.c:	/* determine window offsets, width & height */
+window.c:		gmask = XParseGeometry(options->geometry, &win->x, &win->y,
+window.c:		                       &win->w, &win->h);
+window.c:		win->w = WIN_WIDTH;
+window.c:		win->h = WIN_HEIGHT;
+window.c:			win->x += sw - win->w;
+window.c:			sizehints.win_gravity = NorthEastGravity;
+window.c:		win->x = 0;
+window.c:			win->y += sh - win->h;
+window.c:			sizehints.win_gravity = sizehints.win_gravity == NorthEastGravity
+window.c:		win->y = 0;
+window.c:	win->xwin = XCreateWindow(dpy, parent,
+window.c:	                          win->x, win->y, win->w, win->h, 0,
+window.c:	if (win->xwin == None)
+window.c:		error(EXIT_FAILURE, 0, "Error creating X window");
+window.c:    	XChangeProperty(dpy, win->xwin,
+window.c:		XSetWMClientMachine(dpy, win->xwin, &tp);
+window.c:	XSelectInput(dpy, win->xwin,
+window.c:	none = XCreateBitmapFromData(dpy, win->xwin, none_data, 8, 8);
+window.c:	//gc = XCreateGC(dpy, win->xwin, 0, None);
+window.c:		XChangeProperty(dpy, win->xwin,
+window.c:	win_set_title(win);
+window.c:	XSetClassHint(dpy, win->xwin, &classhint);
+window.c:	XSetWMProtocols(dpy, win->xwin, &atoms[ATOM_WM_DELETE_WINDOW], 1);
+window.c:	sizehints.width = win->w;
+window.c:	sizehints.height = win->h;
+window.c:	sizehints.x = win->x;
+window.c:	sizehints.y = win->y;
+window.c:	XSetWMNormalHints(win->env.dpy, win->xwin, &sizehints);
+window.c:	XSetWMHints(win->env.dpy, win->xwin, &hints);
+window.c://		win->h += win->bar.h;
+window.c://	win->h -= win->bar.h;
+window.c://	win->h += sh;
+window.c:	win->buf.w = sw;
+window.c:	win->buf.h = sh;
+window.c:	win->buf.pm = XCreatePixmap(dpy, win->xwin,
+window.c:	                            win->buf.w, win->buf.h, e->depth);
+window.c:	//XSetForeground(dpy, gc, win->bg.pixel);
+window.c:	//XFillRectangle(dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
+window.c:	drw_rect(drw, 0, 0, win->buf.w, win->buf.h, 1, 0);
+window.c:	XSetWindowBackgroundPixmap(dpy, win->xwin, win->buf.pm);
+window.c:	XMapWindow(dpy, win->xwin);
+window.c:		win_toggle_fullscreen(win);
+window.c:win_close(win_t *win)
+window.c:		XFreeCursor(win->env.dpy, cursors[i].icon);
+window.c:	XFreeGC(win->env.dpy, drw->gc);
+window.c:	XDestroyWindow(win->env.dpy, win->xwin);
+window.c:	XCloseDisplay(win->env.dpy);
+window.c:win_configure(win_t *win, XConfigureEvent *c)
+window.c:	changed = win->w != c->width || win->h + win->bar.h != c->height;
+window.c:	win->x = c->x;
+window.c:	win->y = c->y;
+window.c:	win->w = c->width;
+window.c:	win->h = c->height - win->bar.h;
+window.c:	win->bw = c->border_width;
+window.c:win_toggle_fullscreen(win_t *win)
+window.c:	cm->window = win->xwin;
+window.c:	XSendEvent(win->env.dpy, DefaultRootWindow(win->env.dpy), False,
+window.c:win_toggle_bar(win_t *win)
+window.c:		if (win->bar.h != 0) {
+window.c:			win->h -= win->bar.h;
+window.c:			win->bar.h = 0;
+window.c:			//win->h = win->bar.h - win->h;
+window.c:			//win->bar.h = 0;
+window.c:			win->bar.h = barheight;
+window.c:			win->h += win->bar.h;
+window.c:			//win->bar.h = barheight;
+window.c:			//win->h = win->bar.h + win->h;
+window.c:		if (win->bar.h != 0) {
+window.c:			win->h += win->bar.h;
+window.c:			win->bar.h = 0;
+window.c:			win->bar.h = barheight;
+window.c:			win->h -= win->bar.h;
+window.c:win_clear(win_t *win)
+window.c:	win_env_t *e;
+window.c:	e = &win->env;
+window.c:	if (win->w > win->buf.w || win->h + win->bar.h > win->buf.h) {
+window.c:		XFreePixmap(dpy, win->buf.pm);
+window.c:		win->buf.w = MAX(win->buf.w, win->w);
+window.c:		win->buf.h = MAX(win->buf.h, win->h + win->bar.h);
+window.c:		win->buf.pm = XCreatePixmap(dpy, win->xwin,
+window.c:		                            win->buf.w, win->buf.h, e->depth);
+window.c:	//XSetForeground(dpy, gc, win->bg.pixel);
+window.c:	//XFillRectangle(dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
+window.c:	drw_rect(drw, 0, 0, win->buf.w, win->buf.h, 1, 0);
+window.c:#define TEXTWIDTH(win, text, len) \
+window.c:	win_draw_text(win, NULL, NULL, 0, 0, text, len, 0)
+window.c:win_draw_text(win_t *win, XftDraw *d, const XftColor *color, int x, int y, char *text, int len, int w)
+window.c:		if (XftCharExists(win->env.dpy, font, rune))
+window.c:			f = XftFontOpen(win->env.dpy, win->env.scr, FC_CHARSET, FcTypeCharSet,
+window.c:		XftTextExtentsUtf8(win->env.dpy, f, (XftChar8*)t, next - t, &ext);
+window.c:			XftFontClose(win->env.dpy, f);
+window.c:win_draw_bar(win_t *win)
+window.c:	win_env_t *e;
+window.c:	win_bar_t *l, *r;
+window.c:	if ((l = &win->bar.l)->buf == NULL || (r = &win->bar.r)->buf == NULL)
+window.c:	e = &win->env;
+window.c:		y = win->h + font->ascent + V_TEXT_PAD;
+window.c:	w = win->w - 2*H_TEXT_PAD;
+window.c:	d = XftDrawCreate(dpy, win->buf.pm, DefaultVisual(dpy, screen),
+window.c:	XSetForeground(dpy, drw->gc, win->fg.pixel);
+window.c:		XFillRectangle(dpy, win->buf.pm, drw->gc, 0, 0, win->w, win->bar.h);
+window.c:		XFillRectangle(dpy, win->buf.pm, drw->gc, 0, win->h, win->w, win->bar.h);
+window.c:	XSetForeground(dpy, drw->gc, win->bg.pixel);
+window.c:	XSetBackground(dpy, drw->gc, win->fg.pixel);
+window.c:		if ((tw = TEXTWIDTH(win, r->buf, len)) > w)
+window.c:		x = win->w - tw - H_TEXT_PAD;
+window.c:		win_draw_text(win, d, &win->bg, x, y, r->buf, len, tw);
+window.c:		win_draw_text(win, d, &win->bg, x, y, l->buf, len, w);
+window.c:win_draw(win_t *win)
+window.c:	if (win->bar.h > 0)
+window.c:		win_draw_bar(win);
+window.c:	XSetWindowBackgroundPixmap(win->env.dpy, win->xwin, win->buf.pm);
+window.c:	XClearWindow(win->env.dpy, win->xwin);
+window.c:	XFlush(win->env.dpy);
+window.c:win_draw_rect(win_t *win, int x, int y, int w, int h, int fill, int lw, unsigned long col)
+window.c:	XChangeGC(win->env.dpy, drw->gc, GCForeground | GCLineWidth, &gcval);
+window.c:		XFillRectangle(win->env.dpy, win->buf.pm, drw->gc, x, y, w, h);
+window.c:		XDrawRectangle(win->env.dpy, win->buf.pm, drw->gc, x, y, w, h);
+window.c:win_set_title(win_t *win)
+window.c:	XStoreName(win->env.dpy, win->xwin, win->title);
+window.c:	XSetIconName(win->env.dpy, win->xwin, win->title);
+window.c:	XChangeProperty(win->env.dpy, win->xwin, atoms[ATOM__NET_WM_NAME],
+window.c:	                XInternAtom(win->env.dpy, "UTF8_STRING", False), 8,
+window.c:	                PropModeReplace, (unsigned char *) win->title, strlen(win->title));
+window.c:	XChangeProperty(win->env.dpy, win->xwin, atoms[ATOM__NET_WM_ICON_NAME],
+window.c:	                XInternAtom(win->env.dpy, "UTF8_STRING", False), 8,
+window.c:	                PropModeReplace, (unsigned char *) win->title, strlen(win->title));
+window.c:win_set_cursor(win_t *win, cursor_t cursor)
+window.c:		XDefineCursor(win->env.dpy, win->xwin, cursors[cursor].icon);
+window.c:		XFlush(win->env.dpy);
+window.c:win_cursor_pos(win_t *win, int *x, int *y)
+window.c:	if (!XQueryPointer(win->env.dpy, win->xwin, &w, &w, &i, &i, x, y, &ui))
+main.h:typedef struct win win_t;
+main.c:/* window.c */
+main.c:#include "window.h"
+main.c:win_t win;
+main.c:	win_close(&win);
+main.c:	if (info.f.err != 0 || info.fd >= 0 || win.bar.h == 0)
+main.c:	win.bar.l.buf[0] = '\0';
+main.c:					win.bar.l.buf[info.i++] = ' ';
+main.c:				win.bar.l.buf[info.i++] = buf[i];
+main.c:			if (info.i + 1 == win.bar.l.size)
+main.c:	win.bar.l.buf[info.i] = '\0';
+main.c:	win_draw(&win);
+main.c:	if (win.xwin != None)
+main.c:		win_set_cursor(&win, CURSOR_WATCH);
+main.c:bar_put(win_bar_t *bar, const char *fmt, ...)
+main.c:	win_bar_t *l = &win.bar.l, *r = &win.bar.r;
+main.c:	if (win.bar.h == 0)
+main.c:	win_cursor_pos(&win, &x, &y);
+main.c:	return MAX(0, MIN(2, (x / (win.w * 0.33))));
+main.c:	win_draw(&win);
+main.c:	win_set_cursor(&win, cursor);
+main.c:	memcpy(oldbar, win.bar.l.buf, sizeof(oldbar));
+main.c:	snprintf(win.bar.l.buf, win.bar.l.size, "%s >_ Keyhandler...", oldbar);
+main.c:	win_draw(&win);
+main.c:	win_set_cursor(&win, CURSOR_WATCH);
+main.c:	while (XCheckIfEvent(win.env.dpy, &dump, is_input_ev, NULL));
+main.c:						XMaskEvent(win.env.dpy,
+main.c:						while (XCheckTypedEvent(win.env.dpy, MotionNotify, &e));
+main.c:			   arl.fd != -1) && XPending(win.env.dpy) == 0)
+main.c:				xfd = ConnectionNumber(win.env.dpy);
+main.c:			XNextEvent(win.env.dpy, &ev);
+main.c:			if (XEventsQueued(win.env.dpy, QueuedAlready) > 0) {
+main.c:				XPeekEvent(win.env.dpy, &nextev);
+main.c:				if (win_configure(&win, &ev.xconfigure)) {
+main.c:	win_init(&win);
+main.c:	img_init(&img, &win);
+main.c:	/* Set window title to 'Sxiv - [First file's directory's basename]' */
+main.c:	win.title = title;
+main.c:		tns_init(&tns, files, &filecnt, &fileidx, &win);
+main.c:	win_open(&win);
+main.c:	win_set_cursor(&win, CURSOR_WATCH);
+thumbs.c:/* window.c */
+thumbs.c:#include "window.h"
+thumbs.c:tns_init(tns_t *tns, fileinfo_t *files, const int *cnt, int *sel, win_t *win)
+thumbs.c:	tns->win = win;
+thumbs.c:	win_t *win;
+thumbs.c:	win = tns->win;
+thumbs.c:	win_clear(win);
+thumbs.c:	imlib_context_set_drawable(win->buf.pm);
+thumbs.c:	tns->cols = MAX(1, (win->w - 2 * abs(THUMB_MARGIN)) / tns->dim);
+thumbs.c:	tns->rows = MAX(1, (win->h - 2 * abs(THUMB_MARGIN)) / tns->dim);
+thumbs.c:	tns->x = x = (win->w - MIN(cnt, tns->cols) * tns->dim) / 2 + tns->bw + THUMB_PADDING + THUMB_MARGIN;
+thumbs.c:	tns->y = y = (win->h - (cnt / tns->cols + r) * tns->dim) / 2 + tns->bw + THUMB_PADDING + THUMB_MARGIN;
+thumbs.c:		win_t *win = tns->win;
+thumbs.c:		unsigned long col = mark ? win->markcol.pixel : win->bg.pixel;
+thumbs.c:			//win_draw_rect(win, x, y, w, h, 0, tns->bw, col);
+thumbs.c:        //if (mark) col = win->markcol.pixel;
+thumbs.c://	win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
+thumbs.c:	//win_draw_rect(win, x - 1, y - 1, w - 1, h - 1, 0, tns->bw, col);
+thumbs.c:	win_draw_rect(win, x, y, w, h, 0, tns->bw, col);
+thumbs.c://	win_draw_rect(win, x, y, 2 * tns->bw, 2 * tns->bw, 1, tns->bw, col);
+thumbs.c:		win_t *win = tns->win;
+thumbs.c:		unsigned long col = hl ? win->selcol.pixel : win->bg.pixel;
+thumbs.c:		/* if passed close to a mark image win->markcol.pixel?? */
+thumbs.c://		win_draw_rect(win, t->x - oxy, t->y - oxy, t->w + owh, t->h + owh,
+thumbs.c:	//	win_draw_rect(win, x - 1 , y - 1, w +2 , h + 2, 0, tns->bw, col);
+thumbs.c:		win_draw_rect(win, x, y, w, h, 0, tns->bw, col);
+.git/info/exclude:# For a project mostly in C, the following would be a good set of
+.git/hooks/pre-push.sample:# This hook is called with the following parameters:
+.git/hooks/fsmonitor-watchman.sample:	if ($^O =~ 'msys' || $^O =~ 'cygwin') {
+.git/hooks/pre-rebase.sample:# The hook is called with the following parameters:
+.git/hooks/pre-rebase.sample:# merged to 'next' branch from getting rebased, because allowing it
+.git/hooks/pre-rebase.sample:    not want to rewind it.
+.git/COMMIT_EDITMSG:#	modified:   window.c
+util.c:/* window.c */
+util.c:#include "window.h"
+config.h:enum { WIN_WIDTH = 800, WIN_HEIGHT = 600 };  /* -g option; window dimensions */
+config.h:	{ 0,		XK_W,		i_fit_to_win,		SCALE_DOWN },
+config.h://	{ 0,		XK_w,		i_fit_to_win,		SCALE_FIT },
+config.h:	{ 0,		XK_0,		i_fit_to_win,		SCALE_FIT },
+config.h:	{ 0,		XK_9,		i_fit_to_win,		SCALE_WIDTH },
+config.h:	{ 0,		XK_e,		i_fit_to_win,		SCALE_WIDTH },
+config.h:	{ 0,		XK_E,		i_fit_to_win,		SCALE_HEIGHT },
+config.h: 	{ 0,		XK_F,		i_fit_to_win,		SCALE_FILL },
+image.c:/* window.c */
+image.c:#include "window.h"
+image.c:img_init(img_t *img, win_t *win)
+image.c:	imlib_context_set_display(win->env.dpy);
+image.c:	imlib_context_set_visual(win->env.vis);
+image.c:	imlib_context_set_colormap(win->env.cmap);
+image.c:	img->win = win;
+image.c://	img_fit_win(img, SCALE_DOWN);
+image.c:	win_t *win;
+image.c:	win = img->win;
+image.c:	if (w < win->w)
+image.c:		img->x = (win->w - w) / 2;
+image.c:	else if (img->x + w < win->w)
+image.c:		img->x = win->w - w;
+image.c:	if (h < win->h)
+image.c:		img->y = (win->h - h) / 2;
+image.c:	else if (img->y + h < win->h)
+image.c:		img->y = win->h - h;
+image.c:	zw = (float) img->win->w / (float) img->w;
+image.c:	zh = (float) img->win->h / (float) img->h;
+image.c:	win_t *win;
+image.c:	win = img->win;
+image.c:	 *   - part of image drawn on full window, or
+image.c:	 *   - full image drawn on part of window
+image.c:		sw = win->w / img->zoom;
+image.c:		dw = win->w;
+image.c:		sh = win->h / img->zoom;
+image.c:		dh = win->h;
+image.c:	win_clear(win);
+image.c:	imlib_context_set_drawable(win->buf.pm);
+image.c:			c = win->bg.pixel;
+image.c:img_fit_win(img_t *img, scalemode_t sm)
+image.c:		img->x = img->win->w / 2 - (img->win->w / 2 - img->x) * img->zoom / oz;
+image.c:		img->y = img->win->h / 2 - (img->win->h / 2 - img->y) * img->zoom / oz;
+image.c:		win_cursor_pos(img->win, &x, &y);
+image.c:		if (x < 0 || x >= img->win->w || y < 0 || y >= img->win->h) {
+image.c:			x = img->win->w / 2;
+image.c:			y = img->win->h / 2;
+image.c:		x = img->win->w / (d < 0 ? 1 : PAN_FRACTION);
+image.c:		y = img->win->h / (d < 0 ? 1 : PAN_FRACTION);
+image.c:	x = img->win->w / (PAN_FRACTION);
+image.c:	y = img->win->h / (PAN_FRACTION);
+image.c:		img->x = img->win->w - img->w * img->zoom;
+image.c:		img->y = img->win->h - img->h * img->zoom;
+image.c:		ox = d == DEGREE_90  ? img->x : img->win->w - img->x - img->w * img->zoom;
+image.c:		oy = d == DEGREE_270 ? img->y : img->win->h - img->y - img->h * img->zoom;
+image.c:		img->x = oy + (img->win->w - img->win->h) / 2;
+image.c:		img->y = ox + (img->win->h - img->win->w) / 2;
+thumbs.h:	win_t *win;
+thumbs.h:void tns_init(tns_t*, fileinfo_t*, const int*, int*, win_t*);
+commands.h:	win_t *win;
+commands.h:void img_init(img_t*, win_t*);
+commands.h:int img_fit_win(img_t*, scalemode_t);
+drw.c:drw_map(Drw *drw, Window win, int x, int y, unsigned int w, unsigned int h)
+drw.c:	XCopyArea(drw->dpy, drw->drawable, win, drw->gc, x, y, w, h, x, y);
+drw.h:Drw *drw_create(Display *dpy, int screen, Window win, unsigned int w, unsigned int h);
+drw.h:/* Drawing context manipulation */
+drw.h:/* Drawing functions */
+drw.h:void drw_map(Drw *drw, Window win, int x, int y, unsigned int w, unsigned int h);
+commands.c:/* window.c */
+commands.c:#include "window.h"
+commands.c:extern win_t win;
+commands.c:			tns_init(&tns, files, &filecnt, &fileidx, &win);
+commands.c:	win_toggle_fullscreen(&win);
+commands.c:	win_toggle_bar(&win);
+commands.c:		if (win.bar.h > 0)
+commands.c:		win_set_cursor(&win, CURSOR_WATCH);
+commands.c:	//return img_fit_win(&img, SCALE_WIDTH) && img_pan_edge(&img, dir);
+commands.c:		//if (img_fit_win(&img, SCALE_WIDTH))
+commands.c:	if ((int)(img.w * img.zoom) <= win.w && (int)(img.h * img.zoom) <= win.h)
+commands.c:	win_set_cursor(&win, CURSOR_DRAG);
+commands.c:	win_cursor_pos(&win, &x, &y);
+commands.c:			px = MIN(MAX(0.0, x - win.w*0.1), win.w*0.8) / (win.w*0.8)
+commands.c:			   * (win.w - img.w * img.zoom);
+commands.c:			py = MIN(MAX(0.0, y - win.h*0.1), win.h*0.8) / (win.h*0.8)
+commands.c:			   * (win.h - img.h * img.zoom);
+commands.c:			win_draw(&win);
+commands.c:		XMaskEvent(win.env.dpy,
+commands.c:		while (XCheckTypedEvent(win.env.dpy, MotionNotify, &e));
+commands.c:ci_fit_to_win(arg_t sm)
+commands.c:	return img_fit_win(&img, sm);
+commands.c:	tns_init(&tns, files, &filecnt, &fileidx, &win);
+commands.lst:I_CMD(fit_to_win)

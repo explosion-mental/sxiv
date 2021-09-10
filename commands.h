@@ -20,6 +20,7 @@ typedef struct {
 typedef struct {
 	unsigned int mask;
 	KeySym ksym;
+	//void (*func)(const Arg *);
 	cmd_id_t cmd;
 	arg_t arg;
 } keymap_t;
