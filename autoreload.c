@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with sxiv.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <Imlib2.h>
+//#include <Imlib2.h>
 //#include "sxiv.h"
 
 /* sxiv.c */

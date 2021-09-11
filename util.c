@@ -29,7 +29,7 @@
 //#include "commands.h"
 
 /* options.c */
-#include "options.h"
+//#include "options.h"
 
 /* thumbs.c */
 //#include "thumbs.h"

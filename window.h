@@ -43,7 +43,7 @@ struct win {
 	XftColor selcol;
 	XftColor markcol;
 
-    const char *title;
+	const char *title;
 
 	int x;
 	int y;

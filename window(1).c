@@ -69,10 +69,19 @@ static struct {
 	{ XC_sb_left_arrow }, { XC_sb_right_arrow }
 };
 
+static Display *dpy;
 static Drw *drw;
+static int screen;
+static Window root, wmcheckwin;
+static int sw, sh;           /* X display screen geometry width, height */
+
+static Visual *visual;
+static int depth;
+static Colormap cmap;
 
 static GC gc;
 //static GC = drw->gc;
+static Clr **scheme;
 static XftFont *font;
 static int fontheight;
 static double fontsize;
@@ -80,29 +89,10 @@ static int barheight;
 
 Atom atoms[ATOM_COUNT];
 
-//void
-//drw_rect(const win_env_t *e, int x, int y, unsigned int w, unsigned int h, int filled, int invert)
-//{
-//	//const win_env_t *e;
-//	win_t *win;
-//
-//	//if (!drw || !drw->scheme)
-//	//	return;
-//	XSetForeground(e->dpy, gc, invert ? win->bg.pixel : win->fg.pixel);
-//	//XSetForeground(drw->dpy, drw->gc, invert ? drw->scheme[ColBg].pixel : drw->scheme[ColFg].pixel);
-//	if (filled)
-//		//XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
-//		XFillRectangle(e->dpy, win->buf.pm, gc, x, y, w, h);
-//	else
-//		//XDrawRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w - 1, h - 1);
-//		XDrawRectangle(win->env.dpy, win->buf.pm, gc, x, y, w - 1, h - 1);
-//}
-
-
 void
 win_init_font(const win_env_t *e, const char *fontstr)
 {
-	if ((font = XftFontOpenName(e->dpy, e->scr, fontstr)) == NULL)
+	if ((font = XftFontOpenName(dpy, screen, fontstr)) == NULL)
 		error(EXIT_FAILURE, 0, "Error loading font '%s'", fontstr);
 	fontheight = font->ascent + font->descent;
 	FcPatternGetDouble(font->pattern, FC_SIZE, 0, &fontsize);
@@ -112,8 +102,8 @@ win_init_font(const win_env_t *e, const char *fontstr)
 void
 win_alloc_color(const win_env_t *e, const char *name, XftColor *col)
 {
-	if (!XftColorAllocName(e->dpy, DefaultVisual(e->dpy, e->scr),
-	                       DefaultColormap(e->dpy, e->scr), name, col))
+	if (!XftColorAllocName(dpy, visual,
+	                       cmap, name, col))
 		error(EXIT_FAILURE, 0, "Error allocating color '%s'", name);
 }
 		/* database          name                      def*/
@@ -135,9 +125,9 @@ win_res(XrmDatabase db, const char *name, const char *def)
 	}
 }
 
-//typedef XftColor Clr;
-#define INIT_ATOM_(atom) atoms[ATOM_##atom] = XInternAtom(e->dpy, #atom, False);
+#define INIT_ATOM_(atom) atoms[ATOM_##atom] = XInternAtom(dpy, #atom, False);
 #define RES_CLASS "Sxiv"
+#define LENGTH(X)               (sizeof X / sizeof X[0])
 void
 win_init(win_t *win)
 {
@@ -149,21 +139,37 @@ win_init(win_t *win)
 	memset(win, 0, sizeof(win_t));
 
 	e = &win->env;
-	if ((e->dpy = XOpenDisplay(NULL)) == NULL)
+	if ((dpy = XOpenDisplay(NULL)) == NULL)
 		error(EXIT_FAILURE, 0, "Error opening X display");
 
-	e->scr = DefaultScreen(e->dpy);
-	e->scrw = DisplayWidth(e->dpy, e->scr);
-	e->scrh = DisplayHeight(e->dpy, e->scr);
-	e->vis = DefaultVisual(e->dpy, e->scr);
-	e->cmap = DefaultColormap(e->dpy, e->scr);
-	e->depth = DefaultDepth(e->dpy, e->scr);
+	//screen = DefaultScreen(dpy);
+	//e->dpy = DisplayWidth(dpy, screen);
+	//e->dpy = DisplayHeight(dpy, screen);
+	/* init screen */
+	screen = DefaultScreen(dpy);
+	sw = DisplayWidth(dpy, screen);
+	sh = DisplayHeight(dpy, screen);
+	root = RootWindow(dpy, screen);
+	drw = drw_create(dpy, screen, root, sw, sh);
 
-	if (setlocale(LC_CTYPE, "") == NULL || XSupportsLocale() == 0)
-		error(0, 0, "No locale support");
+	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
+	for (int i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], 3);
+
+	visual = DefaultVisual(dpy, screen);
+	depth = DefaultDepth(dpy, screen);
+	cmap = DefaultColormap(dpy, screen);
+	//e->vis = DefaultVisual(dpy, screen);
+	//e->cmap = DefaultColormap(dpy, screen);
+	//e->depth = DefaultDepth(dpy, screen);
+
+	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
+		fputs("warning: no locale support\n", stderr);
+	//if (setlocale(LC_CTYPE, "") == NULL || XSupportsLocale() == 0)
+	//	error(0, 0, "No locale support");
 
 	XrmInitialize();
-	res_man = XResourceManagerString(e->dpy);
+	res_man = XResourceManagerString(dpy);
 	db = res_man != NULL ? XrmGetStringDatabase(res_man) : None;
 
 	//f = win_res(db, RES_CLASS "unifont-9", "monospace-8");
@@ -217,7 +223,7 @@ win_open(win_t *win)
 	XWMHints hints;
 
 	e = &win->env;
-	parent = options->embed != 0 ? options->embed : RootWindow(e->dpy, e->scr);
+	parent = options->embed != 0 ? options->embed : RootWindow(dpy, screen);
 
 	sizehints.flags = PWinGravity;
 	sizehints.win_gravity = NorthWestGravity;
@@ -238,7 +244,7 @@ win_open(win_t *win)
 		win->h = WIN_HEIGHT;
 	if ((gmask & XValue) != 0) {
 		if ((gmask & XNegative) != 0) {
-			win->x += e->scrw - win->w;
+			win->x += sw - win->w;
 			sizehints.win_gravity = NorthEastGravity;
 		}
 		sizehints.flags |= USPosition;
@@ -247,7 +253,7 @@ win_open(win_t *win)
 
 	if ((gmask & YValue) != 0) {
 		if ((gmask & YNegative) != 0) {
-			win->y += e->scrh - win->h;
+			win->y += sh - win->h;
 			sizehints.win_gravity = sizehints.win_gravity == NorthEastGravity
 			                      ? SouthEastGravity : SouthWestGravity;
 		}
@@ -255,7 +261,7 @@ win_open(win_t *win)
 	} else
 		win->y = 0;
 
-	win->xwin = XCreateWindow(e->dpy, parent,
+	win->xwin = XCreateWindow(dpy, parent,
 	                          win->x, win->y, win->w, win->h, 0,
 	                          e->depth, InputOutput, e->vis, 0, NULL);
 	if (win->xwin == None)
@@ -263,7 +269,7 @@ win_open(win_t *win)
 
 	/* set the _NET_WM_PID */
     	pid_t pid = getpid();
-    	XChangeProperty(e->dpy, win->xwin,
+    	XChangeProperty(dpy, win->xwin,
 		atoms[ATOM__NET_WM_PID], XA_CARDINAL, sizeof(pid_t) * 8,
 		PropModeReplace, (unsigned char *) &pid, 1);
 
@@ -275,25 +281,25 @@ win_open(win_t *win)
 		tp.nitems = strlen(hostname);
 		tp.encoding = XA_STRING;
 		tp.format = 8;
-		XSetWMClientMachine(e->dpy, win->xwin, &tp);
+		XSetWMClientMachine(dpy, win->xwin, &tp);
     	}
 
-	XSelectInput(e->dpy, win->xwin,
+	XSelectInput(dpy, win->xwin,
 	             ButtonReleaseMask | ButtonPressMask | KeyPressMask |
 	             PointerMotionMask | StructureNotifyMask);
 
 	for (i = 0; i < ARRLEN(cursors); i++) {
 		if (i != CURSOR_NONE)
-			cursors[i].icon = XCreateFontCursor(e->dpy, cursors[i].name);
+			cursors[i].icon = XCreateFontCursor(dpy, cursors[i].name);
 	}
-	if (XAllocNamedColor(e->dpy, DefaultColormap(e->dpy, e->scr), "black",
+	if (XAllocNamedColor(dpy, DefaultColormap(dpy, screen), "black",
 	                     &col, &col) == 0)
 		error(EXIT_FAILURE, 0, "Error allocating color 'black'");
-	none = XCreateBitmapFromData(e->dpy, win->xwin, none_data, 8, 8);
-	*cnone = XCreatePixmapCursor(e->dpy, none, none, &col, &col, 0, 0);
+	none = XCreateBitmapFromData(dpy, win->xwin, none_data, 8, 8);
+	*cnone = XCreatePixmapCursor(dpy, none, none, &col, &col, 0, 0);
 
 	// GC
-	gc = XCreateGC(e->dpy, win->xwin, 0, None);
+	//gc = XCreateGC(dpy, win->xwin, 0, None);
 
 	n = icons[ARRLEN(icons)-1].size;
 	icon_data = emalloc((n * n + 2) * sizeof(*icon_data));
@@ -307,7 +313,7 @@ win_open(win_t *win)
 			for (c = icons[i].data[j] >> 4; c >= 0; c--)
 				icon_data[n++] = icon_colors[icons[i].data[j] & 0x0F];
 		}
-		XChangeProperty(e->dpy, win->xwin,
+		XChangeProperty(dpy, win->xwin,
 		                atoms[ATOM__NET_WM_ICON], XA_CARDINAL, 32,
 		                i == 0 ? PropModeReplace : PropModeAppend,
 		                (unsigned char *) icon_data, n);
@@ -318,9 +324,9 @@ win_open(win_t *win)
 
 	classhint.res_class = RES_CLASS;
 	classhint.res_name = options->res_name != NULL ? options->res_name : "sxiv";
-	XSetClassHint(e->dpy, win->xwin, &classhint);
+	XSetClassHint(dpy, win->xwin, &classhint);
 
-	XSetWMProtocols(e->dpy, win->xwin, &atoms[ATOM_WM_DELETE_WINDOW], 1);
+	XSetWMProtocols(dpy, win->xwin, &atoms[ATOM_WM_DELETE_WINDOW], 1);
 
 	sizehints.width = win->w;
 	sizehints.height = win->h;
@@ -339,21 +345,27 @@ win_open(win_t *win)
 //	win->h -= win->bar.h;
 //	c->height
 
-//	win->h += e->scrh;
-	win->buf.w = e->scrw;
-	win->buf.h = e->scrh;
-	win->buf.pm = XCreatePixmap(e->dpy, win->xwin,
+//	win->h += sh;
+	win->buf.w = sw;
+	win->buf.h = sh;
+	win->buf.pm = XCreatePixmap(dpy, win->xwin,
 	                            win->buf.w, win->buf.h, e->depth);
-	XSetForeground(e->dpy, gc, win->bg.pixel);
-	//XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
+	//               dpy     gc  scheme
+	//XSetForeground(dpy, gc, win->bg.pixel);
+	//		dpy	drawable	gc x y  w           h
+	//XFillRectangle(dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
 	drw_rect(drw, 0, 0, win->buf.w, win->buf.h, 1, 0);
-	XSetWindowBackgroundPixmap(e->dpy, win->xwin, win->buf.pm);
+	XSetWindowBackgroundPixmap(dpy, win->xwin, win->buf.pm);
 
-	XMapWindow(e->dpy, win->xwin);
-	XFlush(e->dpy);
+	XMapWindow(dpy, win->xwin);
+	XFlush(dpy);
 
 	if (options->fullscreen)
 		win_toggle_fullscreen(win);
+}
+void
+setup(void)
+{
 }
 
 CLEANUP void
@@ -364,7 +376,7 @@ win_close(win_t *win)
 	for (i = 0; i < ARRLEN(cursors); i++)
 		XFreeCursor(win->env.dpy, cursors[i].icon);
 
-	XFreeGC(win->env.dpy, gc);
+	XFreeGC(win->env.dpy, drw->gc);
 	XDestroyWindow(win->env.dpy, win->xwin);
 	XCloseDisplay(win->env.dpy);
 }
@@ -439,14 +451,15 @@ win_clear(win_t *win)
 	e = &win->env;
 
 	if (win->w > win->buf.w || win->h + win->bar.h > win->buf.h) {
-		XFreePixmap(e->dpy, win->buf.pm);
+		XFreePixmap(dpy, win->buf.pm);
 		win->buf.w = MAX(win->buf.w, win->w);
 		win->buf.h = MAX(win->buf.h, win->h + win->bar.h);
-		win->buf.pm = XCreatePixmap(e->dpy, win->xwin,
+		win->buf.pm = XCreatePixmap(dpy, win->xwin,
 		                            win->buf.w, win->buf.h, e->depth);
 	}
-	XSetForeground(e->dpy, gc, win->bg.pixel);
-	XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
+	//XSetForeground(dpy, gc, win->bg.pixel);
+	//XFillRectangle(dpy, win->buf.pm, gc, 0, 0, win->buf.w, win->buf.h);
+	drw_rect(drw, 0, 0, win->buf.w, win->buf.h, 1, 0);
 }
 
 #define TEXTWIDTH(win, text, len) \
@@ -503,19 +516,19 @@ win_draw_bar(win_t *win)
 	else
 		y = win->h + font->ascent + V_TEXT_PAD;
 	w = win->w - 2*H_TEXT_PAD;
-	d = XftDrawCreate(e->dpy, win->buf.pm, DefaultVisual(e->dpy, e->scr),
-			DefaultColormap(e->dpy, e->scr));
+	d = XftDrawCreate(dpy, win->buf.pm, DefaultVisual(dpy, screen),
+			DefaultColormap(dpy, screen));
 
-	XSetForeground(e->dpy, gc, win->fg.pixel);
+	XSetForeground(dpy, drw->gc, win->fg.pixel);
 	/* bar */
 	if (topbar)
 			    /*display	drawable    gc  x	y	wid     height	*/
-		XFillRectangle(e->dpy, win->buf.pm, gc, 0, 0, win->w, win->bar.h);
+		XFillRectangle(dpy, win->buf.pm, drw->gc, 0, 0, win->w, win->bar.h);
 	else
-		XFillRectangle(e->dpy, win->buf.pm, gc, 0, win->h, win->w, win->bar.h);
+		XFillRectangle(dpy, win->buf.pm, drw->gc, 0, win->h, win->w, win->bar.h);
 
-	XSetForeground(e->dpy, gc, win->bg.pixel);
-	XSetBackground(e->dpy, gc, win->fg.pixel);
+	XSetForeground(dpy, drw->gc, win->bg.pixel);
+	XSetBackground(dpy, drw->gc, win->fg.pixel);
 
 	/* right text */
 	if ((len = strlen(r->buf)) > 0) {
@@ -553,12 +566,12 @@ win_draw_rect(win_t *win, int x, int y, int w, int h, int fill, int lw, unsigned
 
 	gcval.line_width = lw;
 	gcval.foreground = col;
-	XChangeGC(win->env.dpy, gc, GCForeground | GCLineWidth, &gcval);
+	XChangeGC(win->env.dpy, drw->gc, GCForeground | GCLineWidth, &gcval);
 
 	if (fill)
-		XFillRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
+		XFillRectangle(win->env.dpy, win->buf.pm, drw->gc, x, y, w, h);
 	else
-		XDrawRectangle(win->env.dpy, win->buf.pm, gc, x, y, w, h);
+		XDrawRectangle(win->env.dpy, win->buf.pm, drw->gc, x, y, w, h);
 }
 
 void

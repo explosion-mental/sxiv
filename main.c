@@ -44,7 +44,7 @@
 #include "commands.h"
 
 /* options.c */
-#include "options.h"
+//#include "options.h"
 
 /* thumbs.c */
 #include "thumbs.h"
@@ -60,18 +60,30 @@
 
 #include "config.h"
 
-typedef struct {
-	struct timeval when;
-	int active;
-	timeout_f handler;
-} timeout_t;
-
 /* timeout handler functions: */
 void redraw(void);
 void reset_cursor(void);
 void animate(void);
 void slideshow(void);
 void clear_resize(void);
+
+/* options.c */
+void print_usage(void);
+void parse_options(int, char**);
+opt_t _options;
+const opt_t *options = (const opt_t*) &_options;
+
+#ifdef HAVE_LIBCURL
+int is_url(const char *url);
+int get_url(const char *url, char **out);
+#endif /* HAVE_LIBCURL */
+
+
+typedef struct {
+	struct timeval when;
+	int active;
+	timeout_f handler;
+} timeout_t;
 
 appmode_t mode;
 arl_t arl;
@@ -135,13 +147,6 @@ tmp_unlink(char **rmfiles, int n) {
 		unlink(rmfiles[n]);
 }
 #endif /* HAVE_LIBCURL */
-
-
-#ifdef HAVE_LIBCURL
-int is_url(const char *url);
-int get_url(const char *url, char **out);
-#endif /* HAVE_LIBCURL */
-
 
 void
 cleanup(void)
@@ -1062,6 +1067,167 @@ setup_signal(int sig, void (*handler)(int sig))
 	if (sigaction(sig, &sa, 0) == -1)
 		error(EXIT_FAILURE, errno, "signal %d", sig);
 }
+
+
+
+void
+parse_options(int argc, char **argv)
+{
+	int n, opt;
+	char *end, *s;
+	const char *scalemodes = "dfwh";
+
+	progname = strrchr(argv[0], '/');
+	progname = progname ? progname + 1 : argv[0];
+
+	_options.from_stdin = 0;
+	_options.to_stdout = 0;
+	_options.recursive = 0;
+	_options.single_r = 0;
+	_options.startnum = 0;
+
+	_options.scalemode = SCALE_DOWN;
+	_options.zoom = 1.0;
+	_options.animate = 0;
+	_options.gamma = 0;
+	_options.slideshow = 0;
+	_options.framerate = 0;
+
+	_options.fullscreen = 0;
+	_options.embed = 0;
+	_options.hide_bar = 0;
+	_options.geometry = NULL;
+	_options.res_name = NULL;
+
+	_options.quiet = 0;
+	_options.thumb_mode = 0;
+	_options.clean_cache = 0;
+	_options.private_mode = 0;
+
+	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opqRrS:s:tvZz:")) != -1) {
+		switch (opt) {
+			case '?':
+				print_usage();
+				exit(EXIT_FAILURE);
+			case 'A':
+				n = strtol(optarg, &end, 0);
+				if (*end != '\0' || n <= 0)
+					error(EXIT_FAILURE, 0, "Invalid argument for option -A: %s", optarg);
+				_options.framerate = n;
+				/* fall through */
+			case 'a':
+				_options.animate = 1;
+				break;
+			case 'b':
+				_options.hide_bar = 1;
+				break;
+			case 'c':
+				_options.clean_cache = 1;
+				break;
+			case 'e':
+				n = strtol(optarg, &end, 0);
+				if (*end != '\0')
+					error(EXIT_FAILURE, 0, "Invalid argument for option -e: %s", optarg);
+				_options.embed = n;
+				break;
+			case 'f':
+				_options.fullscreen = 1;
+				break;
+			case 'G':
+				n = strtol(optarg, &end, 0);
+				if (*end != '\0')
+					error(EXIT_FAILURE, 0, "Invalid argument for option -G: %s", optarg);
+				_options.gamma = n;
+				break;
+			case 'g':
+				_options.geometry = optarg;
+				break;
+			case 'h':
+				print_usage();
+				exit(EXIT_SUCCESS);
+			case 'i':
+				_options.from_stdin = 1;
+				break;
+			case 'n':
+				n = strtol(optarg, &end, 0);
+				if (*end != '\0' || n <= 0)
+					error(EXIT_FAILURE, 0, "Invalid argument for option -n: %s", optarg);
+				_options.startnum = n - 1;
+				break;
+			case 'N':
+				_options.res_name = optarg;
+				break;
+			case 'o':
+				_options.to_stdout = 1;
+				break;
+			case 'p':
+				_options.private_mode = 1;
+				break;
+			case 'q':
+				_options.quiet = 1;
+				break;
+			case 'R':
+				_options.recursive = 1;
+				break;
+			case 'r':
+				_options.single_r = 1;
+				break;
+			case 'S':
+				n = strtof(optarg, &end) * 10;
+				if (*end != '\0' || n <= 0)
+					error(EXIT_FAILURE, 0, "Invalid argument for option -S: %s", optarg);
+				_options.slideshow = n;
+				break;
+			case 's':
+				s = strchr(scalemodes, optarg[0]);
+				if (s == NULL || *s == '\0' || strlen(optarg) != 1)
+					error(EXIT_FAILURE, 0, "Invalid argument for option -s: %s", optarg);
+				_options.scalemode = s - scalemodes;
+				break;
+			case 't':
+				_options.thumb_mode = 1;
+				break;
+			case 'v':
+				puts("sxiv-"VERSION);
+				exit(EXIT_SUCCESS);
+			case 'Z':
+				_options.scalemode = SCALE_ZOOM;
+				_options.zoom = 1.0;
+				break;
+			case 'z':
+				n = strtol(optarg, &end, 0);
+				if (*end != '\0' || n <= 0)
+					error(EXIT_FAILURE, 0, "Invalid argument for option -z: %s", optarg);
+				_options.scalemode = SCALE_ZOOM;
+				_options.zoom = (float) n / 100.0;
+				break;
+		}
+	}
+
+	_options.filenames = argv + optind;
+	_options.filecnt = argc - optind;
+
+	if (_options.filecnt == 1 && STREQ(_options.filenames[0], "-")) {
+		_options.filenames++;
+		_options.filecnt--;
+		_options.from_stdin = 1;
+	}
+}
+
+
+
+void
+print_usage(void)
+{
+	printf("usage: sxiv [-abcfhiopqRrtvZ] [-A framerate] [-e wid] [-G gamma] "
+	       "[-g geometry] [-N name] [-n num] [-S delay] [-s mode] [-z zoom] "
+#if HAVE_LIBCURL
+	       "FILES / URLS...\n");
+#else
+ 	       "FILES...\n");
+#endif /* HAVE_LIBCURL */
+}
+
 
 int
 main(int argc, char **argv)
