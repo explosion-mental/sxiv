@@ -97,12 +97,12 @@ Really usefull repo [0ion9 fork](https://github.com/0ion9/sxiv) , which is too c
 - '-T' for title
 - If the bar is hidden in image mode, toggle the bar while switching modes (maybe bar is always shown in "thumbnail mode"? 	cg_toggle_bar();)
 - Which color would be a nice one for the marks?
-- Is there a way to scroll & not navigate in WIDTH mode? (usefull on some memes, and comics)
 - toggle square thumbnails on run time
 - When searching recursively (i.e., search all images in the directory and subdirs), images names on the bar are displayed. I would like to know in which directory am I (dirname), so how to show the subdirectory of the directory in which sxiv was called to be recursive.
 - Remove all position modificacion (zoom, rotation) RESTORE to default?, so reload image
 - Make '#ifdef' on tns_move_selection. That is, how to remove the 'cnt' var?
 - If only one image given match background color to the image.
+- <s>Is there a way to scroll & not navigate in WIDTH mode? (usefull on some memes, and comics)<s>
 - <s>'-d' for dmenu like output?</s> Why have a flag, a command added called dmenu_output added ☑️
 - <s>After adding the padding patch, I found a screenshot of my dwm bar which is really wide but not with much height. When I marked it in "thumbnail mode" on some of the smalls zooms the image dissapears (the image was almost as thick as the marks)</s>
 - <s>How to loop on the command 'cg_navigate_marked'? (on marked images)</s> Done✅
@@ -119,3 +119,4 @@ Really usefull repo [0ion9 fork](https://github.com/0ion9/sxiv) , which is too c
 - Saner config.h (Mar 24)
 - On/off Prefix-keys on *some* commands(Mar 25)
 - Streaming url images (May 25)
+- scroll on WIDTH mode (Feb 06 2022)
