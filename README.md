@@ -1,5 +1,9 @@
+
+
 # sxiv
-Improving sxiv!
+My build of sxiv.
+
+_Note_: **There is https://github.com/nsxiv/nsxiv which is a 'new' mantained version of sxiv** (Worth taking a look).
 
 
 ![Image](sxiv.png "sxiv")
