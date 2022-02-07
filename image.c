@@ -50,7 +50,7 @@ img_init(img_t *img, win_t *win)
 	imlib_context_set_display(win->env.dpy);
 	imlib_context_set_visual(win->env.vis);
 	imlib_context_set_colormap(win->env.cmap);
-	imlib_set_cache_size(cachesize);
+	imlib_set_cache_size(cachesize * 1024 * 1024);
 
 	img->im = NULL;
 	img->win = win;
@@ -398,10 +398,10 @@ img_check_pan(img_t *img, bool moved)
 		img->dirty = true;
 }
 
-//Is there a way to not navigate (to scroll) on WIDTH mode? (usefull on some memes, comics, anime)
 int
 img_zoom_diff(img_t *img, float *zptr)
 {
+	int flag; /* returns -1 to enable scrolling (navigate_or_scroll) */
 	float z, zw, zh;
 
 	zw = (float) img->win->w / (float) img->w;
@@ -410,6 +410,7 @@ img_zoom_diff(img_t *img, float *zptr)
 	switch (img->scalemode) {
 		case SCALE_WIDTH:
 			z = zw;
+			flag = 1;
 			break;
 		case SCALE_HEIGHT:
 			z = zh;
@@ -423,9 +424,9 @@ img_zoom_diff(img_t *img, float *zptr)
 	}
 	//z = MIN(z, img->scalemode == SCALE_DOWN ? 1.0 : zoom_max);
 	if (zptr != NULL)
-	*zptr = z;
+		*zptr = z;
 
-  return zoomdiff(img, z);
+	return flag ? -1 : zoomdiff(img, z);
 }
 
 bool

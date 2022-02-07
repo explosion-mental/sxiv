@@ -38,9 +38,8 @@ static const int thumb_sizes[]   = {
 
 /* cache size for imlib2, in bytes. For backwards compatibility reasons, the
  * size is kept at 4MiB. For most users, it is advised to pick a value close to
- * or above 128MiB for better image (re)loading performance.
- */
-static const int cachesize = 4 * 1024 * 1024; /* 4MiB */
+ * or above 128MiB for better image (re)loading performance. */
+static const int cachesize = 256; /* 256MiB */
 
 static const keymap_t keys[] = {
 	/* modifier(s)	key		function		argument */
