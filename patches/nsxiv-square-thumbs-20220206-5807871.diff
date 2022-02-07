@@ -1,0 +1,82 @@
+From 0725fd44c66a0c3a82d406d0bd3135755108e3d1 Mon Sep 17 00:00:00 2001
+From: explosion-mental <explosion0mental@gmail.com>
+Date: Sun, 6 Feb 2022 22:04:55 -0500
+Subject: [PATCH] [PATCH] Allow nsxiv to have a configurable square thumbnails
+
+---
+ config.def.h |  3 +++
+ thumbs.c     | 40 +++++++++++++++++++++++++++-------------
+ 2 files changed, 30 insertions(+), 13 deletions(-)
+
+diff --git a/config.def.h b/config.def.h
+index 92b2101..b5ba24b 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -77,6 +77,9 @@ static const int thumb_sizes[] = { 32, 64, 96, 128, 160 };
+ /* thumbnail size at startup, index into thumb_sizes[]: */
+ static const int THUMB_SIZE = 3;
+ 
++/* 0 means normal thumbs (default) */
++static const int squarethumb = 1;
++
+ #endif
+ #ifdef _MAPPINGS_CONFIG
+ 
+diff --git a/thumbs.c b/thumbs.c
+index 4ba96fa..010c226 100644
+--- a/thumbs.c
++++ b/thumbs.c
+@@ -203,23 +203,37 @@ CLEANUP void tns_free(tns_t *tns)
+ static Imlib_Image tns_scale_down(Imlib_Image im, int dim)
+ {
+ 	int w, h;
+-	float z, zw, zh;
+ 
+ 	imlib_context_set_image(im);
+ 	w = imlib_image_get_width();
+ 	h = imlib_image_get_height();
+-	zw = (float) dim / (float) w;
+-	zh = (float) dim / (float) h;
+-	z = MIN(zw, zh);
+-	z = MIN(z, 1.0);
+-
+-	if (z < 1.0) {
+-		imlib_context_set_anti_alias(1);
+-		im = imlib_create_cropped_scaled_image(0, 0, w, h,
+-		                                       MAX(z * w, 1), MAX(z * h, 1));
+-		if (im == NULL)
+-			error(EXIT_FAILURE, ENOMEM, NULL);
+-		imlib_free_image_and_decache();
++
++	if (squarethumb) {
++		int x = (w < h) ? 0 : (w - h) / 2;
++		int y = (w > h) ? 0 : (h - w) / 2;
++		int s = (w < h) ? w : h;
++
++		if (dim < w || dim < h) {
++			imlib_context_set_anti_alias(1);
++			im = imlib_create_cropped_scaled_image(x, y, s, s, dim, dim);
++			if (im == NULL)
++				error(EXIT_FAILURE, ENOMEM, NULL);
++			imlib_free_image_and_decache();
++		}
++	} else {
++		float z, zw, zh;
++		zw = (float) dim / (float) w;
++		zh = (float) dim / (float) h;
++		z = MIN(zw, zh);
++		z = MIN(z, 1.0);
++
++		if (z < 1.0) {
++			imlib_context_set_anti_alias(1);
++			im = imlib_create_cropped_scaled_image(0, 0, w, h, MAX(z * w, 1), MAX(z * h, 1));
++			if (im == NULL)
++				error(EXIT_FAILURE, ENOMEM, NULL);
++			imlib_free_image_and_decache();
++		}
+ 	}
+ 	return im;
+ }
+-- 
+2.35.1
+
