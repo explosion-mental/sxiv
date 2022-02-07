@@ -50,6 +50,7 @@ img_init(img_t *img, win_t *win)
 	imlib_context_set_display(win->env.dpy);
 	imlib_context_set_visual(win->env.vis);
 	imlib_context_set_colormap(win->env.cmap);
+	imlib_set_cache_size(cachesize);
 
 	img->im = NULL;
 	img->win = win;
