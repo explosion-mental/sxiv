@@ -401,7 +401,7 @@ img_check_pan(img_t *img, bool moved)
 int
 img_zoom_diff(img_t *img, float *zptr)
 {
-	int flag; /* returns -1 to enable scrolling (navigate_or_scroll) */
+	int flag = 0; /* returns -1 to enable scrolling (navigate_or_scroll) */
 	float z, zw, zh;
 
 	zw = (float) img->win->w / (float) img->w;
@@ -426,7 +426,7 @@ img_zoom_diff(img_t *img, float *zptr)
 	if (zptr != NULL)
 		*zptr = z;
 
-	return flag ? -1 : zoomdiff(img, z);
+	return flag == 1? -1 : zoomdiff(img, z);
 }
 
 bool
